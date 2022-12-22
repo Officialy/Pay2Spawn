@@ -33,7 +33,7 @@ package net.doubledoordev.pay2spawn.util.shapes;
 import com.google.gson.JsonObject;
 import net.doubledoordev.pay2spawn.types.guis.StructureTypeGui;
 import net.doubledoordev.pay2spawn.types.guis.shapes.CylinderGui;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundTag;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -91,20 +91,20 @@ public class Cylinder extends AbstractShape
     }
 
     @Override
-    public NBTTagCompound toNBT()
+    public CompoundTag toNBT()
     {
-        NBTTagCompound compound = super.toNBT();
-        compound.setInteger(RADIUS_KEY, radius);
-        compound.setInteger(HEIGHT_KEY, height);
+        CompoundTag compound = super.toNBT();
+        compound.putInt(RADIUS_KEY, radius);
+        compound.putInt(HEIGHT_KEY, height);
         return compound;
     }
 
     @Override
-    public IShape fromNBT(NBTTagCompound compound)
+    public IShape fromNBT(CompoundTag compound)
     {
         super.fromNBT(compound);
-        this.radius = compound.getInteger(RADIUS_KEY);
-        this.height = compound.getInteger(HEIGHT_KEY);
+        this.radius = compound.getInt(RADIUS_KEY);
+        this.height = compound.getInt(HEIGHT_KEY);
         return this;
     }
 

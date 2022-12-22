@@ -31,10 +31,6 @@
 package net.doubledoordev.pay2spawn.network;
 
 import com.google.gson.JsonObject;
-import cpw.mods.fml.common.network.ByteBufUtils;
-import cpw.mods.fml.common.network.simpleimpl.IMessage;
-import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
-import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import io.netty.buffer.ByteBuf;
 import net.doubledoordev.pay2spawn.Pay2Spawn;
 import net.doubledoordev.pay2spawn.permissions.BanHelper;
@@ -46,8 +42,7 @@ import net.doubledoordev.pay2spawn.types.TypeRegistry;
 import net.doubledoordev.pay2spawn.util.Helper;
 import net.doubledoordev.pay2spawn.util.JsonNBTHelper;
 import net.minecraft.client.Minecraft;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.nbt.CompoundTag;
 
 /**
  * Allows testing of rewards
@@ -57,14 +52,14 @@ import net.minecraft.util.EnumChatFormatting;
 public class TestMessage implements IMessage
 {
     private String         name;
-    private NBTTagCompound data;
+    private CompoundTag data;
 
     public TestMessage()
     {
 
     }
 
-    public TestMessage(String name, NBTTagCompound data)
+    public TestMessage(String name, CompoundTag data)
     {
         this.name = name;
         this.data = data;
@@ -72,8 +67,8 @@ public class TestMessage implements IMessage
 
     public static void sendToServer(String name, JsonObject jsondata)
     {
-        if (Minecraft.getMinecraft().isGamePaused()) Helper.msg(EnumChatFormatting.RED + "Some tests don't work while paused! Use your chat key to lose focus.");
-        NBTTagCompound data = JsonNBTHelper.parseJSON(jsondata);
+        if (Minecraft.getInstance().isGamePaused()) Helper.msg(ChatFormatting.RED + "Some tests don't work while paused! Use your chat key to lose focus.");
+        CompoundTag data = JsonNBTHelper.parseJSON(jsondata);
         if (Helper.checkTooBigForNetwork(data)) return;
         Pay2Spawn.getSnw().sendToServer(new TestMessage(name, data));
     }
@@ -101,7 +96,7 @@ public class TestMessage implements IMessage
             {
                 RndVariable.reset();
 
-                NBTTagCompound rewardData = new NBTTagCompound();
+                CompoundTag rewardData = new CompoundTag();
                 Helper.sendChatToPlayer(ctx.getServerHandler().playerEntity, "Testing reward " + message.name + ".");
                 Pay2Spawn.getLogger().info("Test by " + ctx.getServerHandler().playerEntity.getCommandSenderName() + " Type: " + message.name + " Data: " + message.data);
                 TypeBase type = TypeRegistry.getByName(message.name);
@@ -109,7 +104,7 @@ public class TestMessage implements IMessage
                 Node node = type.getPermissionNode(ctx.getServerHandler().playerEntity, message.data);
                 if (BanHelper.isBanned(node))
                 {
-                    Helper.sendChatToPlayer(ctx.getServerHandler().playerEntity, "This node (" + node + ") is banned.", EnumChatFormatting.RED);
+                    Helper.sendChatToPlayer(ctx.getServerHandler().playerEntity, "This node (" + node + ") is banned.", ChatFormatting.RED);
                     Pay2Spawn.getLogger().warn(ctx.getServerHandler().playerEntity.getCommandSenderName() + " tried using globally banned node " + node + ".");
                     return null;
                 }

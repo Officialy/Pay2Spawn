@@ -36,9 +36,9 @@ import net.doubledoordev.pay2spawn.permissions.Node;
 import net.doubledoordev.pay2spawn.types.guis.PotionEffectTypeGui;
 import net.doubledoordev.pay2spawn.util.Helper;
 import net.doubledoordev.pay2spawn.util.JsonNBTHelper;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.entity.player.Player;
+import net.minecraft.entity.player.ServerPlayer;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.StatCollector;
@@ -82,15 +82,15 @@ public class PotionEffectType extends TypeBase
     }
 
     @Override
-    public NBTTagCompound getExample()
+    public CompoundTag getExample()
     {
         Potion potion = null;
         while (potion == null) potion = Potion.potionTypes[RANDOM.nextInt(Potion.potionTypes.length)];
-        return new PotionEffect(potion.getId(), (int) (RANDOM.nextDouble() * 1000)).writeCustomPotionEffectToNBT(new NBTTagCompound());
+        return new PotionEffect(potion.getId(), (int) (RANDOM.nextDouble() * 1000)).writeCustomPotionEffectToNBT(new CompoundTag());
     }
 
     @Override
-    public void spawnServerSide(EntityPlayerMP player, NBTTagCompound dataFromClient, NBTTagCompound rewardData)
+    public void spawnServerSide(ServerPlayer player, CompoundTag dataFromClient, CompoundTag rewardData)
     {
         player.addPotionEffect(PotionEffect.readCustomPotionEffectFromNBT(dataFromClient));
     }
@@ -153,7 +153,7 @@ public class PotionEffectType extends TypeBase
     }
 
     @Override
-    public Node getPermissionNode(EntityPlayer player, NBTTagCompound dataFromClient)
+    public Node getPermissionNode(Player player, CompoundTag dataFromClient)
     {
         PotionEffect effect = PotionEffect.readCustomPotionEffectFromNBT(dataFromClient);
         String name = effect.getEffectName();

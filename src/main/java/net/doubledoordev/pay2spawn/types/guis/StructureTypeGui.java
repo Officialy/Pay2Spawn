@@ -34,7 +34,7 @@ import com.google.common.base.Strings;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import com.mojang.blaze3d.vertex.Tesselator;
 import net.doubledoordev.pay2spawn.configurator.Configurator;
 import net.doubledoordev.pay2spawn.network.TestMessage;
 import net.doubledoordev.pay2spawn.util.Helper;
@@ -43,11 +43,9 @@ import net.doubledoordev.pay2spawn.util.shapes.IShape;
 import net.doubledoordev.pay2spawn.util.shapes.PointI;
 import net.doubledoordev.pay2spawn.util.shapes.Shapes;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.entity.RenderManager;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
-import net.minecraftforge.client.event.RenderWorldLastEvent;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 
@@ -99,10 +97,10 @@ public class StructureTypeGui extends HelperGuiBase
         makeAndOpen();
     }
 
-    public static void importCallback(NBTTagCompound root)
+    public static void importCallback(CompoundTag root)
     {
-        NBTTagList list = root.getTagList("list", COMPOUND);
-        for (int i = 0; i < list.tagCount(); i++)
+        ListTag list = root.getList("list", COMPOUND);
+        for (int i = 0; i < list.size(); i++)
         {
             instance.shapes.add(JsonNBTHelper.parseNBT(Shapes.addShapeType(list.getCompoundTagAt(i), PointI.class)));
         }
@@ -315,8 +313,8 @@ public class StructureTypeGui extends HelperGuiBase
         if (disabled || !renderShapesIngameCheckBox.isSelected()) return;
         if (ishapes.size() == 0) return;
 
-        Tessellator tess = Tessellator.instance;
-        Tessellator.renderingWorldRenderer = false;
+        Tesselator tess = Tesselator.getInstance();
+        Tesselator.renderingWorldRenderer = false;
 
         GL11.glPushMatrix();
         GL11.glEnable(GL12.GL_RESCALE_NORMAL);
@@ -324,7 +322,7 @@ public class StructureTypeGui extends HelperGuiBase
         GL11.glDisable(GL11.GL_TEXTURE_2D);
 
         GL11.glTranslated(-RenderManager.renderPosX, -RenderManager.renderPosY, 1 - RenderManager.renderPosZ);
-        GL11.glTranslated(Helper.round(Minecraft.getMinecraft().thePlayer.posX), Helper.round(Minecraft.getMinecraft().thePlayer.posY), Helper.round(Minecraft.getMinecraft().thePlayer.posZ));
+        GL11.glTranslated(Helper.round(Minecraft.getInstance().player.getX()), Helper.round(Minecraft.getInstance().player.getY()), Helper.round(Minecraft.getInstance().player.getZ()));
         GL11.glScalef(1.0F, 1.0F, 1.0F);
 
         if (rotateBasedOnPlayerCheckBox.isSelected())
@@ -336,17 +334,10 @@ public class StructureTypeGui extends HelperGuiBase
                 {
                     GL11.glRotated(90 * i, 0, -1, 0);
 
-                    switch (i)
-                    {
-                        case 1:
-                            GL11.glTranslated(-1, 0, 0);
-                            break;
-                        case 2:
-                            GL11.glTranslated(-1, 0, 1);
-                            break;
-                        case 3:
-                            GL11.glTranslated(0, 0, 1);
-                            break;
+                    switch (i) {
+                        case 1 -> GL11.glTranslated(-1, 0, 0);
+                        case 2 -> GL11.glTranslated(-1, 0, 1);
+                        case 3 -> GL11.glTranslated(0, 0, 1);
                     }
                 }
             }
@@ -354,20 +345,13 @@ public class StructureTypeGui extends HelperGuiBase
             {
             }
 
-            int rot = Helper.getHeading(Minecraft.getMinecraft().thePlayer);
+            int rot = Helper.getHeading(Minecraft.getInstance().player);
             GL11.glRotated(90 * rot, 0, -1, 0);
 
-            switch (rot)
-            {
-                case 1:
-                    GL11.glTranslated(-1, 0, 0);
-                    break;
-                case 2:
-                    GL11.glTranslated(-1, 0, 1);
-                    break;
-                case 3:
-                    GL11.glTranslated(0, 0, 1);
-                    break;
+            switch (rot) {
+                case 1 -> GL11.glTranslated(-1, 0, 0);
+                case 2 -> GL11.glTranslated(-1, 0, 1);
+                case 3 -> GL11.glTranslated(0, 0, 1);
             }
         }
 

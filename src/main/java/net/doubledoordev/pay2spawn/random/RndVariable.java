@@ -48,22 +48,18 @@ import java.util.regex.Pattern;
  *
  * @author Dries007
  */
-public class RndVariable implements IRandomResolver
-{
-    private static final Pattern                 PATTERN = Pattern.compile("\\$var\\((.*?), ?([^$]*)\\)");
-    private static final HashMap<String, String> VARMAP  = new HashMap<>();
+public class RndVariable implements IRandomResolver {
+    private static final Pattern PATTERN = Pattern.compile("\\$var\\((.*?), ?([^$]*)\\)");
+    private static final HashMap<String, String> VARMAP = new HashMap<>();
 
-    public static void reset()
-    {
+    public static void reset() {
         VARMAP.clear();
     }
 
     @Override
-    public String solverRandom(int type, String value)
-    {
+    public String solverRandom(int type, String value) {
         Matcher matcher = PATTERN.matcher(value);
-        if (matcher.find())
-        {
+        if (matcher.find()) {
             String var = matcher.group(1);
             if (!VARMAP.containsKey(var)) VARMAP.put(var, RandomRegistry.solveRandom(type, "$" + matcher.group(2)));
             return matcher.replaceFirst(VARMAP.get(var));
@@ -73,8 +69,7 @@ public class RndVariable implements IRandomResolver
     }
 
     @Override
-    public boolean matches(int type, String value)
-    {
+    public boolean matches(int type, String value) {
         return PATTERN.matcher(value).find();
     }
 }

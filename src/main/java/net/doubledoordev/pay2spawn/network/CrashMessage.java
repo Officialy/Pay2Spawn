@@ -31,10 +31,7 @@
 package net.doubledoordev.pay2spawn.network;
 
 import com.google.common.base.Throwables;
-import cpw.mods.fml.common.network.ByteBufUtils;
-import cpw.mods.fml.common.network.simpleimpl.IMessage;
-import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
-import cpw.mods.fml.common.network.simpleimpl.MessageContext;
+
 import io.netty.buffer.ByteBuf;
 import net.doubledoordev.pay2spawn.types.CrashType;
 import net.doubledoordev.pay2spawn.util.DramaException;

@@ -86,7 +86,7 @@ public abstract class AbstractChecker
 
     protected void process(Donation donation, boolean msg, AbstractChecker tracker)
     {
-        if (Minecraft.getMinecraft().thePlayer == null || !Pay2Spawn.enable)
+        if (Minecraft.getInstance().player == null || !Pay2Spawn.enable)
         {
             if (!backlog.contains(donation)) backlog.add(donation);
             return;

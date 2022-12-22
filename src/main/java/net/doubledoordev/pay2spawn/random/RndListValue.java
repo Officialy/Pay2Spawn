@@ -47,21 +47,18 @@ import static net.doubledoordev.pay2spawn.util.Constants.INT_ARRAY;
  *
  * @author Dries007
  */
-public class RndListValue implements IRandomResolver
-{
+public class RndListValue implements IRandomResolver {
     private final static Pattern PATTERN = Pattern.compile("\\$random\\[(.+)\\]");
 
     @Override
-    public String solverRandom(int type, String value)
-    {
+    public String solverRandom(int type, String value) {
         Matcher matcher = PATTERN.matcher(value);
         matcher.find();
         return matcher.replaceFirst(Helper.getRandomFromSet(Arrays.asList(matcher.group(1).split(", ?"))));
     }
 
     @Override
-    public boolean matches(int type, String value)
-    {
+    public boolean matches(int type, String value) {
         return type != BYTE_ARRAY && type != INT_ARRAY && PATTERN.matcher(value).find();
     }
 }

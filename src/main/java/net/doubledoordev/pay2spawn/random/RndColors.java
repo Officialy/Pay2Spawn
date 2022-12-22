@@ -46,32 +46,27 @@ import static net.doubledoordev.pay2spawn.util.Constants.*;
  *
  * @author Dries007
  */
-public class RndColors implements IRandomResolver
-{
+public class RndColors implements IRandomResolver {
     private static final Pattern PATTERN = Pattern.compile("\\$randomRGB\\((\\w+)\\)");
 
     @Override
-    public String solverRandom(int type, String value)
-    {
+    public String solverRandom(int type, String value) {
         int max = 200;
         int offset = 55;
         Matcher mRGB = PATTERN.matcher(value);
-        if (type == INT_ARRAY)
-        {
+        if (type == INT_ARRAY) {
             JsonArray colors = new JsonArray();
             mRGB.find();
-            for (int i = 0; i < Integer.parseInt(mRGB.group(1)); i++) colors.add(new JsonPrimitive((RANDOM.nextInt(max) << 16) + (RANDOM.nextInt(max) << 8) + RANDOM.nextInt(max)));
+            for (int i = 0; i < Integer.parseInt(mRGB.group(1)); i++)
+                colors.add(new JsonPrimitive((RANDOM.nextInt(max) << 16) + (RANDOM.nextInt(max) << 8) + RANDOM.nextInt(max)));
             return mRGB.replaceFirst(colors.toString());
-        }
-        else
-        {
+        } else {
             return mRGB.replaceFirst("" + (((offset + RANDOM.nextInt(max)) << 16) + ((offset + RANDOM.nextInt(max)) << 8) + offset + RANDOM.nextInt(max)));
         }
     }
 
     @Override
-    public boolean matches(int type, String value)
-    {
+    public boolean matches(int type, String value) {
         return (type == INT_ARRAY || type == INT || type == STRING) && PATTERN.matcher(value).find();
     }
 }

@@ -31,17 +31,14 @@
 package net.doubledoordev.pay2spawn.network;
 
 import com.google.common.base.Strings;
-import cpw.mods.fml.common.network.ByteBufUtils;
-import cpw.mods.fml.common.network.simpleimpl.IMessage;
-import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
-import cpw.mods.fml.common.network.simpleimpl.MessageContext;
+
 import io.netty.buffer.ByteBuf;
 import net.doubledoordev.pay2spawn.Pay2Spawn;
 import net.doubledoordev.pay2spawn.util.Donation;
 import net.doubledoordev.pay2spawn.util.Helper;
 import net.doubledoordev.pay2spawn.util.Reward;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.TextComponent;
 
 import static net.doubledoordev.pay2spawn.util.Constants.GSON;
 import static net.doubledoordev.pay2spawn.util.Constants.GSON_NOPP;
@@ -111,7 +108,7 @@ public class MessageMessage implements IMessage
                 format = format.replace("$reward_amount", message.amount + "");
                 format = format.replace("$reward_countdown", message.countdown + "");
 
-                MinecraftServer.getServer().getConfigurationManager().sendChatMsg(new ChatComponentText(format));
+                MinecraftServer.getServer().getConfigurationManager().sendChatMsg(new TextComponent(format));
             }
 
             return null;

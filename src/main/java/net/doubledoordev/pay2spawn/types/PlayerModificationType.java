@@ -33,9 +33,9 @@ package net.doubledoordev.pay2spawn.types;
 import com.google.gson.JsonObject;
 import net.doubledoordev.pay2spawn.permissions.Node;
 import net.doubledoordev.pay2spawn.types.guis.PlayerModificationTypeGui;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.entity.player.Player;
+import net.minecraft.entity.player.ServerPlayer;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.*;
 
 import java.util.Collection;
@@ -75,19 +75,19 @@ public class PlayerModificationType extends TypeBase
     }
 
     @Override
-    public NBTTagCompound getExample()
+    public CompoundTag getExample()
     {
-        NBTTagCompound data = new NBTTagCompound();
-        data.setInteger(TYPE_KEY, Type.HUNGER.ordinal());
-        data.setInteger(OPERATION_KEY, ADD);
+        CompoundTag data = new CompoundTag();
+        data.putInt(TYPE_KEY, Type.HUNGER.ordinal());
+        data.putInt(OPERATION_KEY, ADD);
         data.setFloat(AMOUNT_KEY, 20F);
         return data;
     }
 
     @Override
-    public void spawnServerSide(EntityPlayerMP player, NBTTagCompound dataFromClient, NBTTagCompound rewardData)
+    public void spawnServerSide(ServerPlayer player, CompoundTag dataFromClient, CompoundTag rewardData)
     {
-        Type.values()[dataFromClient.getInteger(TYPE_KEY)].doOnServer(player, dataFromClient);
+        Type.values()[dataFromClient.getInt(TYPE_KEY)].doOnServer(player, dataFromClient);
     }
 
     @Override
@@ -105,9 +105,9 @@ public class PlayerModificationType extends TypeBase
     }
 
     @Override
-    public Node getPermissionNode(EntityPlayer player, NBTTagCompound dataFromClient)
+    public Node getPermissionNode(Player player, CompoundTag dataFromClient)
     {
-        return new Node(getName(), Type.values()[dataFromClient.getInteger(TYPE_KEY)].name().toLowerCase());
+        return new Node(getName(), Type.values()[dataFromClient.getInt(TYPE_KEY)].name().toLowerCase());
     }
 
     @Override
@@ -143,9 +143,9 @@ public class PlayerModificationType extends TypeBase
         HEALTH(false)
                 {
                     @Override
-                    public void doOnServer(EntityPlayer player, NBTTagCompound dataFromClient)
+                    public void doOnServer(Player player, CompoundTag dataFromClient)
                     {
-                        switch (dataFromClient.getInteger(OPERATION_KEY))
+                        switch (dataFromClient.getInt(OPERATION_KEY))
                         {
                             case ADD:
                                 player.setHealth(player.getHealth() + dataFromClient.getFloat(AMOUNT_KEY));
@@ -162,10 +162,10 @@ public class PlayerModificationType extends TypeBase
         HUNGER(false)
                 {
                     @Override
-                    public void doOnServer(EntityPlayer player, NBTTagCompound dataFromClient)
+                    public void doOnServer(Player player, CompoundTag dataFromClient)
                     {
                         FoodStats food = player.getFoodStats();
-                        switch (dataFromClient.getInteger(OPERATION_KEY))
+                        switch (dataFromClient.getInt(OPERATION_KEY))
                         {
                             case ADD:
                                 food.addStats((int) dataFromClient.getFloat(AMOUNT_KEY), 0);
@@ -183,10 +183,10 @@ public class PlayerModificationType extends TypeBase
         SATURATION(false)
                 {
                     @Override
-                    public void doOnServer(EntityPlayer player, NBTTagCompound dataFromClient)
+                    public void doOnServer(Player player, CompoundTag dataFromClient)
                     {
                         FoodStats food = player.getFoodStats();
-                        switch (dataFromClient.getInteger(OPERATION_KEY))
+                        switch (dataFromClient.getInt(OPERATION_KEY))
                         {
                             case ADD:
                                 food.addStats(0, dataFromClient.getFloat(AMOUNT_KEY));
@@ -204,27 +204,27 @@ public class PlayerModificationType extends TypeBase
         XP(false)
                 {
                     @Override
-                    public void doOnServer(EntityPlayer player, NBTTagCompound dataFromClient)
+                    public void doOnServer(Player player, CompoundTag dataFromClient)
                     {
-                        switch (dataFromClient.getInteger(OPERATION_KEY))
+                        switch (dataFromClient.getInt(OPERATION_KEY))
                         {
                             case ADD:
                                 player.addExperience((int) dataFromClient.getFloat(AMOUNT_KEY));
                                 break;
                             case SUBTRACT:
-                                player.addExperience((int) MathHelper.clamp_float(-dataFromClient.getFloat(AMOUNT_KEY), -player.experienceTotal, 0));
+                                player.addExperience((int) Mth.clamp_float(-dataFromClient.getFloat(AMOUNT_KEY), -player.experienceTotal, 0));
                                 break;
                             case SET:
-                                player.addChatComponentMessage(new ChatComponentText("You can't set the XP amount with pay2spawn. Only add and subtract.").setChatStyle(new ChatStyle().setColor(EnumChatFormatting.AQUA)));
+                                player.addChatComponentMessage(new TextComponent("You can't set the XP amount with pay2spawn. Only add and subtract.").setChatStyle(new ChatStyle().setColor(ChatFormatting.AQUA)));
                         }
                     }
                 },
         XP_LEVEL(false)
                 {
                     @Override
-                    public void doOnServer(EntityPlayer player, NBTTagCompound dataFromClient)
+                    public void doOnServer(Player player, CompoundTag dataFromClient)
                     {
-                        switch (dataFromClient.getInteger(OPERATION_KEY))
+                        switch (dataFromClient.getInt(OPERATION_KEY))
                         {
                             case ADD:
                                 player.addExperienceLevel((int) dataFromClient.getFloat(AMOUNT_KEY));
@@ -241,20 +241,20 @@ public class PlayerModificationType extends TypeBase
         FLIGHT(true)
                 {
                     @Override
-                    public void doOnServer(EntityPlayer player, NBTTagCompound dataFromClient)
+                    public void doOnServer(Player player, CompoundTag dataFromClient)
                     {
-                        switch (dataFromClient.getInteger(OPERATION_KEY))
+                        switch (dataFromClient.getInt(OPERATION_KEY))
                         {
                             case ENABLE:
                                 player.capabilities.allowFlying = true;
                                 player.capabilities.isFlying = true;
                                 player.sendPlayerAbilities();
-                                if (dataFromClient.hasKey(AMOUNT_KEY))
+                                if (dataFromClient.contains(AMOUNT_KEY))
                                 {
-                                    NBTTagCompound tagCompound = player.getEntityData().getCompoundTag(EntityPlayer.PERSISTED_NBT_TAG).getCompoundTag("P2S");
-                                    tagCompound.setInteger(name(), (int) (dataFromClient.getFloat(AMOUNT_KEY) * 20));
-                                    if (!player.getEntityData().hasKey(EntityPlayer.PERSISTED_NBT_TAG)) player.getEntityData().setTag(EntityPlayer.PERSISTED_NBT_TAG, new NBTTagCompound());
-                                    player.getEntityData().getCompoundTag(EntityPlayer.PERSISTED_NBT_TAG).setTag("P2S", tagCompound);
+                                    CompoundTag tagCompound = player.getEntityData().getCompound(Player.PERSISTED_NBT_TAG).getCompound("P2S");
+                                    tagCompound.putInt(name(), (int) (dataFromClient.getFloat(AMOUNT_KEY) * 20));
+                                    if (!player.getEntityData().contains(Player.PERSISTED_NBT_TAG)) player.getEntityData().put(Player.PERSISTED_NBT_TAG, new CompoundTag());
+                                    player.getEntityData().getCompound(Player.PERSISTED_NBT_TAG).put("P2S", tagCompound);
                                 }
                                 break;
                             case DISABLE:
@@ -266,7 +266,7 @@ public class PlayerModificationType extends TypeBase
                     }
 
                     @Override
-                    public void undo(EntityPlayer player)
+                    public void undo(Player player)
                     {
                         player.capabilities.allowFlying = player.capabilities.isCreativeMode;
                         player.capabilities.isFlying = player.capabilities.isCreativeMode;
@@ -276,19 +276,19 @@ public class PlayerModificationType extends TypeBase
         INVULNERABILITY(true)
                 {
                     @Override
-                    public void doOnServer(EntityPlayer player, NBTTagCompound dataFromClient)
+                    public void doOnServer(Player player, CompoundTag dataFromClient)
                     {
-                        switch (dataFromClient.getInteger(OPERATION_KEY))
+                        switch (dataFromClient.getInt(OPERATION_KEY))
                         {
                             case ENABLE:
                                 player.capabilities.disableDamage = true;
                                 player.sendPlayerAbilities();
-                                if (dataFromClient.hasKey(AMOUNT_KEY))
+                                if (dataFromClient.contains(AMOUNT_KEY))
                                 {
-                                    NBTTagCompound tagCompound = player.getEntityData().getCompoundTag(EntityPlayer.PERSISTED_NBT_TAG).getCompoundTag("P2S");
-                                    tagCompound.setInteger(name(), (int) (dataFromClient.getFloat(AMOUNT_KEY) * 20));
-                                    if (!player.getEntityData().hasKey(EntityPlayer.PERSISTED_NBT_TAG)) player.getEntityData().setTag(EntityPlayer.PERSISTED_NBT_TAG, new NBTTagCompound());
-                                    player.getEntityData().getCompoundTag(EntityPlayer.PERSISTED_NBT_TAG).setTag("P2S", tagCompound);
+                                    CompoundTag tagCompound = player.getEntityData().getCompound(Player.PERSISTED_NBT_TAG).getCompound("P2S");
+                                    tagCompound.putInt(name(), (int) (dataFromClient.getFloat(AMOUNT_KEY) * 20));
+                                    if (!player.getEntityData().contains(Player.PERSISTED_NBT_TAG)) player.getEntityData().put(Player.PERSISTED_NBT_TAG, new CompoundTag());
+                                    player.getEntityData().getCompound(Player.PERSISTED_NBT_TAG).put("P2S", tagCompound);
                                 }
                                 break;
                             case DISABLE:
@@ -299,7 +299,7 @@ public class PlayerModificationType extends TypeBase
                     }
 
                     @Override
-                    public void undo(EntityPlayer player)
+                    public void undo(Player player)
                     {
                         player.capabilities.disableDamage = player.capabilities.isCreativeMode;
                         player.sendPlayerAbilities();
@@ -312,14 +312,14 @@ public class PlayerModificationType extends TypeBase
             this.timable = timable;
         }
 
-        public abstract void doOnServer(EntityPlayer player, NBTTagCompound dataFromClient);
+        public abstract void doOnServer(Player player, CompoundTag dataFromClient);
 
         public boolean isTimable()
         {
             return timable;
         }
 
-        public void undo(EntityPlayer player)
+        public void undo(Player player)
         {
 
         }

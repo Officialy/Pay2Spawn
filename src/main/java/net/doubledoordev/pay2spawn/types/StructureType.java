@@ -38,12 +38,12 @@ import net.doubledoordev.pay2spawn.util.Helper;
 import net.doubledoordev.pay2spawn.util.shapes.*;
 import net.minecraft.block.Block;
 import net.minecraft.entity.EntityList;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.Player;
+import net.minecraft.entity.player.ServerPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.tileentity.TileEntityMobSpawner;
@@ -80,42 +80,42 @@ public class StructureType extends TypeBase
     private static final String NAME = "structure";
     public static int[][] bannedBlocks;
 
-    public static void applyShape(IShape shape, EntityPlayer player, ArrayList<NBTTagCompound> blockDataNbtList, byte baseRotation)
+    public static void applyShape(IShape shape, Player player, ArrayList<CompoundTag> blockDataNbtList, byte baseRotation)
     {
         try
         {
             ArrayList<BlockData> blockDataList = new ArrayList<>();
-            for (NBTTagCompound compound : blockDataNbtList)
+            for (CompoundTag compound : blockDataNbtList)
             {
                 BlockData blockData = new BlockData(compound);
                 for (int i = 0; i <= blockData.weight; i++)
                     blockDataList.add(blockData);
             }
 
-            int x = Helper.round(player.posX), y = Helper.round(player.posY + 1), z = Helper.round(player.posZ);
+            int x = Helper.round(player.getX()), y = Helper.round(player.getY() + 1), z = Helper.round(player.getZ());
             Collection<PointI> points = shape.rotate(baseRotation).rotate(baseRotation == -1 ? -1 : Helper.getHeading(player)).move(x, y, z).getPoints();
             for (PointI p : points)
             {
-                if (!shape.getReplaceableOnly() || player.worldObj.getBlock(p.getX(), p.getY(), p.getZ()).isReplaceable(player.worldObj, p.getX(), p.getY(), p.getZ()))
+                if (!shape.getReplaceableOnly() || player.level.getBlock(p.getX(), p.getY(), p.getZ()).isReplaceable(player.level, p.getX(), p.getY(), p.getZ()))
                 {
                     BlockData block = blockDataList.size() == 1 ? blockDataList.get(0) : Helper.getRandomFromSet(blockDataList);
                     Block block1 = Block.getBlockById(block.id);
-                    player.worldObj.setBlock(p.getX(), p.getY(), p.getZ(), block1, block.meta, 2);
+                    player.level.setBlock(p.getX(), p.getY(), p.getZ(), block1, block.meta, 2);
                     if (block.te != null)
                     {
                         TileEntity tileEntity = TileEntity.createAndLoadEntity(block.te);
-                        tileEntity.setWorldObj(player.worldObj);
+                        tileEntity.setWorldObj(player.level);
                         tileEntity.xCoord = p.getX();
                         tileEntity.yCoord = p.getY();
                         tileEntity.zCoord = p.getZ();
-                        player.worldObj.setTileEntity(p.getX(), p.getY(), p.getZ(), tileEntity);
+                        player.level.setTileEntity(p.getX(), p.getY(), p.getZ(), tileEntity);
                     }
                 }
             }
         }
         catch (BlockData.BannedBlockException e)
         {
-            ((EntityPlayerMP) player).playerNetServerHandler.kickPlayerFromServer(e.getMessage());
+            ((ServerPlayer) player).playerNetServerHandler.kickPlayerFromServer(e.getMessage());
         }
         catch (Exception e)
         {
@@ -134,173 +134,173 @@ public class StructureType extends TypeBase
     }
 
     @Override
-    public NBTTagCompound getExample()
+    public CompoundTag getExample()
     {
-        NBTTagCompound root = new NBTTagCompound();
-        NBTTagList shapesList = new NBTTagList();
+        CompoundTag root = new CompoundTag();
+        ListTag shapesList = new ListTag();
 
         // Sphere
         {
-            NBTTagCompound shapeNbt = Shapes.storeShape(new Sphere(10).setHollow(true).setReplaceableOnly(true));
+            CompoundTag shapeNbt = Shapes.storeShape(new Sphere(10).setHollow(true).setReplaceableOnly(true));
 
-            NBTTagList blockDataNbt = new NBTTagList();
+            ListTag blockDataNbt = new ListTag();
             {
-                NBTTagCompound compound = new NBTTagCompound();
-                compound.setInteger(BLOCKID_KEY, 35);
-                compound.setInteger(WEIGHT_KEY, 5);
-                blockDataNbt.appendTag(compound);
+                CompoundTag compound = new CompoundTag();
+                compound.putInt(BLOCKID_KEY, 35);
+                compound.putInt(WEIGHT_KEY, 5);
+                blockDataNbt.add(compound);
             }
             {
-                NBTTagCompound compound = new NBTTagCompound();
-                compound.setInteger(BLOCKID_KEY, 35);
-                compound.setInteger(META_KEY, 5);
-                blockDataNbt.appendTag(compound);
+                CompoundTag compound = new CompoundTag();
+                compound.putInt(BLOCKID_KEY, 35);
+                compound.putInt(META_KEY, 5);
+                blockDataNbt.add(compound);
             }
 
-            shapeNbt.setTag(BLOCKDATA_KEY, blockDataNbt);
+            shapeNbt.put(BLOCKDATA_KEY, blockDataNbt);
 
-            shapesList.appendTag(shapeNbt);
+            shapesList.add(shapeNbt);
         }
 
         // Box
         {
-            NBTTagCompound shapeNbt = Shapes.storeShape(new Box(new PointI(-2, -3, 5), 5, 2, 3).setReplaceableOnly(true));
+            CompoundTag shapeNbt = Shapes.storeShape(new Box(new PointI(-2, -3, 5), 5, 2, 3).setReplaceableOnly(true));
 
-            NBTTagList blockDataNbt = new NBTTagList();
+            ListTag blockDataNbt = new ListTag();
             {
-                NBTTagCompound compound = new NBTTagCompound();
-                compound.setInteger(BLOCKID_KEY, 98);
-                blockDataNbt.appendTag(compound);
+                CompoundTag compound = new CompoundTag();
+                compound.putInt(BLOCKID_KEY, 98);
+                blockDataNbt.add(compound);
             }
             {
-                NBTTagCompound compound = new NBTTagCompound();
-                compound.setInteger(BLOCKID_KEY, 98);
-                compound.setInteger(META_KEY, 1);
-                blockDataNbt.appendTag(compound);
+                CompoundTag compound = new CompoundTag();
+                compound.putInt(BLOCKID_KEY, 98);
+                compound.putInt(META_KEY, 1);
+                blockDataNbt.add(compound);
             }
             {
-                NBTTagCompound compound = new NBTTagCompound();
-                compound.setInteger(BLOCKID_KEY, 98);
-                compound.setInteger(META_KEY, 2);
-                blockDataNbt.appendTag(compound);
+                CompoundTag compound = new CompoundTag();
+                compound.putInt(BLOCKID_KEY, 98);
+                compound.putInt(META_KEY, 2);
+                blockDataNbt.add(compound);
             }
             {
-                NBTTagCompound compound = new NBTTagCompound();
-                compound.setInteger(BLOCKID_KEY, 98);
-                compound.setInteger(META_KEY, 3);
-                blockDataNbt.appendTag(compound);
+                CompoundTag compound = new CompoundTag();
+                compound.putInt(BLOCKID_KEY, 98);
+                compound.putInt(META_KEY, 3);
+                blockDataNbt.add(compound);
             }
-            shapeNbt.setTag(BLOCKDATA_KEY, blockDataNbt);
+            shapeNbt.put(BLOCKDATA_KEY, blockDataNbt);
 
-            shapesList.appendTag(shapeNbt);
+            shapesList.add(shapeNbt);
         }
 
         // Cylinder
         {
-            NBTTagCompound shapeNbt = Shapes.storeShape(new Cylinder(new PointI(0, 3, 0), 12));
+            CompoundTag shapeNbt = Shapes.storeShape(new Cylinder(new PointI(0, 3, 0), 12));
 
-            NBTTagList blockDataNbt = new NBTTagList();
+            ListTag blockDataNbt = new ListTag();
             {
-                NBTTagCompound compound = new NBTTagCompound();
-                compound.setInteger(BLOCKID_KEY, 99);
-                compound.setInteger(META_KEY, 14);
-                blockDataNbt.appendTag(compound);
+                CompoundTag compound = new CompoundTag();
+                compound.putInt(BLOCKID_KEY, 99);
+                compound.putInt(META_KEY, 14);
+                blockDataNbt.add(compound);
             }
             {
-                NBTTagCompound compound = new NBTTagCompound();
-                compound.setInteger(BLOCKID_KEY, 100);
-                compound.setInteger(META_KEY, 14);
-                blockDataNbt.appendTag(compound);
+                CompoundTag compound = new CompoundTag();
+                compound.putInt(BLOCKID_KEY, 100);
+                compound.putInt(META_KEY, 14);
+                blockDataNbt.add(compound);
             }
-            shapeNbt.setTag(BLOCKDATA_KEY, blockDataNbt);
+            shapeNbt.put(BLOCKDATA_KEY, blockDataNbt);
 
-            shapesList.appendTag(shapeNbt);
+            shapesList.add(shapeNbt);
         }
 
         // Pillar
         {
-            NBTTagCompound shapeNbt = Shapes.storeShape(new Pillar(new PointI(-2, 0, -6), 15));
+            CompoundTag shapeNbt = Shapes.storeShape(new Pillar(new PointI(-2, 0, -6), 15));
 
-            NBTTagList blockDataNbt = new NBTTagList();
+            ListTag blockDataNbt = new ListTag();
             for (int meta = 0; meta < 16; meta++)
             {
-                NBTTagCompound compound = new NBTTagCompound();
-                compound.setInteger(BLOCKID_KEY, 159);
-                compound.setInteger(META_KEY, meta);
-                blockDataNbt.appendTag(compound);
+                CompoundTag compound = new CompoundTag();
+                compound.putInt(BLOCKID_KEY, 159);
+                compound.putInt(META_KEY, meta);
+                blockDataNbt.add(compound);
             }
-            shapeNbt.setTag(BLOCKDATA_KEY, blockDataNbt);
+            shapeNbt.put(BLOCKDATA_KEY, blockDataNbt);
 
-            shapesList.appendTag(shapeNbt);
+            shapesList.add(shapeNbt);
         }
 
         // Point
         {
-            NBTTagCompound shapeNbt = Shapes.storeShape(new PointI(0, 0, 0));
+            CompoundTag shapeNbt = Shapes.storeShape(new PointI(0, 0, 0));
 
-            NBTTagList blockDataNbt = new NBTTagList();
+            ListTag blockDataNbt = new ListTag();
             {
-                NBTTagCompound compound = new NBTTagCompound();
-                compound.setInteger(BLOCKID_KEY, 54);
+                CompoundTag compound = new CompoundTag();
+                compound.putInt(BLOCKID_KEY, 54);
 
                 TileEntityChest chest = new TileEntityChest();
                 chest.setInventorySlotContents(13, new ItemStack(Items.golden_apple));
-                NBTTagCompound chestNbt = new NBTTagCompound();
+                CompoundTag chestNbt = new CompoundTag();
                 chest.writeToNBT(chestNbt);
-                compound.setTag(TEDATA_KEY, chestNbt);
+                compound.put(TEDATA_KEY, chestNbt);
 
-                blockDataNbt.appendTag(compound);
+                blockDataNbt.add(compound);
             }
-            shapeNbt.setTag(BLOCKDATA_KEY, blockDataNbt);
+            shapeNbt.put(BLOCKDATA_KEY, blockDataNbt);
 
-            shapesList.appendTag(shapeNbt);
+            shapesList.add(shapeNbt);
         }
 
         // Point
         {
-            NBTTagCompound shapeNbt = Shapes.storeShape(new PointI(-1, -2, -1));
+            CompoundTag shapeNbt = Shapes.storeShape(new PointI(-1, -2, -1));
 
-            NBTTagList blockDataNbt = new NBTTagList();
+            ListTag blockDataNbt = new ListTag();
             for (Object mob : EntityList.entityEggs.keySet())
             {
-                NBTTagCompound compound = new NBTTagCompound();
-                compound.setInteger(BLOCKID_KEY, 52);
+                CompoundTag compound = new CompoundTag();
+                compound.putInt(BLOCKID_KEY, 52);
 
                 TileEntityMobSpawner mobSpawner = new TileEntityMobSpawner();
                 mobSpawner.func_145881_a().setEntityName(EntityList.getStringFromID((Integer) mob));
-                NBTTagCompound spawnerNbt = new NBTTagCompound();
+                CompoundTag spawnerNbt = new CompoundTag();
                 mobSpawner.writeToNBT(spawnerNbt);
 
                 // Removes some clutter, not really necessary though
-                spawnerNbt.removeTag("x");
-                spawnerNbt.removeTag("y");
-                spawnerNbt.removeTag("z");
+                spawnerNbt.remove("x");
+                spawnerNbt.remove("y");
+                spawnerNbt.remove("z");
 
-                compound.setTag(TEDATA_KEY, spawnerNbt);
+                compound.put(TEDATA_KEY, spawnerNbt);
 
-                blockDataNbt.appendTag(compound);
+                blockDataNbt.add(compound);
             }
-            shapeNbt.setTag(BLOCKDATA_KEY, blockDataNbt);
+            shapeNbt.put(BLOCKDATA_KEY, blockDataNbt);
 
-            shapesList.appendTag(shapeNbt);
+            shapesList.add(shapeNbt);
         }
 
-        root.setTag(SHAPES_KEY, shapesList);
+        root.put(SHAPES_KEY, shapesList);
         return root;
     }
 
     @Override
-    public void spawnServerSide(EntityPlayerMP player, NBTTagCompound dataFromClient, NBTTagCompound rewardData)
+    public void spawnServerSide(ServerPlayer player, CompoundTag dataFromClient, CompoundTag rewardData)
     {
         byte baseRotation = dataFromClient.getBoolean(ROTATE_KEY) ? dataFromClient.getByte(BASEROTATION_KEY) : -1;
-        NBTTagList list = dataFromClient.getTagList(SHAPES_KEY, COMPOUND);
-        for (int i = 0; i < list.tagCount(); i++)
+        ListTag list = dataFromClient.getTagList(SHAPES_KEY, COMPOUND);
+        for (int i = 0; i < list.size(); i++)
         {
-            NBTTagCompound shapeNbt = list.getCompoundTagAt(i);
+            CompoundTag shapeNbt = list.getCompoundTagAt(i);
 
-            ArrayList<NBTTagCompound> blockDataList = new ArrayList<>();
-            NBTTagList blockDataNbt = shapeNbt.getTagList(BLOCKDATA_KEY, COMPOUND);
-            for (int j = 0; j < blockDataNbt.tagCount(); j++)
+            ArrayList<CompoundTag> blockDataList = new ArrayList<>();
+            ListTag blockDataNbt = shapeNbt.getTagList(BLOCKDATA_KEY, COMPOUND);
+            for (int j = 0; j < blockDataNbt.size(); j++)
                 blockDataList.add(blockDataNbt.getCompoundTagAt(j));
 
             applyShape(Shapes.loadShape(shapeNbt), player, blockDataList, baseRotation);
@@ -339,7 +339,7 @@ public class StructureType extends TypeBase
     }
 
     @Override
-    public Node getPermissionNode(EntityPlayer player, NBTTagCompound dataFromClient)
+    public Node getPermissionNode(Player player, CompoundTag dataFromClient)
     {
         return new Node(NAME);
     }
@@ -353,15 +353,15 @@ public class StructureType extends TypeBase
     public static class BlockData
     {
         final int id, meta, weight;
-        final NBTTagCompound te;
+        final CompoundTag te;
 
-        private BlockData(NBTTagCompound compound) throws BannedBlockException
+        private BlockData(CompoundTag compound) throws BannedBlockException
         {
-            id = compound.getInteger(BLOCKID_KEY);
-            meta = compound.getInteger(META_KEY);
-            weight = compound.hasKey(WEIGHT_KEY) ? compound.getInteger(WEIGHT_KEY) : 1;
+            id = compound.getInt(BLOCKID_KEY);
+            meta = compound.getInt(META_KEY);
+            weight = compound.contains(WEIGHT_KEY) ? compound.getInt(WEIGHT_KEY) : 1;
 
-            te = compound.hasKey(TEDATA_KEY) ? compound.getCompoundTag(TEDATA_KEY) : null;
+            te = compound.contains(TEDATA_KEY) ? compound.getCompound(TEDATA_KEY) : null;
 
             for (int[] ban : bannedBlocks)
             {

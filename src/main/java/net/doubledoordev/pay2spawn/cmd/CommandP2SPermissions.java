@@ -30,16 +30,16 @@
 
 package net.doubledoordev.pay2spawn.cmd;
 
+import com.mojang.brigadier.CommandDispatcher;
 import net.doubledoordev.pay2spawn.permissions.Group;
 import net.doubledoordev.pay2spawn.permissions.Node;
 import net.doubledoordev.pay2spawn.permissions.PermissionsHandler;
 import net.doubledoordev.pay2spawn.permissions.Player;
 import net.doubledoordev.pay2spawn.util.Helper;
-import net.minecraft.command.CommandBase;
-import net.minecraft.command.ICommandSender;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.ChatFormatting;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.server.level.ServerPlayer;
 
 import java.util.Arrays;
 import java.util.List;
@@ -49,198 +49,168 @@ import java.util.List;
  *
  * @author Dries007
  */
-public class CommandP2SPermissions extends CommandBase
-{
+public class CommandP2SPermissions {
     static final String HELP = "Use client side command 'p2s' for non permissions stuff.";
 
-    @Override
-    public String getCommandName()
-    {
+    public String getCommandName() {
         return "p2spermissions";
     }
 
-    @Override
-    public String getCommandUsage(ICommandSender icommandsender)
-    {
+    public String getCommandUsage(ICommandSender icommandsender) {
         return HELP;
     }
 
-    @Override
-    public void processCommand(ICommandSender sender, String[] args)
-    {
-        if (args.length == 0)
-        {
-            Helper.sendChatToPlayer(sender, "Use '/p2sperm group|groups|player' for more info.", EnumChatFormatting.RED);
+    public static void processCommand(CommandDispatcher<CommandSourceStack> sender, String[] args) {
+        if (args.length == 0) {
+            Helper.sendChatToPlayer(sender, "Use '/p2sperm group|groups|player' for more info.", ChatFormatting.RED);
             return;
         }
-        switch (args[0])
-        {
-            case "groups":
-                if (args.length < 3)
-                {
-                    Helper.sendChatToPlayer(sender, "Use '/p2s perm groups add|remove <name> [parent group]' to add or remove a group.", EnumChatFormatting.RED);
-                    break;
-                }
-                else
-                {
+        switch (args[0]) {
+            case "groups" -> {
+                if (args.length < 3) {
+                    Helper.sendChatToPlayer(sender, "Use '/p2s perm groups add|remove <name> [parent group]' to add or remove a group.", ChatFormatting.RED);
+                } else {
                     String name = args[2];
-                    switch (args[1])
-                    {
-                        case "add":
+                    switch (args[1]) {
+                        case "add" -> {
                             String parent = args.length == 4 ? args[3] : null;
                             PermissionsHandler.getDB().newGroup(name, parent);
-                            Helper.sendChatToPlayer(sender, "Added new group named '" + name + (parent != null ? "' with parent group '" + parent : "") + "'.", EnumChatFormatting.GOLD);
-                            break;
-                        case "remove":
+                            Helper.sendChatToPlayer(sender, "Added new group named '" + name + (parent != null ? "' with parent group '" + parent : "") + "'.", ChatFormatting.GOLD);
+                        }
+                        case "remove" -> {
                             PermissionsHandler.getDB().remove(name);
-                            Helper.sendChatToPlayer(sender, "Removed group named '" + name + "'", EnumChatFormatting.GOLD);
-                            break;
+                            Helper.sendChatToPlayer(sender, "Removed group named '" + name + "'", ChatFormatting.GOLD);
+                        }
                     }
                 }
-                break;
-            case "group":
-                if (args.length < 4)
-                {
-                    Helper.sendChatToPlayer(sender, "Use '/p2s perm group <name> add|remove <node>' OR '<name> parent set|clear [name]'", EnumChatFormatting.RED);
-                    break;
-                }
-                else
-                {
+            }
+            case "group" -> {
+                if (args.length < 4) {
+                    Helper.sendChatToPlayer(sender, "Use '/p2s perm group <name> add|remove <node>' OR '<name> parent set|clear [name]'", ChatFormatting.RED);
+                } else {
                     Group group = PermissionsHandler.getDB().getGroup(args[1]);
-                    if (group == null)
-                    {
-                        Helper.sendChatToPlayer(sender, "The group doesn't exist.", EnumChatFormatting.RED);
+                    if (group == null) {
+                        Helper.sendChatToPlayer(sender, "The group doesn't exist.", ChatFormatting.RED);
                         break;
                     }
-                    switch (args[2])
-                    {
-                        case "parent":
-                            switch (args[3])
-                            {
-                                case "set":
-                                    if (args.length != 5)
-                                    {
-                                        Helper.sendChatToPlayer(sender, "Use 'parent set <name>.", EnumChatFormatting.RED);
+                    switch (args[2]) {
+                        case "parent" -> {
+                            switch (args[3]) {
+                                case "set" -> {
+                                    if (args.length != 5) {
+                                        Helper.sendChatToPlayer(sender, "Use 'parent set <name>.", ChatFormatting.RED);
                                         return;
                                     }
                                     group.setParent(args[4]);
-                                    Helper.sendChatToPlayer(sender, "Set parent to: " + args[4], EnumChatFormatting.GOLD);
-                                    break;
-                                case "clear":
+                                    Helper.sendChatToPlayer(sender, "Set parent to: " + args[4], ChatFormatting.GOLD);
+                                }
+                                case "clear" -> {
                                     group.setParent(null);
-                                    Helper.sendChatToPlayer(sender, "Cleared parent group.", EnumChatFormatting.GOLD);
-                                    break;
+                                    Helper.sendChatToPlayer(sender, "Cleared parent group.", ChatFormatting.GOLD);
+                                }
                             }
-                            break;
-                        case "add":
+                        }
+                        case "add" -> {
                             group.addNode(args[3]);
-                            Helper.sendChatToPlayer(sender, "Added node: " + args[3], EnumChatFormatting.GOLD);
-                            break;
-                        case "remove":
-                            if (group.removeNode(args[3])) Helper.sendChatToPlayer(sender, "Removed node: " + args[3], EnumChatFormatting.GOLD);
-                            else Helper.sendChatToPlayer(sender, "Node not removed, it wasn't there in the first place...", EnumChatFormatting.RED);
-                            break;
+                            Helper.sendChatToPlayer(sender, "Added node: " + args[3], ChatFormatting.GOLD);
+                        }
+                        case "remove" -> {
+                            if (group.removeNode(args[3]))
+                                Helper.sendChatToPlayer(sender, "Removed node: " + args[3], ChatFormatting.GOLD);
+                            else
+                                Helper.sendChatToPlayer(sender, "Node not removed, it wasn't there in the first place...", ChatFormatting.RED);
+                        }
                     }
                 }
-                break;
-            case "player":
-                if (args.length < 5)
-                {
-                    Helper.sendChatToPlayer(sender, "Use '/p2s perm player <name> group add|remove <group>' OR '<name> perm add|remove <node>'", EnumChatFormatting.RED);
-                    break;
-                }
-                else
-                {
+            }
+            case "player" -> {
+                if (args.length < 5) {
+                    Helper.sendChatToPlayer(sender, "Use '/p2s perm player <name> group add|remove <group>' OR '<name> perm add|remove <node>'", ChatFormatting.RED);
+                } else {
                     Player playero = PermissionsHandler.getDB().getPlayer(args[1]);
-                    if (playero == null)
-                    {
-                        Helper.sendChatToPlayer(sender, "That player doesn't exist.", EnumChatFormatting.RED);
+                    if (playero == null) {
+                        Helper.sendChatToPlayer(sender, "That player doesn't exist.", ChatFormatting.RED);
                         break;
                     }
-                    switch (args[2])
-                    {
-                        case "group":
-                            switch (args[3])
-                            {
-                                case "add":
+                    switch (args[2]) {
+                        case "group" -> {
+                            switch (args[3]) {
+                                case "add" -> {
                                     playero.addGroup(args[4]);
-                                    Helper.sendChatToPlayer(sender, "Added " + args[1] + " to " + args[4], EnumChatFormatting.GOLD);
-                                    break;
-                                case "remove":
-                                    if (playero.removeGroup(args[4])) Helper.sendChatToPlayer(sender, "Removed group: " + args[4], EnumChatFormatting.GOLD);
-                                    else Helper.sendChatToPlayer(sender, "Group not removed, it wasn't there in the first place...", EnumChatFormatting.RED);
-                                    break;
+                                    Helper.sendChatToPlayer(sender, "Added " + args[1] + " to " + args[4], ChatFormatting.GOLD);
+                                }
+                                case "remove" -> {
+                                    if (playero.removeGroup(args[4]))
+                                        Helper.sendChatToPlayer(sender, "Removed group: " + args[4], ChatFormatting.GOLD);
+                                    else
+                                        Helper.sendChatToPlayer(sender, "Group not removed, it wasn't there in the first place...", ChatFormatting.RED);
+                                }
                             }
-                            break;
-                        case "perm":
-                            switch (args[3])
-                            {
-                                case "add":
-                                    playero.addNode(new Node(args[4]));
-                                    break;
-                                case "remove":
-                                    if (playero.removeNode(new Node(args[4]))) Helper.sendChatToPlayer(sender, "Added per node: " + args[4], EnumChatFormatting.GOLD);
-                                    else Helper.sendChatToPlayer(sender, "Perm node not removed, it wasn't there in the first place...", EnumChatFormatting.RED);
-                                    break;
+                        }
+                        case "perm" -> {
+                            switch (args[3]) {
+                                case "add" -> playero.addNode(new Node(args[4]));
+                                case "remove" -> {
+                                    if (playero.removeNode(new Node(args[4])))
+                                        Helper.sendChatToPlayer(sender, "Added per node: " + args[4], ChatFormatting.GOLD);
+                                    else
+                                        Helper.sendChatToPlayer(sender, "Perm node not removed, it wasn't there in the first place...", ChatFormatting.RED);
+                                }
                             }
-                            break;
+                        }
                     }
                 }
-                break;
+            }
         }
         PermissionsHandler.getDB().save();
     }
 
-    @Override
-    public List getCommandAliases()
-    {
+    public List getCommandAliases() {
         return Arrays.asList("p2sperm");
     }
 
-    @Override
-    public boolean canCommandSenderUseCommand(ICommandSender sender)
-    {
-        return !(sender instanceof EntityPlayerMP) || MinecraftServer.getServer().getConfigurationManager().func_152596_g(((EntityPlayerMP) sender).getGameProfile());
+    public boolean canCommandSenderUseCommand(ICommandSender sender) {
+        return !(sender instanceof ServerPlayer) || MinecraftServer.getServer().getConfigurationManager().func_152596_g(((ServerPlayer) sender).getGameProfile());
     }
 
-    @Override
-    public List addTabCompletionOptions(ICommandSender sender, String[] args)
-    {
-        switch (args.length)
-        {
+    public List addTabCompletionOptions(ICommandSender sender, String[] args) {
+        switch (args.length) {
             case 1:
                 return getListOfStringsMatchingLastWord(args, "groups", "group", "player");
             case 2:
-                switch (args[0])
-                {
-                    case "groups":
+                switch (args[0]) {
+                    case "groups" -> {
                         return getListOfStringsMatchingLastWord(args, "add", "remove");
-                    case "group":
+                    }
+                    case "group" -> {
                         return getListOfStringsFromIterableMatchingLastWord(args, PermissionsHandler.getDB().getGroups());
-                    case "player":
+                    }
+                    case "player" -> {
                         return getListOfStringsFromIterableMatchingLastWord(args, PermissionsHandler.getDB().getPlayers());
+                    }
                 }
                 break;
             case 3:
-                switch (args[0])
-                {
-                    case "groups":
-                        if (args[1].equals("remove")) return getListOfStringsFromIterableMatchingLastWord(args, PermissionsHandler.getDB().getGroups());
-                        break;
-                    case "group":
+                switch (args[0]) {
+                    case "groups" -> {
+                        if (args[1].equals("remove"))
+                            return getListOfStringsFromIterableMatchingLastWord(args, PermissionsHandler.getDB().getGroups());
+                    }
+                    case "group" -> {
                         return getListOfStringsMatchingLastWord(args, "parent", "add", "remove");
-                    case "player":
+                    }
+                    case "player" -> {
                         return getListOfStringsMatchingLastWord(args, "group", "perm");
+                    }
                 }
                 break;
             case 4:
-                switch (args[0])
-                {
+                switch (args[0]) {
                     case "groups":
-                        if (args[1].equals("add")) return getListOfStringsFromIterableMatchingLastWord(args, PermissionsHandler.getDB().getGroups());
+                        if (args[1].equals("add"))
+                            return getListOfStringsFromIterableMatchingLastWord(args, PermissionsHandler.getDB().getGroups());
                     case "group":
-                        switch (args[2])
-                        {
+                        switch (args[2]) {
                             case "parent":
                                 return getListOfStringsMatchingLastWord(args, "set", "clear");
                             case "add":
@@ -250,45 +220,47 @@ public class CommandP2SPermissions extends CommandBase
                         }
                         break;
                     case "player":
-                        switch (args[2])
-                        {
-                            case "group":
+                        switch (args[2]) {
+                            case "group" -> {
                                 return getListOfStringsMatchingLastWord(args, "add", "remove");
-                            case "perm":
+                            }
+                            case "perm" -> {
                                 return getListOfStringsMatchingLastWord(args, "add", "remove");
+                            }
                         }
                         break;
                 }
                 break;
             case 5:
-                switch (args[0])
-                {
-                    case "group":
-                        if (args[2].equals("parent") && args[3].equals("set")) return getListOfStringsFromIterableMatchingLastWord(args, PermissionsHandler.getDB().getGroups());
-                        break;
-                    case "player":
-                        switch (args[2])
-                        {
-                            case "group":
-                                switch (args[3])
-                                {
-                                    case "add":
+                switch (args[0]) {
+                    case "group" -> {
+                        if (args[2].equals("parent") && args[3].equals("set"))
+                            return getListOfStringsFromIterableMatchingLastWord(args, PermissionsHandler.getDB().getGroups());
+                    }
+                    case "player" -> {
+                        switch (args[2]) {
+                            case "group" -> {
+                                switch (args[3]) {
+                                    case "add" -> {
                                         return getListOfStringsFromIterableMatchingLastWord(args, PermissionsHandler.getDB().getGroups());
-                                    case "remove":
+                                    }
+                                    case "remove" -> {
                                         return getListOfStringsFromIterableMatchingLastWord(args, PermissionsHandler.getDB().getPlayer(args[1]).getGroups());
+                                    }
                                 }
-                                break;
-                            case "perm":
-                                switch (args[3])
-                                {
-                                    case "add":
+                            }
+                            case "perm" -> {
+                                switch (args[3]) {
+                                    case "add" -> {
                                         return getListOfStringsFromIterableMatchingLastWord(args, PermissionsHandler.getAllPermNodes());
-                                    case "remove":
+                                    }
+                                    case "remove" -> {
                                         return getListOfStringsFromIterableMatchingLastWord(args, PermissionsHandler.getDB().getPlayer(args[1]).getNodes());
+                                    }
                                 }
-                                break;
+                            }
                         }
-                        break;
+                    }
                 }
                 break;
         }

@@ -30,18 +30,18 @@
 
 package net.doubledoordev.pay2spawn.network;
 
-import cpw.mods.fml.common.network.ByteBufUtils;
-import cpw.mods.fml.common.network.simpleimpl.IMessage;
-import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
-import cpw.mods.fml.common.network.simpleimpl.MessageContext;
+
 import io.netty.buffer.ByteBuf;
 import net.doubledoordev.pay2spawn.types.guis.StructureTypeGui;
 import net.doubledoordev.pay2spawn.util.shapes.PointI;
 import net.minecraft.block.Block;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
 
 import static net.doubledoordev.pay2spawn.types.StructureType.*;
 import static net.doubledoordev.pay2spawn.util.Constants.COMPOUND;
@@ -55,13 +55,13 @@ import static net.doubledoordev.pay2spawn.util.Constants.COMPOUND;
  */
 public class StructureImportMessage implements IMessage
 {
-    NBTTagCompound root;
+    CompoundTag root;
 
     public StructureImportMessage()
     {
     }
 
-    public StructureImportMessage(NBTTagCompound root)
+    public StructureImportMessage(CompoundTag root)
     {
         this.root = root;
     }
@@ -85,49 +85,49 @@ public class StructureImportMessage implements IMessage
         {
             if (ctx.side.isServer())
             {
-                int offsetx = message.root.getInteger("x"), offsety = message.root.getInteger("y"), offsetz = message.root.getInteger("z");
-                NBTTagCompound newRoot = new NBTTagCompound();
-                NBTTagList newList = new NBTTagList();
+                int offsetx = message.root.getInt("x"), offsety = message.root.getInt("y"), offsetz = message.root.getInt("z");
+                CompoundTag newRoot = new CompoundTag();
+                ListTag newList = new ListTag();
 
-                NBTTagList list = message.root.getTagList("list", COMPOUND);
-                for (int i = 0; i < list.tagCount(); i++)
+                ListTag list = message.root.getTagList("list", COMPOUND);
+                for (int i = 0; i < list.size(); i++)
                 {
                     PointI point = new PointI(list.getCompoundTagAt(i));
-                    World world = ctx.getServerHandler().playerEntity.worldObj;
+                    Level world = ctx.getServerHandler().playerEntity.level;
                     int x = point.getX(), y = point.getY(), z = point.getZ();
 
                     // Set up the correct block data
-                    NBTTagList blockDataNbt = new NBTTagList();
+                    ListTag blockDataNbt = new ListTag();
                     {
-                        NBTTagCompound compound = new NBTTagCompound();
+                        CompoundTag compound = new CompoundTag();
 
                         // BlockID
-                        compound.setInteger(BLOCKID_KEY, Block.getIdFromBlock(world.getBlock(x, y, z)));
+                        compound.putInt(BLOCKID_KEY, Block.getIdFromBlock(world.getBlock(x, y, z)));
 
                         // metaData
                         int meta = world.getBlockMetadata(x, y, z);
-                        if (meta != 0) compound.setInteger(META_KEY, meta);
+                        if (meta != 0) compound.putInt(META_KEY, meta);
 
                         // TileEntity
-                        TileEntity te = world.getTileEntity(x, y, z);
+                        BlockEntity te = world.getBlockEntity(new BlockPos(x, y, z));
                         if (te != null)
                         {
-                            NBTTagCompound teNbt = new NBTTagCompound();
+                            CompoundTag teNbt = new CompoundTag();
                             te.writeToNBT(teNbt);
-                            teNbt.removeTag("x");
-                            teNbt.removeTag("y");
-                            teNbt.removeTag("z");
-                            compound.setTag(TEDATA_KEY, teNbt);
+                            teNbt.remove("x");
+                            teNbt.remove("y");
+                            teNbt.remove("z");
+                            compound.put(TEDATA_KEY, teNbt);
                         }
 
-                        blockDataNbt.appendTag(compound);
+                        blockDataNbt.add(compound);
                     }
-                    NBTTagCompound shapeNbt = point.move(offsetx, offsety, offsetz).toNBT();
-                    shapeNbt.setTag(BLOCKDATA_KEY, blockDataNbt);
-                    newList.appendTag(shapeNbt);
+                    CompoundTag shapeNbt = point.move(offsetx, offsety, offsetz).toNBT();
+                    shapeNbt.put(BLOCKDATA_KEY, blockDataNbt);
+                    newList.add(shapeNbt);
                 }
 
-                newRoot.setTag("list", newList);
+                newRoot.put("list", newList);
                 return new StructureImportMessage(newRoot);
             }
             else

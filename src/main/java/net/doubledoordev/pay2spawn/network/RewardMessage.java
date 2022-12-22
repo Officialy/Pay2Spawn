@@ -30,10 +30,7 @@
 
 package net.doubledoordev.pay2spawn.network;
 
-import cpw.mods.fml.common.network.ByteBufUtils;
-import cpw.mods.fml.common.network.simpleimpl.IMessage;
-import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
-import cpw.mods.fml.common.network.simpleimpl.MessageContext;
+
 import io.netty.buffer.ByteBuf;
 import net.doubledoordev.pay2spawn.Pay2Spawn;
 import net.doubledoordev.pay2spawn.permissions.BanHelper;
@@ -42,8 +39,8 @@ import net.doubledoordev.pay2spawn.permissions.PermissionsHandler;
 import net.doubledoordev.pay2spawn.types.TypeBase;
 import net.doubledoordev.pay2spawn.types.TypeRegistry;
 import net.doubledoordev.pay2spawn.util.Helper;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.util.ChatFormatting;
 
 /**
  * Uses NBT instead of a stringified JSON array because of network efficiency
@@ -52,13 +49,13 @@ import net.minecraft.util.EnumChatFormatting;
  */
 public class RewardMessage implements IMessage
 {
-    private NBTTagCompound reward, rewardData;
+    private CompoundTag reward, rewardData;
 
     public RewardMessage()
     {
     }
 
-    public RewardMessage(NBTTagCompound reward, NBTTagCompound rewardData)
+    public RewardMessage(CompoundTag reward, CompoundTag rewardData)
     {
         this.reward = reward;
         this.rewardData = rewardData;
@@ -86,11 +83,11 @@ public class RewardMessage implements IMessage
             try
             {
                 TypeBase type = TypeRegistry.getByName(message.reward.getString("type").toLowerCase());
-                NBTTagCompound nbt = message.reward.getCompoundTag("data");
+                CompoundTag nbt = message.reward.getCompound("data");
                 Node node = type.getPermissionNode(ctx.getServerHandler().playerEntity, nbt);
                 if (BanHelper.isBanned(node))
                 {
-                    Helper.sendChatToPlayer(ctx.getServerHandler().playerEntity, "This node (" + node + ") is banned.", EnumChatFormatting.RED);
+                    Helper.sendChatToPlayer(ctx.getServerHandler().playerEntity, "This node (" + node + ") is banned.", ChatFormatting.RED);
                     Pay2Spawn.getLogger().warn(ctx.getServerHandler().playerEntity.getCommandSenderName() + " tried using globally banned node " + node + ".");
                     return null;
                 }
@@ -105,7 +102,7 @@ public class RewardMessage implements IMessage
             {
                 Pay2Spawn.getLogger().warn("ERROR TYPE 3: Error spawning a reward on the server.");
                 Pay2Spawn.getLogger().warn("Type: " + message.reward.getString("type").toLowerCase());
-                Pay2Spawn.getLogger().warn("Data: " + message.reward.getCompoundTag("data"));
+                Pay2Spawn.getLogger().warn("Data: " + message.reward.getCompound("data"));
                 e.printStackTrace();
             }
             return null;

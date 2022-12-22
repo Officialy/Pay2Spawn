@@ -30,10 +30,10 @@
 
 package net.doubledoordev.pay2spawn.random;
 
-import cpw.mods.fml.common.registry.FMLControlledNamespacedRegistry;
-import cpw.mods.fml.common.registry.GameData;
-import net.minecraft.item.Item;
-import org.lwjgl.Sys;
+import net.minecraft.world.level.block.Block;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.Collection;
 
 import static net.doubledoordev.pay2spawn.util.Constants.INT;
 import static net.doubledoordev.pay2spawn.util.Constants.SHORT;
@@ -41,19 +41,16 @@ import static net.doubledoordev.pay2spawn.util.Constants.SHORT;
 /**
  * @author Dries007
  */
-public abstract class ItemId<T> implements IRandomResolver
-{
+public abstract class ItemId<T> implements IRandomResolver {
     @Override
-    public String solverRandom(int type, String value)
-    {
+    public String solverRandom(int type, String value) {
         return String.valueOf(getRegistry().getId(getRegistry().getObject(value)));
     }
 
     @Override
-    public boolean matches(int type, String value)
-    {
+    public boolean matches(int type, String value) {
         return (type == SHORT || type == INT) && getRegistry().containsKey(value);
     }
 
-    public abstract FMLControlledNamespacedRegistry<T> getRegistry();
+    public abstract @NotNull Collection<?> getRegistry();
 }

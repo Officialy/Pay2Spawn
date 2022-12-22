@@ -35,9 +35,9 @@ import net.doubledoordev.pay2spawn.Pay2Spawn;
 import net.doubledoordev.pay2spawn.network.StatusMessage;
 import net.doubledoordev.pay2spawn.permissions.Node;
 import net.doubledoordev.pay2spawn.types.guis.SaleTypeGui;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.entity.player.Player;
+import net.minecraft.entity.player.ServerPlayer;
+import net.minecraft.nbt.CompoundTag;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -70,18 +70,18 @@ public class SaleType extends TypeBase
     }
 
     @Override
-    public NBTTagCompound getExample()
+    public CompoundTag getExample()
     {
-        NBTTagCompound nbt = new NBTTagCompound();
-        nbt.setInteger(AMOUNT_KEY, 50);
-        nbt.setInteger(TIME_KEY, 10);
+        CompoundTag nbt = new CompoundTag();
+        nbt.putInt(AMOUNT_KEY, 50);
+        nbt.putInt(TIME_KEY, 10);
         return nbt;
     }
 
     @Override
-    public void spawnServerSide(EntityPlayerMP player, NBTTagCompound dataFromClient, NBTTagCompound rewardData)
+    public void spawnServerSide(ServerPlayer player, CompoundTag dataFromClient, CompoundTag rewardData)
     {
-        Pay2Spawn.getSnw().sendTo(new StatusMessage(SALE, Integer.toString(dataFromClient.getInteger(TIME_KEY)), Integer.toString(dataFromClient.getInteger(AMOUNT_KEY))), player);
+        Pay2Spawn.getSnw().sendTo(new StatusMessage(SALE, Integer.toString(dataFromClient.getInt(TIME_KEY)), Integer.toString(dataFromClient.getInt(AMOUNT_KEY))), player);
     }
 
     @Override
@@ -99,7 +99,7 @@ public class SaleType extends TypeBase
     }
 
     @Override
-    public Node getPermissionNode(EntityPlayer player, NBTTagCompound dataFromClient)
+    public Node getPermissionNode(Player player, CompoundTag dataFromClient)
     {
         return new Node(NAME);
     }

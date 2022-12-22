@@ -33,7 +33,7 @@ package net.doubledoordev.pay2spawn.checkers;
 import net.doubledoordev.pay2spawn.Pay2Spawn;
 import net.doubledoordev.pay2spawn.util.Donation;
 import net.doubledoordev.pay2spawn.util.Helper;
-import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.ChatFormatting;
 import net.minecraftforge.common.config.Configuration;
 
 import java.util.*;
@@ -111,7 +111,7 @@ public class CheckerHandler
     public static void fakeDonation(double amount, String name)
     {
         Donation donation = new Donation(UUID.randomUUID().toString(), amount, new Date().getTime(), name);
-        Helper.msg(EnumChatFormatting.GOLD + "[P2S] Faking donation of " + amount + " from " + name + ".");
+        Helper.msg(ChatFormatting.GOLD + "[P2S] Faking donation of " + amount + " from " + name + ".");
         Pay2Spawn.getRewardsDB().process(donation, false);
     }
 }

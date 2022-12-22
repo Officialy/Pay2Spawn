@@ -30,6 +30,7 @@
 
 package net.doubledoordev.pay2spawn.types.guis;
 
+import com.mojang.blaze3d.vertex.Tesselator;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import net.doubledoordev.pay2spawn.Pay2Spawn;
 import net.doubledoordev.pay2spawn.network.StructureImportMessage;
@@ -37,11 +38,11 @@ import net.doubledoordev.pay2spawn.util.Helper;
 import net.doubledoordev.pay2spawn.util.shapes.IShape;
 import net.doubledoordev.pay2spawn.util.shapes.PointI;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.Tesselator;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.init.Items;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import org.lwjgl.opengl.GL11;
@@ -204,16 +205,16 @@ public class StructureImporter
             @Override
             public void actionPerformed(ActionEvent e)
             {
-                NBTTagCompound root = new NBTTagCompound();
-                root.setInteger("x", -Helper.round(Minecraft.getMinecraft().thePlayer.posX));
-                root.setInteger("y", -Helper.round(Minecraft.getMinecraft().thePlayer.posY));
-                root.setInteger("z", -Helper.round(Minecraft.getMinecraft().thePlayer.posZ));
-                NBTTagList list = new NBTTagList();
+                CompoundTag root = new CompoundTag();
+                root.putInt("x", -Helper.round(Minecraft.getInstance().player.getX()));
+                root.putInt("y", -Helper.round(Minecraft.getInstance().player.getY()));
+                root.putInt("z", -Helper.round(Minecraft.getInstance().player.getZ()));
+                ListTag list = new ListTag();
                 synchronized (points)
                 {
-                    for (PointI point : points) list.appendTag(point.toNBT());
+                    for (PointI point : points) list.add(point.toNBT());
                 }
-                root.setTag("list", list);
+                root.put("list", list);
                 if (Helper.checkTooBigForNetwork(root)) return;
                 Pay2Spawn.getSnw().sendToServer(new StructureImportMessage(root));
                 dialog.dispose();
@@ -249,8 +250,8 @@ public class StructureImporter
     {
         if (selection.size() == 0 && points.size() == 0 && p1 == null && p2 == null) return;
 
-        Tessellator tess = Tessellator.instance;
-        Tessellator.renderingWorldRenderer = false;
+        Tesselator tess = Tesselator.getInstance();
+        Tesselator.renderingWorldRenderer = false;
 
         GL11.glPushMatrix();
         GL11.glEnable(GL12.GL_RESCALE_NORMAL);
@@ -303,7 +304,7 @@ public class StructureImporter
     @SubscribeEvent
     public void clickEvent(PlayerInteractEvent e)
     {
-        if (e.entityPlayer.getHeldItem() == null || e.entityPlayer.getHeldItem().getItem() != Items.stick) return;
+        if (e.Player.getHeldItem() == null || e.Player.getHeldItem().getItem() != Items.stick) return;
         e.setCanceled(true);
 
         if (e.action == PlayerInteractEvent.Action.LEFT_CLICK_BLOCK) click(Click.LEFT, e.x, e.y, e.z);

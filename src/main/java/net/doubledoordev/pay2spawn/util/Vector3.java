@@ -43,9 +43,9 @@ public class Vector3
 
     public Vector3(Entity src, Entity target)
     {
-        x = -src.posX + target.posX;
-        y = -src.posY + target.posY;
-        z = -src.posZ + target.posZ;
+        x = -src.getX() + target.getX();
+        y = -src.getY() + target.getY();
+        z = -src.getZ() + target.getZ();
     }
 
     public Vector3 normalize()

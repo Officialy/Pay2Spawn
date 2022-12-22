@@ -30,16 +30,13 @@
 
 package net.doubledoordev.pay2spawn.util;
 
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.common.gameevent.TickEvent;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.entity.living.LivingDeathEvent;
+import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import static net.doubledoordev.pay2spawn.types.PlayerModificationType.Type;
-import static net.doubledoordev.pay2spawn.types.PlayerModificationType.typeMap;
 
 /**
  * Server side tick things, does timeable player effects
@@ -52,7 +49,7 @@ public class ServerTickHandler
 
     private ServerTickHandler()
     {
-        FMLCommonHandler.instance().bus().register(this);
+        MinecraftForge.EVENT_BUS.register(this);
     }
 
     @SubscribeEvent
@@ -60,22 +57,22 @@ public class ServerTickHandler
     {
         if (event.phase != TickEvent.Phase.START) return;
 
-        NBTTagCompound data = event.player.getEntityData().getCompoundTag(EntityPlayer.PERSISTED_NBT_TAG).getCompoundTag("P2S");
+        CompoundTag data = event.player.getEntityData().getCompound(Player.PERSISTED_NBT_TAG).getCompound("P2S");
         for (Type t : Type.values())
         {
             if (t.isTimable())
             {
-                if (data.hasKey(t.name()))
+                if (data.contains(t.name()))
                 {
-                    int i = data.getInteger(t.name());
+                    int i = data.getInt(t.name());
                     if (i == 0)
                     {
                         t.undo(event.player);
-                        data.removeTag(t.name());
+                        data.remove(t.name());
                     }
                     else
                     {
-                        data.setInteger(t.name(), --i);
+                        data.putInt(t.name(), --i);
                     }
                 }
             }

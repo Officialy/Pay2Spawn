@@ -31,19 +31,14 @@
 package net.doubledoordev.pay2spawn.cmd;
 
 import net.doubledoordev.pay2spawn.Pay2Spawn;
-import net.doubledoordev.pay2spawn.ai.CustomAI;
 import net.doubledoordev.pay2spawn.util.Constants;
-import net.minecraft.command.CommandBase;
-import net.minecraft.command.ICommandSender;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.ChatComponentText;
-import net.minecraft.util.ChatStyle;
-import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.world.WorldServer;
-import net.minecraftforge.common.DimensionManager;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 
+import javax.swing.text.html.parser.Entity;
 import java.util.Arrays;
 import java.util.List;
 
@@ -52,100 +47,79 @@ import java.util.List;
  *
  * @author Dries007
  */
-public class CommandP2SServer extends CommandBase
-{
+public class CommandP2SServer {
     static final String HELP = "OP only command, Server side.";
 
-    @Override
-    public String getCommandName()
-    {
+    public String getCommandName() {
         return "pay2spawnserver";
     }
 
-    @Override
-    public String getCommandUsage(ICommandSender icommandsender)
-    {
+    public String getCommandUsage(ICommandSender icommandsender) {
         return HELP;
     }
 
-    @Override
-    public void processCommand(final ICommandSender sender, String[] args)
-    {
+    public static void processCommand(final ICommandSender sender, String[] args) {
         // todo: DEBUG
         // CustomAI.INSTANCE.test(getCommandSenderAsPlayer(sender));
 
-        if (args.length == 0)
-        {
-            sendChatToPlayer(sender, HELP, EnumChatFormatting.AQUA);
-            sendChatToPlayer(sender, "Protip: Use tab completion!", EnumChatFormatting.AQUA);
+        if (args.length == 0) {
+            sendChatToPlayer(sender, HELP, ChatFormatting.AQUA);
+            sendChatToPlayer(sender, "Protip: Use tab completion!", ChatFormatting.AQUA);
             return;
         }
-        switch (args[0])
-        {
-            case "butcher":
-            {
-                sendChatToPlayer(sender, "Removing all spawned entities...", EnumChatFormatting.YELLOW);
+        switch (args[0]) {
+            case "butcher": {
+                sendChatToPlayer(sender, "Removing all spawned entities...", ChatFormatting.YELLOW);
                 int count = 0;
-                for (WorldServer world : DimensionManager.getWorlds())
-                {
-                    for (Entity entity : (List<Entity>) world.loadedEntityList)
-                    {
-                        if (entity.getEntityData().hasKey(Constants.NAME))
-                        {
+                for (ServerLevel world : DimensionManager.getWorlds()) {
+                    for (Entity entity : (List<Entity>) world.loadedEntityList) {
+                        if (entity.getEntityData().contains(Constants.NAME)) {
                             count++;
                             entity.setDead();
                         }
                     }
                 }
-                sendChatToPlayer(sender, "Removed " + count + " entities.", EnumChatFormatting.GREEN);
+                sendChatToPlayer(sender, "Removed " + count + " entities.", ChatFormatting.GREEN);
                 break;
             }
             case "reload":
-                if (MinecraftServer.getServer().isDedicatedServer())
-                {
-                    try
-                    {
+                if (MinecraftServer.getServer().isDedicatedServer()) {
+                    try {
                         Pay2Spawn.reloadDB_Server();
-                    }
-                    catch (Exception e)
-                    {
-                        sendChatToPlayer(sender, "RELOAD FAILED.", EnumChatFormatting.RED);
+                    } catch (Exception e) {
+                        sendChatToPlayer(sender, "RELOAD FAILED.", ChatFormatting.RED);
                         e.printStackTrace();
                     }
                 }
                 break;
             case "hasmod":
-                if (args.length == 1) sendChatToPlayer(sender, "Use '/p2sserver hasmod <player>'.", EnumChatFormatting.RED);
-                else sendChatToPlayer(sender, args[1] + (Pay2Spawn.doesPlayerHaveValidConfig(args[1]) ? " does " : " doesn't ") + "have P2S.", EnumChatFormatting.AQUA);
+                if (args.length == 1) sendChatToPlayer(sender, "Use '/p2sserver hasmod <player>'.", ChatFormatting.RED);
+                else
+                    sendChatToPlayer(sender, args[1] + (Pay2Spawn.doesPlayerHaveValidConfig(args[1]) ? " does " : " doesn't ") + "have P2S.", ChatFormatting.AQUA);
                 break;
             default:
-                sendChatToPlayer(sender, "Unknown command. Protip: Use tab completion!", EnumChatFormatting.RED);
+                sendChatToPlayer(sender, "Unknown command. Protip: Use tab completion!", ChatFormatting.RED);
                 break;
         }
     }
 
     @Override
-    public List getCommandAliases()
-    {
+    public List getCommandAliases() {
         return Arrays.asList("p2sserver");
     }
 
     @Override
-    public boolean canCommandSenderUseCommand(ICommandSender sender)
-    {
-        return !(sender instanceof EntityPlayerMP) || MinecraftServer.getServer().getConfigurationManager().func_152596_g(((EntityPlayerMP) sender).getGameProfile());
+    public boolean canCommandSenderUseCommand(ICommandSender sender) {
+        return !(sender instanceof ServerPlayer) || MinecraftServer.getServer().getConfigurationManager().func_152596_g(((ServerPlayer) sender).getGameProfile());
     }
 
     @Override
-    public List addTabCompletionOptions(ICommandSender sender, String[] args)
-    {
-        switch (args.length)
-        {
+    public List addTabCompletionOptions(ICommandSender sender, String[] args) {
+        switch (args.length) {
             case 1:
                 return getListOfStringsMatchingLastWord(args, "reload", "hasmod", "butcher");
             case 2:
-                switch (args[1])
-                {
+                switch (args[1]) {
                     case "hasmod":
                         return getListOfStringsMatchingLastWord(args, MinecraftServer.getServer().getAllUsernames());
                 }
@@ -153,8 +127,7 @@ public class CommandP2SServer extends CommandBase
         return null;
     }
 
-    public void sendChatToPlayer(ICommandSender sender, String message, EnumChatFormatting chatFormatting)
-    {
-        sender.addChatMessage(new ChatComponentText(message).setChatStyle(new ChatStyle().setColor(chatFormatting)));
+    public static void sendChatToPlayer(ICommandSender sender, String message, ChatFormatting chatFormatting) {
+        sender.addChatMessage(new TextComponent(message).setChatStyle(new ChatStyle().setColor(chatFormatting)));
     }
 }

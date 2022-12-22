@@ -35,9 +35,9 @@ import net.doubledoordev.pay2spawn.configurator.HTMLGenerator;
 import net.doubledoordev.pay2spawn.permissions.Node;
 import net.doubledoordev.pay2spawn.util.Donation;
 import net.doubledoordev.pay2spawn.util.Reward;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.entity.player.Player;
+import net.minecraft.entity.player.ServerPlayer;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraftforge.common.config.Configuration;
 
 import java.io.File;
@@ -69,7 +69,7 @@ public abstract class TypeBase
      *
      * @return an example, NBT so it can be stored in the JSON
      */
-    public abstract NBTTagCompound getExample();
+    public abstract CompoundTag getExample();
 
     /**
      * Spawn the reward, only called server side.
@@ -77,7 +77,7 @@ public abstract class TypeBase
      * @param player         The player the reward comes from
      * @param dataFromClient the nbt from the JSON file, fully usable
      */
-    public abstract void spawnServerSide(EntityPlayerMP player, NBTTagCompound dataFromClient, NBTTagCompound rewardData);
+    public abstract void spawnServerSide(ServerPlayer player, CompoundTag dataFromClient, CompoundTag rewardData);
 
     /**
      * Extra method for custom configuration
@@ -103,7 +103,7 @@ public abstract class TypeBase
 
     public abstract Collection<Node> getPermissionNodes();
 
-    public abstract Node getPermissionNode(EntityPlayer player, NBTTagCompound dataFromClient);
+    public abstract Node getPermissionNode(Player player, CompoundTag dataFromClient);
 
     public boolean isInDefaultConfig()
     {
@@ -146,7 +146,7 @@ public abstract class TypeBase
 
     public abstract String replaceInTemplate(String id, JsonObject jsonObject);
 
-    public void addConfigTags(NBTTagCompound rewardNtb, Donation donation, Reward reward)
+    public void addConfigTags(CompoundTag rewardNtb, Donation donation, Reward reward)
     {
 
     }

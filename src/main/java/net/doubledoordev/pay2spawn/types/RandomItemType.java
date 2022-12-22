@@ -38,11 +38,11 @@ import net.doubledoordev.pay2spawn.util.Helper;
 import net.doubledoordev.pay2spawn.util.JsonNBTHelper;
 import net.minecraft.block.Block;
 import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.Player;
+import net.minecraft.entity.player.ServerPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundTag;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -73,20 +73,20 @@ public class RandomItemType extends TypeBase
     }
 
     @Override
-    public NBTTagCompound getExample()
+    public CompoundTag getExample()
     {
-        NBTTagCompound root = new NBTTagCompound();
-        NBTTagCompound tag = new NBTTagCompound();
-        NBTTagCompound display = new NBTTagCompound();
-        display.setString(NAME_KEY, "$name");
-        tag.setTag(DISPLAY_KEY, display);
-        root.setTag(TAG_KEY, tag);
+        CompoundTag root = new CompoundTag();
+        CompoundTag tag = new CompoundTag();
+        CompoundTag display = new CompoundTag();
+        display.putString(NAME_KEY, "$name");
+        tag.put(DISPLAY_KEY, display);
+        root.put(TAG_KEY, tag);
 
         return root;
     }
 
     @Override
-    public void spawnServerSide(EntityPlayerMP player, NBTTagCompound dataFromClient, NBTTagCompound rewardData)
+    public void spawnServerSide(ServerPlayer player, CompoundTag dataFromClient, CompoundTag rewardData)
     {
         try
         {
@@ -121,7 +121,7 @@ public class RandomItemType extends TypeBase
     }
 
     @Override
-    public Node getPermissionNode(EntityPlayer player, NBTTagCompound dataFromClient)
+    public Node getPermissionNode(Player player, CompoundTag dataFromClient)
     {
         ItemStack is;
         do
@@ -129,10 +129,10 @@ public class RandomItemType extends TypeBase
             is = pickRandomItemStack();
         } while (is == null || is.getItem() == null);
 
-        NBTTagCompound nbtTagCompound = is.writeToNBT(new NBTTagCompound());
-        for (Object o : dataFromClient.func_150296_c())
+        CompoundTag nbtTagCompound = is.writeToNBT(new CompoundTag());
+        for (Object o : dataFromClient.getAllKeys())
         {
-            nbtTagCompound.setTag(o.toString(), dataFromClient.getTag(o.toString()));
+            nbtTagCompound.put(o.toString(), dataFromClient.get(o.toString()));
         }
         is.readFromNBT(nbtTagCompound);
         is.writeToNBT(dataFromClient);

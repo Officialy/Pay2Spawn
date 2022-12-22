@@ -42,19 +42,16 @@ import static net.doubledoordev.pay2spawn.util.Constants.*;
  *
  * @author Dries007
  */
-public class RndBoolean implements IRandomResolver
-{
+public class RndBoolean implements IRandomResolver {
     private static final Pattern PATTERN = Pattern.compile("\\$random\\(\\)");
 
     @Override
-    public String solverRandom(int type, String value)
-    {
+    public String solverRandom(int type, String value) {
         return PATTERN.matcher(value).replaceFirst(RANDOM.nextBoolean() ? "1" : "0");
     }
 
     @Override
-    public boolean matches(int type, String value)
-    {
+    public boolean matches(int type, String value) {
         return (type == BYTE || type == STRING) && PATTERN.matcher(value).find();
     }
 }

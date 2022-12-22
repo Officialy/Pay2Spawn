@@ -33,9 +33,9 @@ package net.doubledoordev.pay2spawn.types;
 import com.google.gson.JsonObject;
 import net.doubledoordev.pay2spawn.permissions.Node;
 import net.doubledoordev.pay2spawn.types.guis.DeleteworldTypeGui;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.entity.player.Player;
+import net.minecraft.entity.player.ServerPlayer;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.MinecraftServer;
 
 import java.util.Arrays;
@@ -71,19 +71,19 @@ public class DeleteworldType extends TypeBase
     }
 
     @Override
-    public NBTTagCompound getExample()
+    public CompoundTag getExample()
     {
-        NBTTagCompound nbtTagCompound = new NBTTagCompound();
-        nbtTagCompound.setString(MESSAGE_KEY, DEFAULTMESSAGE);
+        CompoundTag nbtTagCompound = new CompoundTag();
+        nbtTagCompound.putString(MESSAGE_KEY, DEFAULTMESSAGE);
         return nbtTagCompound;
     }
 
     @Override
-    public void spawnServerSide(EntityPlayerMP player, NBTTagCompound dataFromClient, NBTTagCompound rewardData)
+    public void spawnServerSide(ServerPlayer player, CompoundTag dataFromClient, CompoundTag rewardData)
     {
         for (int i = 0; i < MinecraftServer.getServer().getConfigurationManager().playerEntityList.size(); ++i)
         {
-            ((EntityPlayerMP) MinecraftServer.getServer().getConfigurationManager().playerEntityList.get(i)).playerNetServerHandler.kickPlayerFromServer(dataFromClient.getString(MESSAGE_KEY).replace("\\n", "\n"));
+            ((ServerPlayer) MinecraftServer.getServer().getConfigurationManager().playerEntityList.get(i)).playerNetServerHandler.kickPlayerFromServer(dataFromClient.getString(MESSAGE_KEY).replace("\\n", "\n"));
         }
         MinecraftServer.getServer().deleteWorldAndStopServer();
     }
@@ -101,7 +101,7 @@ public class DeleteworldType extends TypeBase
     }
 
     @Override
-    public Node getPermissionNode(EntityPlayer player, NBTTagCompound dataFromClient)
+    public Node getPermissionNode(Player player, CompoundTag dataFromClient)
     {
         return new Node(NAME);
     }

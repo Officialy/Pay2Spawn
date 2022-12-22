@@ -31,21 +31,14 @@
 package net.doubledoordev.pay2spawn.ai;
 
 import com.google.common.collect.ImmutableList;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import net.doubledoordev.pay2spawn.util.Constants;
-import net.doubledoordev.pay2spawn.util.JsonNBTHelper;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityCreature;
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.ai.*;
-import net.minecraft.entity.monster.EntityZombie;
-import net.minecraft.entity.passive.EntitySheep;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ambient.AmbientCreature;
+import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
-import org.lwjgl.Sys;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import static net.doubledoordev.pay2spawn.util.Constants.MODID;
 
@@ -66,9 +59,9 @@ public class CustomAI
     @SubscribeEvent
     public void respawnHandler(EntityJoinWorldEvent event)
     {
-        if (event.entity instanceof EntityCreature && event.entity.getEntityData().hasKey(CUSTOM_AI_TAG, Constants.COMPOUND))
+        if (event.getEntity() instanceof AmbientCreature && event.getEntity().getEntityData().contains(CUSTOM_AI_TAG, Constants.COMPOUND))
         {
-            EntityCreature entity = (EntityCreature) event.entity;
+            AmbientCreature entity = (AmbientCreature) event.getEntity();
             for (Object o : ImmutableList.copyOf(entity.tasks.taskEntries)) entity.tasks.removeTask(((EntityAITasks.EntityAITaskEntry) o).action);
             for (Object o : ImmutableList.copyOf(entity.targetTasks.taskEntries)) entity.targetTasks.removeTask(((EntityAITasks.EntityAITaskEntry) o).action);
 
@@ -76,7 +69,7 @@ public class CustomAI
             entity.tasks.addTask(1, new CustomAIAttackOnCollide(entity, 1.0d, false));
             entity.tasks.addTask(2, new CustomAIFollowOwner(entity, 1.5d, 6.0f, 10.0f));
             entity.tasks.addTask(3, new EntityAIWander(entity, 1.0D));
-            entity.tasks.addTask(4, new EntityAIWatchClosest(entity, EntityPlayer.class, 8.0F));
+            entity.tasks.addTask(4, new EntityAIWatchClosest(entity, Player.class, 8.0F));
             entity.tasks.addTask(5, new EntityAILookIdle(entity));
 
             entity.targetTasks.addTask(1, new CustomAIOwnerHurtByTarget(entity));
@@ -85,15 +78,15 @@ public class CustomAI
         }
     }
 
-    public void test(final EntityPlayer player)
+    public void test(final Player player)
     {
         final EntityZombie zombie = new EntityZombie(player.getEntityWorld());
         zombie.setCanPickUpLoot(true);
-        zombie.setPosition(player.posX, player.posY, player.posZ);
+        zombie.setPosition(player.getX(), player.getY(), player.getZ());
 
         setOwner(zombie, player.getCommandSenderName());
         zombie.setCustomNameTag("dries007");
-        player.getEntityWorld().spawnEntityInWorld(zombie);
+        player.getEntityWorld().addFreshEntity(zombie);
     }
 
     public void init()
@@ -101,24 +94,24 @@ public class CustomAI
 
     }
 
-    public static EntityPlayer getOwner(EntityLivingBase mob)
+    public static Player getOwner(LivingEntity mob)
     {
-        if (mob == null || mob.worldObj == null) return null;
-        return mob.worldObj.getPlayerEntityByName(mob.getEntityData().getCompoundTag(CUSTOM_AI_TAG).getString(OWNER_TAG));
+        if (mob == null || mob.level == null) return null;
+        return mob.level.getPlayerEntityByName(mob.getEntityData().getCompound(CUSTOM_AI_TAG).getString(OWNER_TAG));
     }
 
-    public static void setOwner(EntityLiving mob, String owner)
+    public static void setOwner(LivingEntity mob, String owner)
     {
-        NBTTagCompound compound = mob.getEntityData().getCompoundTag(CUSTOM_AI_TAG);
-        compound.setString(OWNER_TAG, owner);
-        mob.getEntityData().setTag(CUSTOM_AI_TAG, compound);
+        CompoundTag compound = mob.getEntityData().getCompound(CUSTOM_AI_TAG);
+        compound.putString(OWNER_TAG, owner);
+        mob.getEntityData().put(CUSTOM_AI_TAG, compound);
     }
 
-    public static boolean isOnSameTeam(EntityLivingBase m1, EntityLivingBase m2)
+    public static boolean isOnSameTeam(LivingEntity m1, LivingEntity m2)
     {
         if (m1 == null || m2 == null) return false;
-        EntityPlayer o1 = getOwner(m1);
-        EntityPlayer o2 = getOwner(m2);
+        Player o1 = getOwner(m1);
+        Player o2 = getOwner(m2);
 
         if (m1 == o2 || m2 == o1) return false;
 

@@ -36,10 +36,10 @@ import net.doubledoordev.pay2spawn.hud.Hud;
 import net.doubledoordev.pay2spawn.hud.StatisticsHudEntry;
 import net.doubledoordev.pay2spawn.hud.StatusHudEntry;
 import net.doubledoordev.pay2spawn.hud.TotalDonationHudEntry;
-import net.minecraft.nbt.CompressedStreamTools;
-import net.minecraft.nbt.NBTBase;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagInt;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.IntTag;
+import net.minecraft.nbt.NbtIo;
+import net.minecraft.nbt.Tag;
 
 import java.io.File;
 import java.io.IOException;
@@ -56,7 +56,7 @@ import java.util.TreeMap;
 public class Statistics
 {
     private static File statisticsFile;
-    private static NBTTagCompound root = new NBTTagCompound();
+    private static CompoundTag root = new CompoundTag();
 
     private static HashMap<String, Integer> killsMap       = new HashMap<>();
     private static TreeMap<String, Integer> sortedKillsMap = new TreeMap<>(new ValueComparator(killsMap));
@@ -78,7 +78,7 @@ public class Statistics
         totalDonationHudEntry.addToDonationamount(amount);
     }
 
-    public static void handleKill(NBTTagCompound data)
+    public static void handleKill(CompoundTag data)
     {
         Pay2Spawn.getLogger().warn("Debug kill data:" + JsonNBTHelper.parseNBT(data).toString());
         String name = data.getString("Reward");
@@ -113,28 +113,28 @@ public class Statistics
         statisticsFile = new File(Pay2Spawn.getFolder(), "Statistics.dat");
         if (statisticsFile.exists())
         {
-            root = CompressedStreamTools.read(statisticsFile);
-            if (root.hasKey("kills"))
+            root = NbtIo.read(statisticsFile);
+            if (root.contains("kills"))
             {
-                for (Object tagName : root.getCompoundTag("kills").func_150296_c())
+                for (Object tagName : root.getCompound("kills").getAllKeys())
                 {
-                    NBTBase tag = root.getCompoundTag("kills").getTag(tagName.toString());
-                    if (tag instanceof NBTTagInt)
+                    Tag tag = root.getCompound("kills").get(tagName.toString());
+                    if (tag instanceof IntTag)
                     {
-                        killsMap.put(tagName.toString(), ((NBTTagInt) tag).func_150287_d());
+                        killsMap.put(tagName.toString(), ((IntTag) tag).getAsInt());
                     }
                 }
                 sortedKillsMap.putAll(killsMap);
             }
 
-            if (root.hasKey("spawns"))
+            if (root.contains("spawns"))
             {
-                for (Object tagName : root.getCompoundTag("spawns").func_150296_c())
+                for (Object tagName : root.getCompound("spawns").getAllKeys())
                 {
-                    NBTBase tag = root.getCompoundTag("spawns").getTag(tagName.toString());
-                    if (tag instanceof NBTTagInt)
+                    Tag tag = root.getCompound("spawns").get(tagName.toString());
+                    if (tag instanceof IntTag)
                     {
-                        spawnsMap.put(tagName.toString(), ((NBTTagInt) tag).func_150287_d());
+                        spawnsMap.put(tagName.toString(), ((IntTag) tag).getAsInt());
                     }
                 }
                 sortedSpawnsMap.putAll(spawnsMap);
@@ -145,7 +145,7 @@ public class Statistics
         Hud.INSTANCE.set.add(spawnsStatisticsHudEntry);
         update(sortedSpawnsMap, spawnsStatisticsHudEntry);
 
-        totalDonationHudEntry = new TotalDonationHudEntry("totalDonation", 1, "Total amount donated: $$amount", root.hasKey("donated") ? root.getDouble("donated") : 0);
+        totalDonationHudEntry = new TotalDonationHudEntry("totalDonation", 1, "Total amount donated: $$amount", root.contains("donated") ? root.getDouble("donated") : 0);
         Hud.INSTANCE.set.add(totalDonationHudEntry);
 
         statusHudEntry = new StatusHudEntry("status", 2);
@@ -172,24 +172,24 @@ public class Statistics
 
     public static void save()
     {
-        NBTTagCompound kills = new NBTTagCompound();
+        CompoundTag kills = new CompoundTag();
         for (String name : killsMap.keySet())
         {
-            kills.setInteger(name, killsMap.get(name));
+            kills.putInt(name, killsMap.get(name));
         }
-        root.setTag("kills", kills);
+        root.put("kills", kills);
 
-        NBTTagCompound spawns = new NBTTagCompound();
+        CompoundTag spawns = new CompoundTag();
         for (String name : spawnsMap.keySet())
         {
-            spawns.setInteger(name, spawnsMap.get(name));
+            spawns.putInt(name, spawnsMap.get(name));
         }
-        root.setTag("spawns", spawns);
-        root.setDouble("donated", totalDonationHudEntry.getDonated());
+        root.put("spawns", spawns);
+        root.putDouble("donated", totalDonationHudEntry.getDonated());
 
         try
         {
-            CompressedStreamTools.write(root, statisticsFile);
+            NbtIo.write(root, statisticsFile);
         }
         catch (IOException e)
         {

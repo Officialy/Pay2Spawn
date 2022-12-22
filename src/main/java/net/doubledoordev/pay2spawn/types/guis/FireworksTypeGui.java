@@ -40,8 +40,8 @@ import net.doubledoordev.pay2spawn.util.IIHasCallback;
 import net.doubledoordev.pay2spawn.util.JsonNBTHelper;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 
 import javax.swing.*;
 import java.awt.*;
@@ -87,19 +87,19 @@ public class FireworksTypeGui extends HelperGuiBase implements IIHasCallback
         if (data.entrySet().isEmpty())
         {
             ItemStack out = new ItemStack((Item) Item.itemRegistry.getObject("fireworks"));
-            NBTTagCompound tag = new NBTTagCompound();
-            NBTTagCompound fireworks = new NBTTagCompound();
-            fireworks.setByte(FLIGHT_KEY, (byte) 0);
+            CompoundTag tag = new CompoundTag();
+            CompoundTag fireworks = new CompoundTag();
+            fireworks.putByte(FLIGHT_KEY, (byte) 0);
 
-            NBTTagList explosions = new NBTTagList();
-            fireworks.setTag(EXPLOSIONS_KEY, explosions);
-            tag.setTag(FIREWORKS_KEY, fireworks);
-            out.setTagCompound(tag);
+            ListTag explosions = new ListTag();
+            fireworks.put(EXPLOSIONS_KEY, explosions);
+            tag.put(FIREWORKS_KEY, fireworks);
+            out.setTag(tag);
 
-            tag = out.writeToNBT(new NBTTagCompound());
+            tag = out.writeToNBT(new CompoundTag());
 
-            tag.setInteger(RADIUS_KEY, 10);
-            tag.setInteger(AMOUNT_KEY, 10);
+            tag.putInt(RADIUS_KEY, 10);
+            tag.putInt(AMOUNT_KEY, 10);
 
             data = JsonNBTHelper.parseNBT(tag);
         }

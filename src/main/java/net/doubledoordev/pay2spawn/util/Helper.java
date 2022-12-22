@@ -40,20 +40,21 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.GameProfileRepository;
 import com.mojang.authlib.ProfileLookupCallback;
 import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import io.netty.buffer.ByteBuf;
 import net.doubledoordev.pay2spawn.util.shapes.PointI;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.command.ICommandSender;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.nbt.CompressedStreamTools;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtIo;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.ChatComponentText;
-import net.minecraft.util.ChatStyle;
-import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.util.MathHelper;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
 import org.lwjgl.opengl.GL11;
 
 import javax.swing.*;
@@ -109,7 +110,7 @@ public class Helper
     public static void msg(String message)
     {
         System.out.println("P2S client message: " + message);
-        if (Minecraft.getMinecraft().thePlayer != null) Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(message));
+        if (Minecraft.getInstance().player != null) Minecraft.getInstance().player.displayClientMessage(new TextComponent(message), false);
     }
 
     /**
@@ -125,10 +126,10 @@ public class Helper
         if (format.contains("$uuid")) format = format.replace("$uuid", getGameProfileFromName(donation.username.replaceAll("[^ -~]", "")).getId().toString());
         if (format.contains("$amount")) format = format.replace("$amount", donation.amount + "");
         if (format.contains("$note")) format = format.replace("$note", donation.note);
-        if (Minecraft.getMinecraft().thePlayer != null)
+        if (Minecraft.getInstance().player != null)
         {
-            if (format.contains("$streameruuid")) format = format.replace("$streameruuid", Minecraft.getMinecraft().thePlayer.getGameProfile().getId().toString());
-            if (format.contains("$streamer")) format = format.replace("$streamer", Minecraft.getMinecraft().thePlayer.getCommandSenderName());
+            if (format.contains("$streameruuid")) format = format.replace("$streameruuid", Minecraft.getInstance().player.getGameProfile().getId().toString());
+            if (format.contains("$streamer")) format = format.replace("$streamer", Minecraft.getInstance().player.getName().toString());
         }
 
         if (reward != null)
@@ -151,7 +152,7 @@ public class Helper
     {
         if (name == null)
         {
-            UUID uuid = EntityPlayer.func_146094_a(new GameProfile(null, ANONYMOUS));
+            UUID uuid = Player.createPlayerUUID(new GameProfile(null, ANONYMOUS));
             return new GameProfile(uuid, ANONYMOUS);
         }
         if (nameToProfileMap.containsKey(name)) return nameToProfileMap.get(name);
@@ -171,13 +172,13 @@ public class Helper
         };
         if (profileRepo == null)
         {
-            profileRepo = ((new YggdrasilAuthenticationService(Minecraft.getMinecraft().getProxy(), String.format("%s_%s", NAME, UUID.randomUUID())))).createProfileRepository();
+            profileRepo = ((new YggdrasilAuthenticationService(Minecraft.getInstance().getProxy(), String.format("%s_%s", NAME, UUID.randomUUID())))).createProfileRepository();
         }
         profileRepo.findProfilesByNames(new String[]{name}, Agent.MINECRAFT, profilelookupcallback);
 
         if (agameprofile[0] == null)
         {
-            UUID uuid = EntityPlayer.func_146094_a(new GameProfile(null, name));
+            UUID uuid = Player.createPlayerUUID(new GameProfile(null, name));
             GameProfile gameprofile = new GameProfile(uuid, name);
             profilelookupcallback.onProfileLookupSucceeded(gameprofile);
         }
@@ -313,77 +314,76 @@ public class Helper
         return max;
     }
 
-    public static void sendChatToPlayer(ICommandSender player, String message, EnumChatFormatting chatFormatting)
+    public static void sendChatToPlayer(CommandSourceStack player, String message, ChatFormatting chatFormatting)
     {
-        player.addChatMessage(new ChatComponentText(message).setChatStyle(new ChatStyle().setColor(chatFormatting)));
+        player.addChatMessage(new TextComponent(message).setChatStyle(new ChatStyle().setColor(chatFormatting)));
     }
 
-    public static void sendChatToPlayer(EntityPlayer player, String message)
+    public static void sendChatToPlayer(Player player, String message)
     {
-        player.addChatMessage(new ChatComponentText(message));
+        player.displayClientMessage(new TextComponent(message), false);
     }
 
     public static int round(double d)
     {
-        return MathHelper.floor_double(d);
+        return Mth.floor(d);
 
     }
 
-    public static void renderPoint(PointI p, Tessellator tess, double r, double g, double b)
+    public static void renderPoint(PointI p, BufferBuilder tess, double r, double g, double b)
     {
         GL11.glColor3d(r, g, b);
         renderPoint(p, tess);
     }
 
-    public static void renderPoint(PointI p, Tessellator tess)
+    public static void renderPoint(PointI p, BufferBuilder tess)
     {
         renderPoint(tess, p.getX(), p.getY(), p.getZ());
     }
 
-    public static void renderPoint(Tessellator tess, int x, int y, int z)
+    public static void renderPoint(BufferBuilder tess, int x, int y, int z)
     {
         GL11.glPushMatrix();
         GL11.glTranslated(x, y, z);
         GL11.glScalef(1.01f, 1.01f, 1.01f);
-        tess.startDrawing(GL11.GL_LINES);
 
         // FRONT
-        tess.addVertex(0, 0, 0);
-        tess.addVertex(0, 1, 0);
+        tess.begin(VertexFormat.Mode.LINES, DefaultVertexFormat.POSITION);
+        tess.vertex(0, 0, 0);
+        tess.vertex(0, 1, 0);
 
-        tess.addVertex(0, 1, 0);
-        tess.addVertex(1, 1, 0);
+        tess.vertex(0, 1, 0);
+        tess.vertex(1, 1, 0);
 
-        tess.addVertex(1, 1, 0);
-        tess.addVertex(1, 0, 0);
+        tess.vertex(1, 1, 0);
+        tess.vertex(1, 0, 0);
 
-        tess.addVertex(1, 0, 0);
-        tess.addVertex(0, 0, 0);
+        tess.vertex(1, 0, 0);
+        tess.vertex(0, 0, 0);
 
         // BACK
-        tess.addVertex(0, 0, -1);
-        tess.addVertex(0, 1, -1);
-        tess.addVertex(0, 0, -1);
-        tess.addVertex(1, 0, -1);
-        tess.addVertex(1, 0, -1);
-        tess.addVertex(1, 1, -1);
-        tess.addVertex(0, 1, -1);
-        tess.addVertex(1, 1, -1);
+        tess.vertex(0, 0, -1);
+        tess.vertex(0, 1, -1);
+        tess.vertex(0, 0, -1);
+        tess.vertex(1, 0, -1);
+        tess.vertex(1, 0, -1);
+        tess.vertex(1, 1, -1);
+        tess.vertex(0, 1, -1);
+        tess.vertex(1, 1, -1);
 
         // betweens.
-        tess.addVertex(0, 0, 0);
-        tess.addVertex(0, 0, -1);
+        tess.vertex(0, 0, 0);
+        tess.vertex(0, 0, -1);
 
-        tess.addVertex(0, 1, 0);
-        tess.addVertex(0, 1, -1);
+        tess.vertex(0, 1, 0);
+        tess.vertex(0, 1, -1);
 
-        tess.addVertex(1, 0, 0);
-        tess.addVertex(1, 0, -1);
+        tess.vertex(1, 0, 0);
+        tess.vertex(1, 0, -1);
 
-        tess.addVertex(1, 1, 0);
-        tess.addVertex(1, 1, -1);
+        tess.vertex(1, 1, 0);
+        tess.vertex(1, 1, -1);
 
-        tess.draw();
         GL11.glPopMatrix();
     }
 
@@ -408,9 +408,9 @@ public class Helper
         return stringBuilder.toString();
     }
 
-    public static int getHeading(EntityPlayer player)
+    public static int getHeading(Player player)
     {
-        return MathHelper.floor_double((double) (player.rotationYaw * 4.0F / 360.0F) + 0.5D) & 3;
+        return Mth.floor((double) (player.getYRot() * 4.0F / 360.0F) + 0.5D) & 3;
     }
 
     /**
@@ -490,11 +490,11 @@ public class Helper
      *
      * @return true if too big
      */
-    public static boolean checkTooBigForNetwork(NBTTagCompound root)
+    public static boolean checkTooBigForNetwork(CompoundTag root)
     {
         try
         {
-            if (CompressedStreamTools.compress(root).length > 32000)
+            if (NbtIo.compress(root).length > 32000)
             {
                 JOptionPane.showMessageDialog(null, "Your reward is too big. (>32 kb)\nYou will CRASH if you spawn this in.\nYou can fix this by separating one large reward into 2 or more smaller rewards.", "Reward too big", JOptionPane.ERROR_MESSAGE);
                 return true;

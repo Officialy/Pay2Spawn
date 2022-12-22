@@ -42,12 +42,11 @@ package net.doubledoordev.pay2spawn.random;
  * Works with: [All nbt types this will accept, enforce in #matches.]
  *
  * @author Dries007
- * @see net.minecraft.nbt.NBTBase#NBTTypes
+ * @see net.minecraft.nbt.Tag
  * @see net.doubledoordev.pay2spawn.random.RndBoolean RndBoolean for an example
  * @see RandomRegistry#addRandomResolver(IRandomResolver) RandomRegistry.addRandomResolver to register.
  */
-public interface IRandomResolver
-{
+public interface IRandomResolver {
 
     /**
      * Gets called when #matches returns true
@@ -56,7 +55,7 @@ public interface IRandomResolver
      * @param value The random tag
      * @return the randomised value
      */
-    public String solverRandom(int type, String value);
+    String solverRandom(int type, String value);
 
     /**
      * Only return true when you can handle the type and the value matches your (and only your) pattern.
@@ -65,5 +64,5 @@ public interface IRandomResolver
      * @param value The random tag
      * @return true to handle this string
      */
-    public boolean matches(int type, String value);
+    boolean matches(int type, String value);
 }

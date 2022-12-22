@@ -33,9 +33,6 @@ package net.doubledoordev.pay2spawn.util;
 import com.google.common.base.Strings;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.common.gameevent.TickEvent;
 import net.doubledoordev.pay2spawn.Pay2Spawn;
 import net.doubledoordev.pay2spawn.hud.CountDownHudEntry;
 import net.doubledoordev.pay2spawn.hud.DonationTrainEntry;
@@ -45,7 +42,10 @@ import net.doubledoordev.pay2spawn.network.RewardMessage;
 import net.doubledoordev.pay2spawn.types.CrashType;
 import net.doubledoordev.pay2spawn.types.TypeBase;
 import net.doubledoordev.pay2spawn.types.TypeRegistry;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.HashSet;
 import java.util.Iterator;
@@ -69,7 +69,7 @@ public class ClientTickHandler
 
     private ClientTickHandler()
     {
-        FMLCommonHandler.instance().bus().register(this);
+        MinecraftForge.EVENT_BUS.register(this);
     }
 
     @SubscribeEvent
@@ -129,7 +129,7 @@ public class ClientTickHandler
         Hud.INSTANCE.set.add(saleEntry);
     }
 
-    public class QueEntry
+    public static class QueEntry
     {
         int      remaining;
         Donation donation;
@@ -148,14 +148,14 @@ public class ClientTickHandler
 
         public void send()
         {
-            NBTTagCompound rewardData = new NBTTagCompound();
-            rewardData.setString("name", reward.getName());
-            rewardData.setDouble("amount", reward.getAmount());
+            CompoundTag rewardData = new CompoundTag();
+            rewardData.putString("name", reward.getName());
+            rewardData.putDouble("amount", reward.getAmount());
             // replace all the dummy data with the correct data by converting the JsonArry to a string and then parsing that string to a new JsonArray
             JsonArray rewards = JSON_PARSER.parse(Helper.formatText(reward.getRewards(), donation, actualReward == null ? reward : actualReward).toString()).getAsJsonArray();
             for (JsonElement reward : rewards)
             {
-                NBTTagCompound rewardNtb = JsonNBTHelper.parseJSON(reward.getAsJsonObject());
+                CompoundTag rewardNtb = JsonNBTHelper.parseJSON(reward.getAsJsonObject());
                 TypeBase type = TypeRegistry.getByName(rewardNtb.getString("type").toLowerCase());
                 type.addConfigTags(rewardNtb, donation, actualReward == null ? this.reward : actualReward);
                 Pay2Spawn.getSnw().sendToServer(new RewardMessage(rewardNtb, rewardData));

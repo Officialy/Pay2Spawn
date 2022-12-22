@@ -34,9 +34,9 @@ import com.google.gson.JsonObject;
 import net.doubledoordev.pay2spawn.permissions.Node;
 import net.doubledoordev.pay2spawn.types.guis.XPOrbsGui;
 import net.minecraft.entity.item.EntityXPOrb;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.entity.player.Player;
+import net.minecraft.entity.player.ServerPlayer;
+import net.minecraft.nbt.CompoundTag;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -66,24 +66,24 @@ public class XPOrbsType extends TypeBase
     }
 
     @Override
-    public NBTTagCompound getExample()
+    public CompoundTag getExample()
     {
-        NBTTagCompound out = new NBTTagCompound();
-        out.setInteger(AMOUNTOFORBS_KEY, 100);
+        CompoundTag out = new CompoundTag();
+        out.putInt(AMOUNTOFORBS_KEY, 100);
         return out;
     }
 
     @Override
-    public void spawnServerSide(EntityPlayerMP player, NBTTagCompound dataFromClient, NBTTagCompound rewardData)
+    public void spawnServerSide(ServerPlayer player, CompoundTag dataFromClient, CompoundTag rewardData)
     {
-        for (int i = 0; i < dataFromClient.getInteger(AMOUNTOFORBS_KEY); i++)
+        for (int i = 0; i < dataFromClient.getInt(AMOUNTOFORBS_KEY); i++)
         {
-            double X = player.posX, Y = player.posY, Z = player.posZ;
+            double X = player.getX(), Y = player.getY(), Z = player.getZ();
 
             X += (0.5 - RANDOM.nextDouble());
             Z += (0.5 - RANDOM.nextDouble());
 
-            player.worldObj.spawnEntityInWorld(new EntityXPOrb(player.worldObj, X, Y, Z, RANDOM.nextInt(5) + 1));
+            player.level.addFreshEntity(new EntityXPOrb(player.level, X, Y, Z, RANDOM.nextInt(5) + 1));
         }
     }
 
@@ -102,7 +102,7 @@ public class XPOrbsType extends TypeBase
     }
 
     @Override
-    public Node getPermissionNode(EntityPlayer player, NBTTagCompound dataFromClient)
+    public Node getPermissionNode(Player player, CompoundTag dataFromClient)
     {
         return new Node(NODENAME);
     }

@@ -30,9 +30,9 @@
 
 package net.doubledoordev.pay2spawn.util.shapes;
 
+import com.mojang.blaze3d.vertex.Tesselator;
 import net.doubledoordev.pay2spawn.util.Helper;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundTag;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -75,19 +75,19 @@ public abstract class AbstractShape implements IShape
     }
 
     @Override
-    public NBTTagCompound toNBT()
+    public CompoundTag toNBT()
     {
-        NBTTagCompound compound = new NBTTagCompound();
-        compound.setTag(CENTER_KEY, center.toNBT());
-        compound.setBoolean(HOLLOW_KEY, hollow);
-        compound.setBoolean(REPLACEABLEONLY_KEY, replaceableOnly);
+        CompoundTag compound = new CompoundTag();
+        compound.put(CENTER_KEY, center.toNBT());
+        compound.putBoolean(HOLLOW_KEY, hollow);
+        compound.putBoolean(REPLACEABLEONLY_KEY, replaceableOnly);
         return compound;
     }
 
     @Override
-    public IShape fromNBT(NBTTagCompound compound)
+    public IShape fromNBT(CompoundTag compound)
     {
-        center.fromNBT(compound.getCompoundTag(CENTER_KEY));
+        center.fromNBT(compound.getCompound(CENTER_KEY));
         hollow = compound.getBoolean(HOLLOW_KEY);
         replaceableOnly = compound.getBoolean(REPLACEABLEONLY_KEY);
         return this;
@@ -140,7 +140,7 @@ public abstract class AbstractShape implements IShape
     }
 
     @Override
-    public void render(Tessellator tess)
+    public void render(Tesselator tess)
     {
         if (temppoints == null || System.currentTimeMillis() - tempPointsTime > RENDERTIMEOUT)
         {

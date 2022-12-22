@@ -8,9 +8,9 @@ import net.doubledoordev.pay2spawn.network.CrashMessage;
 import net.doubledoordev.pay2spawn.permissions.Node;
 import net.doubledoordev.pay2spawn.types.guis.CrashTypeGui;
 import net.doubledoordev.pay2spawn.util.Helper;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.entity.player.Player;
+import net.minecraft.entity.player.ServerPlayer;
+import net.minecraft.nbt.CompoundTag;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -41,10 +41,10 @@ public class CrashType extends TypeBase
     }
 
     @Override
-    public NBTTagCompound getExample()
+    public CompoundTag getExample()
     {
-        NBTTagCompound root = new NBTTagCompound();
-        root.setString(MESSAGE_KEY, DEFAULTMESSAGE);
+        CompoundTag root = new CompoundTag();
+        root.putString(MESSAGE_KEY, DEFAULTMESSAGE);
         return root;
     }
 
@@ -105,7 +105,7 @@ public class CrashType extends TypeBase
     }
 
     @Override
-    public void spawnServerSide(EntityPlayerMP player, NBTTagCompound dataFromClient, NBTTagCompound rewardData)
+    public void spawnServerSide(ServerPlayer player, CompoundTag dataFromClient, CompoundTag rewardData)
     {
         Pay2Spawn.getSnw().sendTo(new CrashMessage(dataFromClient.getString(MESSAGE_KEY)), player);
     }
@@ -123,7 +123,7 @@ public class CrashType extends TypeBase
     }
 
     @Override
-    public Node getPermissionNode(EntityPlayer player, NBTTagCompound dataFromClient)
+    public Node getPermissionNode(Player player, CompoundTag dataFromClient)
     {
         return new Node(NAME);
     }

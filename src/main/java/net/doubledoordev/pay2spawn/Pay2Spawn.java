@@ -30,19 +30,7 @@
 
 package net.doubledoordev.pay2spawn;
 
-import cpw.mods.fml.client.config.DummyConfigElement;
-import cpw.mods.fml.client.config.IConfigElement;
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.Mod;
-import cpw.mods.fml.common.ModMetadata;
-import cpw.mods.fml.common.event.FMLInitializationEvent;
-import cpw.mods.fml.common.event.FMLPostInitializationEvent;
-import cpw.mods.fml.common.event.FMLPreInitializationEvent;
-import cpw.mods.fml.common.event.FMLServerStartingEvent;
-import cpw.mods.fml.common.network.NetworkCheckHandler;
-import cpw.mods.fml.common.network.NetworkRegistry;
-import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
-import cpw.mods.fml.relauncher.Side;
+import com.mojang.brigadier.CommandDispatcher;
 import net.doubledoordev.d3core.util.ID3Mod;
 import net.doubledoordev.pay2spawn.ai.CustomAI;
 import net.doubledoordev.pay2spawn.checkers.CheckerHandler;
@@ -54,12 +42,18 @@ import net.doubledoordev.pay2spawn.configurator.ConfiguratorManager;
 import net.doubledoordev.pay2spawn.configurator.HTMLGenerator;
 import net.doubledoordev.pay2spawn.network.*;
 import net.doubledoordev.pay2spawn.permissions.PermissionsHandler;
-import net.doubledoordev.pay2spawn.types.CrashType;
 import net.doubledoordev.pay2spawn.types.TypeBase;
 import net.doubledoordev.pay2spawn.types.TypeRegistry;
 import net.doubledoordev.pay2spawn.util.*;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.ClientCommandHandler;
-import net.minecraftforge.common.config.ConfigElement;
+import net.minecraftforge.event.RegisterCommandsEvent;
+import net.minecraftforge.event.server.ServerStartingEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.network.simple.SimpleChannel;
 import org.apache.logging.log4j.Logger;
 
 import javax.swing.*;
@@ -80,23 +74,21 @@ import static net.doubledoordev.pay2spawn.util.Constants.*;
  *
  * @author Dries007
  */
-@Mod(modid = MODID, name = NAME)
+@Mod(MODID)
 public class Pay2Spawn implements ID3Mod
 {
     public static final HashSet<String> playersWithValidConfig = new HashSet<>();
-    @Mod.Instance(MODID)
+
     public static Pay2Spawn instance;
     public static  boolean enable       = true;
     public static  boolean forceOn      = false;
     private static boolean serverHasMod = false;
 
-    @Mod.Metadata(MODID)
-    private ModMetadata          metadata;
     private RewardsDB            rewardsDB;
     private P2SConfig            config;
     private File                 configFolder;
     private Logger               logger;
-    private SimpleNetworkWrapper snw;
+    private SimpleChannel snw;
     private boolean              newConfig;
 
     public static String getVersion()
@@ -124,7 +116,7 @@ public class Pay2Spawn implements ID3Mod
         return instance.configFolder;
     }
 
-    public static SimpleNetworkWrapper getSnw()
+    public static SimpleChannel getSnw()
     {
         return instance.snw;
     }
@@ -177,15 +169,15 @@ public class Pay2Spawn implements ID3Mod
     }
 
     @NetworkCheckHandler
-    public boolean networkCheckHandler(Map<String, String> data, Side side)
+    public boolean networkCheckHandler(Map<String, String> data, Dist side)
     {
         if (side.isClient()) serverHasMod = data.containsKey(MODID);
         return !data.containsKey(MODID) || data.get(MODID).equals(metadata.version);
     }
 
-    @Mod.EventHandler
-    public void preInit(FMLPreInitializationEvent event) throws IOException
+    public Pay2Spawn() throws IOException
     {
+        instance = this;
         logger = event.getModLog();
 
         configFolder = new File(event.getModConfigurationDirectory(), NAME);
@@ -199,18 +191,18 @@ public class Pay2Spawn implements ID3Mod
 
         int id = 0;
         snw = NetworkRegistry.INSTANCE.newSimpleChannel(MODID);
-        snw.registerMessage(MessageMessage.Handler.class, MessageMessage.class, id++, Side.SERVER);
-        snw.registerMessage(MusicMessage.Handler.class, MusicMessage.class, id++, Side.CLIENT);
-        snw.registerMessage(NbtRequestMessage.Handler.class, NbtRequestMessage.class, id++, Side.CLIENT);
-        snw.registerMessage(NbtRequestMessage.Handler.class, NbtRequestMessage.class, id++, Side.SERVER);
-        snw.registerMessage(RewardMessage.Handler.class, RewardMessage.class, id++, Side.SERVER);
-        snw.registerMessage(StatusMessage.Handler.class, StatusMessage.class, id++, Side.SERVER);
-        snw.registerMessage(StatusMessage.Handler.class, StatusMessage.class, id++, Side.CLIENT);
-        snw.registerMessage(TestMessage.Handler.class, TestMessage.class, id++, Side.SERVER);
-        snw.registerMessage(StructureImportMessage.Handler.class, StructureImportMessage.class, id++, Side.SERVER);
-        snw.registerMessage(StructureImportMessage.Handler.class, StructureImportMessage.class, id++, Side.CLIENT);
-        snw.registerMessage(HTMLuploadMessage.Handler.class, HTMLuploadMessage.class, id++, Side.SERVER);
-        snw.registerMessage(CrashMessage.Handler.class, CrashMessage.class, id++, Side.CLIENT);
+        snw.registerMessage(MessageMessage.Handler.class, MessageMessage.class, id++, Dist.SERVER);
+        snw.registerMessage(MusicMessage.Handler.class, MusicMessage.class, id++, Dist.CLIENT);
+        snw.registerMessage(NbtRequestMessage.Handler.class, NbtRequestMessage.class, id++, Dist.CLIENT);
+        snw.registerMessage(NbtRequestMessage.Handler.class, NbtRequestMessage.class, id++, Dist.SERVER);
+        snw.registerMessage(RewardMessage.Handler.class, RewardMessage.class, id++, Dist.SERVER);
+        snw.registerMessage(StatusMessage.Handler.class, StatusMessage.class, id++, Dist.SERVER);
+        snw.registerMessage(StatusMessage.Handler.class, StatusMessage.class, id++, Dist.CLIENT);
+        snw.registerMessage(TestMessage.Handler.class, TestMessage.class, id++, Dist.SERVER);
+        snw.registerMessage(StructureImportMessage.Handler.class, StructureImportMessage.class, id++, Dist.SERVER);
+        snw.registerMessage(StructureImportMessage.Handler.class, StructureImportMessage.class, id++, Dist.CLIENT);
+        snw.registerMessage(HTMLuploadMessage.Handler.class, HTMLuploadMessage.class, id++, Dist.SERVER);
+        snw.registerMessage(CrashMessage.Handler.class, CrashMessage.class, id++, Dist.CLIENT);
 
         TypeRegistry.preInit();
         Statistics.preInit();
@@ -218,8 +210,7 @@ public class Pay2Spawn implements ID3Mod
         config.syncConfig();
     }
 
-    @Mod.EventHandler
-    public void init(FMLInitializationEvent event) throws MalformedURLException
+    public void init(FMLCommonSetupEvent event) throws MalformedURLException
     {
         ServerTickHandler.INSTANCE.init();
 
@@ -238,11 +229,7 @@ public class Pay2Spawn implements ID3Mod
         ConnectionHandler.INSTANCE.init();
 
         config.syncConfig();
-    }
 
-    @Mod.EventHandler
-    public void postInit(FMLPostInitializationEvent event)
-    {
         for (TypeBase base : TypeRegistry.getAllTypes()) base.printHelpList(configFolder);
 
         TypeRegistry.registerPermissions();
@@ -305,8 +292,7 @@ public class Pay2Spawn implements ID3Mod
         }
     }
 
-    @Mod.EventHandler
-    public void serverStarting(FMLServerStartingEvent event) throws IOException
+    public void serverStarting(ServerStartingEvent event) throws IOException
     {
         PermissionsHandler.init();
         try
@@ -317,8 +303,13 @@ public class Pay2Spawn implements ID3Mod
         {
             e.printStackTrace();
         }
-        event.registerServerCommand(new CommandP2SPermissions());
-        event.registerServerCommand(new CommandP2SServer());
+    }
+
+    @SubscribeEvent
+    public void onRegisterCommandEvent(RegisterCommandsEvent event) {
+        CommandDispatcher<CommandSourceStack> commandDispatcher = event.getDispatcher();
+        CommandP2SPermissions.processCommand(commandDispatcher);
+        CommandP2SServer.processCommand(commandDispatcher);
     }
 
     @Override

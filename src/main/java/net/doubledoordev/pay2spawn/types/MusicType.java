@@ -36,9 +36,9 @@ import net.doubledoordev.pay2spawn.network.MusicMessage;
 import net.doubledoordev.pay2spawn.permissions.Node;
 import net.doubledoordev.pay2spawn.types.guis.MusicTypeGui;
 import net.doubledoordev.pay2spawn.util.Constants;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.entity.player.Player;
+import net.minecraft.entity.player.ServerPlayer;
+import net.minecraft.nbt.CompoundTag;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 
@@ -76,17 +76,17 @@ public class MusicType extends TypeBase
     }
 
     @Override
-    public NBTTagCompound getExample()
+    public CompoundTag getExample()
     {
-        NBTTagCompound nbt = new NBTTagCompound();
-        nbt.setString(SOUND_KEY, "Rickroll.mp3");
+        CompoundTag nbt = new CompoundTag();
+        nbt.putString(SOUND_KEY, "Rickroll.mp3");
         return nbt;
     }
 
     @Override
-    public void spawnServerSide(EntityPlayerMP player, NBTTagCompound dataFromClient, NBTTagCompound rewardData)
+    public void spawnServerSide(ServerPlayer player, CompoundTag dataFromClient, CompoundTag rewardData)
     {
-        Pay2Spawn.getSnw().sendTo(new MusicMessage(dataFromClient.getString(SOUND_KEY)), (EntityPlayerMP) player);
+        Pay2Spawn.getSnw().sendTo(new MusicMessage(dataFromClient.getString(SOUND_KEY)), (ServerPlayer) player);
     }
 
     @Override
@@ -143,7 +143,7 @@ public class MusicType extends TypeBase
     }
 
     @Override
-    public Node getPermissionNode(EntityPlayer player, NBTTagCompound dataFromClient)
+    public Node getPermissionNode(Player player, CompoundTag dataFromClient)
     {
         return new Node(NAME, dataFromClient.getString(SOUND_KEY).split(" ")[0]);
     }

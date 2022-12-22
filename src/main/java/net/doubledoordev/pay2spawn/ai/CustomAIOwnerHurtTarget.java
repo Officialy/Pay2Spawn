@@ -30,20 +30,20 @@
 
 package net.doubledoordev.pay2spawn.ai;
 
-import net.minecraft.entity.EntityCreature;
-import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.AmbientCreature;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.EntityAITarget;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.Player;
 
 /**
  * @author Dries007
  */
 public class CustomAIOwnerHurtTarget extends EntityAITarget
 {
-    private EntityLivingBase theTarget;
+    private LivingEntity theTarget;
     private int revengeTimer;
 
-    public CustomAIOwnerHurtTarget(EntityCreature owner)
+    public CustomAIOwnerHurtTarget(AmbientCreature owner)
     {
         super(owner, false);
         this.setMutexBits(1);
@@ -51,7 +51,7 @@ public class CustomAIOwnerHurtTarget extends EntityAITarget
 
     public boolean shouldExecute()
     {
-        EntityPlayer owner = CustomAI.getOwner(taskOwner);
+        Player owner = CustomAI.getOwner(taskOwner);
         if (owner == null)
         {
             return false;
@@ -65,7 +65,7 @@ public class CustomAIOwnerHurtTarget extends EntityAITarget
     }
 
     @Override
-    protected boolean isSuitableTarget(EntityLivingBase p_75296_1_, boolean p_75296_2_)
+    protected boolean isSuitableTarget(LivingEntity p_75296_1_, boolean p_75296_2_)
     {
         return !CustomAI.isOnSameTeam(taskOwner, p_75296_1_) && super.isSuitableTarget(p_75296_1_, p_75296_2_);
     }
@@ -73,7 +73,7 @@ public class CustomAIOwnerHurtTarget extends EntityAITarget
     public void startExecuting()
     {
         this.taskOwner.setAttackTarget(this.theTarget);
-        EntityPlayer owner = CustomAI.getOwner(taskOwner);
+        Player owner = CustomAI.getOwner(taskOwner);
 
         if (owner != null)
         {

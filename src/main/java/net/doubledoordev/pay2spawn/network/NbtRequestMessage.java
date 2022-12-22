@@ -30,10 +30,6 @@
 
 package net.doubledoordev.pay2spawn.network;
 
-import cpw.mods.fml.common.network.simpleimpl.IMessage;
-import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
-import cpw.mods.fml.common.network.simpleimpl.MessageContext;
-import cpw.mods.fml.common.registry.GameData;
 import io.netty.buffer.ByteBuf;
 import net.doubledoordev.pay2spawn.Pay2Spawn;
 import net.doubledoordev.pay2spawn.types.StructureType;
@@ -41,16 +37,7 @@ import net.doubledoordev.pay2spawn.util.EventHandler;
 import net.doubledoordev.pay2spawn.util.Helper;
 import net.doubledoordev.pay2spawn.util.IIHasCallback;
 import net.doubledoordev.pay2spawn.util.JsonNBTHelper;
-import net.minecraft.block.Block;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityList;
-import net.minecraft.item.ItemFirework;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.world.World;
-import net.minecraftforge.common.DimensionManager;
+import net.minecraft.nbt.CompoundTag;
 
 import static net.doubledoordev.pay2spawn.types.StructureType.BLOCKID_KEY;
 
@@ -236,21 +223,21 @@ public class NbtRequestMessage implements IMessage
                 switch (message.type)
                 {
                     case ENTITY:
-                        NBTTagCompound nbt = new NBTTagCompound();
-                        Entity entity = ctx.getServerHandler().playerEntity.worldObj.getEntityByID(message.entityIdOrSlot);
+                        CompoundTag nbt = new CompoundTag();
+                        Entity entity = ctx.getServerHandler().playerEntity.level.getEntityByID(message.entityIdOrSlot);
                         entity.writeToNBT(nbt);
                         entity.writeToNBTOptional(nbt);
-                        nbt.setString("id", EntityList.getEntityString(entity));
+                        nbt.putString("id", EntityList.getEntityString(entity));
                         return new NbtRequestMessage(message.type, JsonNBTHelper.parseNBT(nbt).toString());
                     case FIREWORK:
                         ItemStack itemStack = ctx.getServerHandler().playerEntity.getHeldItem();
                         if (itemStack != null && itemStack.getItem() instanceof ItemFirework)
                         {
-                            return new NbtRequestMessage(message.type, JsonNBTHelper.parseNBT(ctx.getServerHandler().playerEntity.getHeldItem().writeToNBT(new NBTTagCompound())).toString());
+                            return new NbtRequestMessage(message.type, JsonNBTHelper.parseNBT(ctx.getServerHandler().playerEntity.getHeldItem().writeToNBT(new CompoundTag())).toString());
                         }
                         else
                         {
-                            Helper.sendChatToPlayer(ctx.getServerHandler().playerEntity, "You are not holding an ItemFirework...", EnumChatFormatting.RED);
+                            Helper.sendChatToPlayer(ctx.getServerHandler().playerEntity, "You are not holding an ItemFirework...", ChatFormatting.RED);
                         }
                         break;
                     case ITEM:
@@ -258,32 +245,32 @@ public class NbtRequestMessage implements IMessage
                         {
                             if (ctx.getServerHandler().playerEntity.getHeldItem() != null)
                             {
-                                return new NbtRequestMessage(message.type, message.entityIdOrSlot, JsonNBTHelper.parseNBT(ctx.getServerHandler().playerEntity.getHeldItem().writeToNBT(new NBTTagCompound())).toString());
+                                return new NbtRequestMessage(message.type, message.entityIdOrSlot, JsonNBTHelper.parseNBT(ctx.getServerHandler().playerEntity.getHeldItem().writeToNBT(new CompoundTag())).toString());
                             }
                             else
                             {
-                                Helper.sendChatToPlayer(ctx.getServerHandler().playerEntity, "You are not holding an item...", EnumChatFormatting.RED);
+                                Helper.sendChatToPlayer(ctx.getServerHandler().playerEntity, "You are not holding an item...", ChatFormatting.RED);
                             }
                         }
                         else
                         {
                             ItemStack stack = ctx.getServerHandler().playerEntity.inventory.getStackInSlot(message.entityIdOrSlot);
-                            if (stack != null) return new NbtRequestMessage(message.type, message.entityIdOrSlot, JsonNBTHelper.parseNBT(stack.writeToNBT(new NBTTagCompound())).toString());
+                            if (stack != null) return new NbtRequestMessage(message.type, message.entityIdOrSlot, JsonNBTHelper.parseNBT(stack.writeToNBT(new CompoundTag())).toString());
                             else return new NbtRequestMessage(message.type, message.entityIdOrSlot, "{}");
                         }
                         break;
                     case BLOCK:
-                        NBTTagCompound compound = new NBTTagCompound();
+                        CompoundTag compound = new CompoundTag();
                         World world = DimensionManager.getWorld(message.dim);
-                        compound.setInteger(BLOCKID_KEY, Block.getIdFromBlock(world.getBlock(message.x, message.y, message.z)));
-                        //compound.setString(StructureType.BLOCKID_KEY, GameData.getBlockRegistry().getNameForObject(world.getBlock(message.x, message.y, message.z)));
-                        compound.setInteger(StructureType.META_KEY, world.getBlockMetadata(message.x, message.y, message.z));
+                        compound.putInt(BLOCKID_KEY, Block.getIdFromBlock(world.getBlock(message.x, message.y, message.z)));
+                        //compound.putString(StructureType.BLOCKID_KEY, GameData.getBlockRegistry().getNameForObject(world.getBlock(message.x, message.y, message.z)));
+                        compound.putInt(StructureType.META_KEY, world.getBlockMetadata(message.x, message.y, message.z));
                         TileEntity tileEntity = world.getTileEntity(message.x, message.y, message.z);
                         if (tileEntity != null)
                         {
-                            NBTTagCompound te = new NBTTagCompound();
+                            CompoundTag te = new CompoundTag();
                             tileEntity.writeToNBT(te);
-                            compound.setTag(StructureType.TEDATA_KEY, te);
+                            compound.put(StructureType.TEDATA_KEY, te);
                         }
                         return new NbtRequestMessage(message.type, JsonNBTHelper.parseNBT(compound).toString());
                 }

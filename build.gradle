@@ -1,154 +1,124 @@
 buildscript {
     repositories {
+        // These repositories are only for Gradle plugins, put any other repositories in the repository block further below
+        maven { url = 'https://maven.minecraftforge.net' }
         mavenCentral()
-        maven {
-            name = "forge"
-            url = "http://files.minecraftforge.net/maven"
-        }
-        maven {
-            name = "sonatype"
-            url = "https://oss.sonatype.org/content/repositories/snapshots/"
-        }
     }
     dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:1.2-SNAPSHOT'
+        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
     }
 }
-
-import groovy.json.*
-
-configurations {
-    compile
-    deployJars
+// Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
+plugins {
+    id 'eclipse'
+    id 'maven-publish'
 }
+apply plugin: 'net.minecraftforge.gradle'
 
-apply plugin: "forge"
-apply plugin: "maven"
 
-group = "net.doubledoordev.pay2spawn"
-version = "2.7.1"
-
-targetCompatibility = 1.7
-sourceCompatibility = 1.7
-
+version = '0.0.1-a'
+group = 'net.doubledoordev.pay2spawn' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = 'Pay2Spawn'
+
+// Mojang ships Java 17 to end users in 1.18+, so your mod should target Java 17.
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+
+println "Java: ${System.getProperty 'java.version'}, JVM: ${System.getProperty 'java.vm.version'} (${System.getProperty 'java.vendor'}), Arch: ${System.getProperty 'os.arch'}"
 minecraft {
-    version = "1.7.10-10.13.2.1286"
-    runDir = "jars"
-}
+    mappings channel: 'official', version: '1.18.2'
 
-repositories {
-    maven {
-         name "DDD repo"
-         url "http://doubledoordev.net/maven/"
-     }
-}
+     accessTransformer = file('src/main/resources/META-INF/P2S_at.cfg') // Currently, this location cannot be changed from the default.
+     accessTransformer = file('src/main/resources/META-INF/D3Core_at.cfg') // Currently, this location cannot be changed from the default.
 
-dependencies {
-    compile "net.doubledoordev.d3core:D3Core:" + project.minecraft.version + "-+:dev"
-}
+    runs {
+        client {
+            workingDirectory project.file('run')
 
-if (System.getenv().BUILD_NUMBER != null) version += "." + System.getenv().BUILD_NUMBER
-def builder = new groovy.json.JsonBuilder()
-builder (version: version, mcversion: project.minecraft.version, apiversion: project.minecraft.apiVersion)
-new File("versions.json").write(builder.toPrettyString())
+            property 'forge.logging.markers', 'REGISTRIES'
+            property 'forge.logging.console.level', 'debug'
 
-processResources {
-    from(sourceSets.main.resources.srcDirs) {
-        include '**/*.info'
-        expand 'version':project.version, 'mcversion':project.minecraft.version
-    }
-
-    from(sourceSets.main.resources.srcDirs) {
-        exclude '**/*.info'
-    }
-}
-
-task sourcesJar(type: Jar) {
-    from "LICENSE.txt"
-    from sourceSets.main.allSource
-    classifier = 'src'
-    appendix = project.minecraft.version
-    manifest {
-        attributes 'FMLAT': 'P2S_at.cfg'
-    }
-}
-
-task deobfJar(type: Jar) {
-    from "LICENSE.txt"
-    from sourceSets.main.output
-	classifier = 'dev'
-    appendix = project.minecraft.version
-    manifest {
-        attributes 'FMLAT': 'P2S_at.cfg'
-    }
-}
-
-jar {
-    from "LICENSE.txt"
-    appendix = project.minecraft.version
-    manifest {
-        attributes 'FMLAT': 'P2S_at.cfg'
-    }
-}
-
-artifacts {
-	archives jar
-    archives sourcesJar
-    archives deobfJar
-}
-
-uploadArchives {
-    if (project.hasProperty("dddUser") && project.hasProperty("dddPass")) {
-        repositories {
-            mavenDeployer {
-                repository(url: "http://doubledoordev.net:8082/artifactory/mods") {
-                    authentication(userName: dddUser, password: dddPass)
+            mods {
+                p2s {
+                    source sourceSets.main
                 }
-                pom {
-                    groupId = project.group
-                    version = project.minecraft.version + "-" + project.version
-                    artifactId = project.archivesBaseName
-                    project {
-                        name project.archivesBaseName
-                        packaging 'jar'
-                        description 'Pay2Spawn'
-                        url 'https://github.com/CCM-Modding/Pay2Spawn'
+            }
+        }
 
-                        scm {
-                            url 'https://github.com/CCM-Modding/Pay2Spawn'
-                            connection 'scm:git:git://github.com/CCM-Modding/Pay2Spawn.git'
-                            developerConnection 'scm:git:git@github.com:CCM-Modding/Pay2Spawn.git'
-                        }
+        server {
+            workingDirectory project.file('run')
 
-                        issueManagement {
-                            system 'github'
-                            url 'https://github.com/CCM-Modding/Pay2Spawn/issues'
-                        }
+            property 'forge.logging.markers', 'REGISTRIES'
 
-                        licenses  {
-                            license  {
-                                name 'MIT License'
-                                url 'https://raw.github.com/CCM-Modding/Pay2Spawn/master/LICENCE'
-                                distribution 'repo'
-                            }
-                        }
+            property 'forge.logging.console.level', 'debug'
 
-                        developers {
-                            developer {
-                                id 'Dries007'
-                                name 'Dries007'
-                                roles { role 'developer' }
-                            }
-                            developer {
-                                id 'Claycorp'
-                                name 'Claycorp'
-                                roles { role 'architect' }
-                            }
-                        }
-                    }
+            mods {
+                p2s {
+                    source sourceSets.main
+                }
+            }
+        }
+
+        data {
+            workingDirectory project.file('run')
+
+            property 'forge.logging.markers', 'REGISTRIES'
+
+            property 'forge.logging.console.level', 'debug'
+
+            // Specify the modid for data generation, where to output the resulting resource, and where to look for existing resources.
+            args '--mod', 'p2s', '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
+
+            mods {
+                p2s {
+                    source sourceSets.main
                 }
             }
         }
     }
+}
+
+// Include resources generated by data generators.
+sourceSets.main.resources { srcDir 'src/generated/resources' }
+
+repositories {
+     mavenCentral()
+}
+
+dependencies {
+    minecraft 'net.minecraftforge:forge:1.18.2-40.1.92'
+
+}
+
+// Example for how to get properties into the manifest for reading at runtime.
+jar {
+    manifest {
+        attributes([
+                "Specification-Title"     : "p2s",
+                "Specification-Vendor"    : "dries007",
+                "Specification-Version"   : "1", // We are version 1 of ourselves
+                "Implementation-Title"    : project.name,
+                "Implementation-Version"  : project.jar.archiveVersion,
+                "Implementation-Vendor"   : "dries007",
+                "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+        ])
+    }
+}
+
+jar.finalizedBy('reobfJar')
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifact jar
+        }
+    }
+    repositories {
+        maven {
+            url "file://${project.projectDir}/mcmodsrepo"
+        }
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
 }

@@ -30,8 +30,8 @@
 
 package net.doubledoordev.pay2spawn.util;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.world.World;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.Level;
 
 import java.util.ArrayList;
 
@@ -40,33 +40,28 @@ import java.util.ArrayList;
  *
  * @author Dries007
  */
-public class PointD
-{
+public class PointD {
     private double x, y, z;
 
-    public PointD(Entity entity)
-    {
-        x = entity.posX;
-        y = entity.posY;
-        z = entity.posZ;
+    public PointD(Entity entity) {
+        x = entity.getX();
+        y = entity.getY();
+        z = entity.getZ();
     }
 
-    public PointD(double x, double y, double z)
-    {
+    public PointD(double x, double y, double z) {
         this.x = x;
         this.y = y;
         this.z = z;
     }
 
-    public PointD()
-    {
+    public PointD() {
         this.x = 0;
         this.y = 0;
         this.z = 0;
     }
 
-    public PointD makeNiceForBlock()
-    {
+    public PointD makeNiceForBlock() {
         x = intX() + 0.5;
         y = intY();
         z = intZ() + 0.5;
@@ -74,43 +69,34 @@ public class PointD
         return this;
     }
 
-    public double getX()
-    {
+    public double getX() {
         return x;
     }
 
-    public void setX(double x)
-    {
+    public void setX(double x) {
         this.x = x;
     }
 
-    public double getZ()
-    {
+    public double getZ() {
         return z;
     }
 
-    public void setZ(double z)
-    {
+    public void setZ(double z) {
         this.z = z;
     }
 
-    public double getY()
-    {
+    public double getY() {
         return y;
     }
 
-    public void setY(double y)
-    {
+    public void setY(double y) {
         this.y = y;
     }
 
-    public ArrayList<PointD> getCircle(int rad)
-    {
+    public ArrayList<PointD> getCircle(int rad) {
         ArrayList<PointD> pointDs = new ArrayList<>();
-        for (int x = -rad; x < rad; x++)
-        {
-            for (int z = -rad; z < rad; z++)
-            {
+        for (int x = -rad; x < rad; x++) {
+            for (int z = -rad; z < rad; z++) {
                 PointD p = new PointD(this.x + x, this.y, this.z + z);
                 if (distanceTo(p) < rad) pointDs.add(p);
             }
@@ -118,55 +104,45 @@ public class PointD
         return pointDs;
     }
 
-    public ArrayList<PointD> getCylinder(int rad, int height)
-    {
+    public ArrayList<PointD> getCylinder(int rad, int height) {
         height = height / 2;
         ArrayList<PointD> pointDs = new ArrayList<>();
-        for (PointD p : getCircle(rad))
-        {
-            for (int dy = -height; dy < height; dy++)
-            {
+        for (PointD p : getCircle(rad)) {
+            for (int dy = -height; dy < height; dy++) {
                 pointDs.add(new PointD(p.x, p.y + dy, p.z));
             }
         }
         return pointDs;
     }
 
-    public ArrayList<PointD> getSphere(int rad)
-    {
+    public ArrayList<PointD> getSphere(int rad) {
         ArrayList<PointD> pointDs = new ArrayList<>();
         for (PointD p : getCylinder(rad, rad)) if (distanceTo(p) < rad) pointDs.add(p);
         return pointDs;
     }
 
-    public double distanceTo(PointD p)
-    {
+    public double distanceTo(PointD p) {
         return Math.sqrt((diffX(p) * diffX(p)) + (diffY(p) * diffY(p)) + (diffZ(p) * diffZ(p)));
     }
 
-    public double diffX(PointD p)
-    {
+    public double diffX(PointD p) {
         return this.x - p.x;
     }
 
-    public double diffY(PointD p)
-    {
+    public double diffY(PointD p) {
         return this.y - p.y;
     }
 
-    public double diffZ(PointD p)
-    {
+    public double diffZ(PointD p) {
         return this.z - p.z;
     }
 
-    public boolean isValid()
-    {
+    public boolean isValid() {
         return this.y >= 0;
     }
 
     @Override
-    public int hashCode()
-    {
+    public int hashCode() {
         int result;
         long temp;
         temp = Double.doubleToLongBits(x);
@@ -179,8 +155,7 @@ public class PointD
     }
 
     @Override
-    public boolean equals(Object o)
-    {
+    public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
@@ -190,35 +165,33 @@ public class PointD
     }
 
     @Override
-    public String toString()
-    {
+    public String toString() {
         return "[" + x + ";" + y + ";" + z + "]";
     }
 
-    public int intX()
-    {
+    public int intX() {
         return (int) x;
     }
 
-    public int intY()
-    {
+    public int intY() {
         return (int) y;
     }
 
-    public int intZ()
-    {
+    public int intZ() {
         return (int) z;
     }
 
-    public void setPosition(Entity entity)
-    {
-        entity.setPosition(intX() + 0.5, intY() + 0.5, intZ() + 0.5);
+    public void setPosition(Entity entity) {
+        entity.setPos(intX() + 0.5, intY() + 0.5, intZ() + 0.5);
     }
 
-    public boolean canSpawn(Entity entity)
-    {
-        World world = entity.worldObj;
-        for (int y = 0; y < Math.ceil(entity.height); y++) if (world.isBlockNormalCubeDefault(intX(), intY() + y, intZ(), false)) return false;
+    public boolean canSpawn(Entity entity) {
+        Level world = entity.level;
+        for (int y = 0; y < Math.ceil(entity.getBbHeight()); y++) {
+         /*todo   if (world.isBlockNormalCubeDefault(intX(), intY() + y, intZ(), false)) {
+                return false;
+            }*/
+        }
         return true;
     }
 }

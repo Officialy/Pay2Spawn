@@ -40,12 +40,12 @@ import net.doubledoordev.pay2spawn.util.JsonNBTHelper;
 import net.doubledoordev.pay2spawn.util.Reward;
 import net.minecraft.block.Block;
 import net.minecraft.enchantment.Enchantment;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.Player;
+import net.minecraft.entity.player.ServerPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundTag;
 
 import java.io.File;
 import java.io.IOException;
@@ -83,15 +83,15 @@ public class ItemType extends TypeBase
     }
 
     @Override
-    public NBTTagCompound getExample()
+    public CompoundTag getExample()
     {
         ItemStack is = new ItemStack(Items.golden_apple);
         is.setStackDisplayName("$name");
-        return is.writeToNBT(new NBTTagCompound());
+        return is.writeToNBT(new CompoundTag());
     }
 
     @Override
-    public void spawnServerSide(EntityPlayerMP player, NBTTagCompound dataFromClient, NBTTagCompound rewardData)
+    public void spawnServerSide(ServerPlayer player, CompoundTag dataFromClient, CompoundTag rewardData)
     {
         ItemsType.spawnItemStackOnPlayer(player, dataFromClient);
     }
@@ -154,7 +154,7 @@ public class ItemType extends TypeBase
     }
 
     @Override
-    public Node getPermissionNode(EntityPlayer player, NBTTagCompound dataFromClient)
+    public Node getPermissionNode(Player player, CompoundTag dataFromClient)
     {
         ItemStack itemStack = ItemStack.loadItemStackFromNBT(dataFromClient);
         if (itemStack == null)
@@ -173,7 +173,7 @@ public class ItemType extends TypeBase
             case "stacksize":
                 return jsonObject.get("Count").getAsString().replace("BYTE:", "");
             case "itemname":
-                NBTTagCompound tagCompound = JsonNBTHelper.parseJSON(jsonObject);
+                CompoundTag tagCompound = JsonNBTHelper.parseJSON(jsonObject);
                 ItemStack is = ItemStack.loadItemStackFromNBT(tagCompound);
                 if (is == null)
                 {
@@ -186,7 +186,7 @@ public class ItemType extends TypeBase
     }
 
     @Override
-    public void addConfigTags(NBTTagCompound rewardNtb, Donation donation, Reward reward)
+    public void addConfigTags(CompoundTag rewardNtb, Donation donation, Reward reward)
     {
         ItemsType.setConfigTags(rewardNtb, donation, reward);
     }

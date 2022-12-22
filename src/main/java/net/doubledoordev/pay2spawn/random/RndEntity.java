@@ -31,7 +31,6 @@
 package net.doubledoordev.pay2spawn.random;
 
 import net.doubledoordev.pay2spawn.util.Helper;
-import net.minecraft.entity.EntityList;
 
 import java.util.regex.Pattern;
 
@@ -45,20 +44,17 @@ import static net.doubledoordev.pay2spawn.util.Constants.STRING;
  *
  * @author Dries007
  */
-public class RndEntity implements IRandomResolver
-{
-    public static final  String  TAG     = "$randomEntity";
+public class RndEntity implements IRandomResolver {
+    public static final String TAG = "$randomEntity";
     private static final Pattern PATTERN = Pattern.compile("\\$randomEntity");
 
     @Override
-    public String solverRandom(int type, String value)
-    {
+    public String solverRandom(int type, String value) {
         return PATTERN.matcher(value).replaceFirst(EntityList.getStringFromID((Integer) Helper.getRandomFromSet(EntityList.entityEggs.keySet())));
     }
 
     @Override
-    public boolean matches(int type, String value)
-    {
+    public boolean matches(int type, String value) {
         return type == STRING && PATTERN.matcher(value).find();
     }
 }

@@ -38,13 +38,11 @@ import static net.doubledoordev.pay2spawn.util.Constants.STRING;
 /**
  * @author Dries007
  */
-public class ASCIIFilter implements IRandomResolver
-{
+public class ASCIIFilter implements IRandomResolver {
     private static final Pattern PATTERN = Pattern.compile("\\$ASCII\\((.+)\\)");
 
     @Override
-    public String solverRandom(int type, String value)
-    {
+    public String solverRandom(int type, String value) {
         // Strip non-printable and control characters: "[^ -~]"
         // From: http://stackoverflow.com/questions/8519669/replace-non-ascii-character-from-string
 
@@ -54,8 +52,7 @@ public class ASCIIFilter implements IRandomResolver
     }
 
     @Override
-    public boolean matches(int type, String value)
-    {
+    public boolean matches(int type, String value) {
         return (type == STRING) && PATTERN.matcher(value).find();
     }
 }

@@ -34,9 +34,9 @@ import com.google.gson.JsonObject;
 import net.doubledoordev.pay2spawn.permissions.Node;
 import net.doubledoordev.pay2spawn.types.guis.CommandTypeGui;
 import net.minecraft.command.ICommand;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.entity.player.Player;
+import net.minecraft.entity.player.ServerPlayer;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.IChatComponent;
 import net.minecraftforge.common.config.Configuration;
@@ -71,17 +71,17 @@ public class CommandType extends TypeBase
     }
 
     @Override
-    public NBTTagCompound getExample()
+    public CompoundTag getExample()
     {
-        NBTTagCompound nbt = new NBTTagCompound();
-        nbt.setString(COMMAND_KEY, "weather clear");
+        CompoundTag nbt = new CompoundTag();
+        nbt.putString(COMMAND_KEY, "weather clear");
         return nbt;
     }
 
     @Override
-    public void spawnServerSide(EntityPlayerMP player, NBTTagCompound dataFromClient, NBTTagCompound rewardData)
+    public void spawnServerSide(ServerPlayer player, CompoundTag dataFromClient, CompoundTag rewardData)
     {
-        MinecraftServer.getServer().getCommandManager().executeCommand(new cmdSender((EntityPlayerMP) player), dataFromClient.getString(COMMAND_KEY));
+        MinecraftServer.getServer().getCommandManager().executeCommand(new cmdSender((ServerPlayer) player), dataFromClient.getString(COMMAND_KEY));
     }
 
     @Override
@@ -121,7 +121,7 @@ public class CommandType extends TypeBase
     }
 
     @Override
-    public Node getPermissionNode(EntityPlayer player, NBTTagCompound dataFromClient)
+    public Node getPermissionNode(Player player, CompoundTag dataFromClient)
     {
         return new Node(NAME, dataFromClient.getString(COMMAND_KEY).split(" ")[0]);
     }
@@ -137,9 +137,9 @@ public class CommandType extends TypeBase
         return id;
     }
 
-    public class cmdSender extends EntityPlayerMP
+    public class cmdSender extends ServerPlayer
     {
-        public cmdSender(EntityPlayerMP player)
+        public cmdSender(ServerPlayer player)
         {
             super(player.mcServer, player.getServerForPlayer(), player.getGameProfile(), player.theItemInWorldManager);
             this.theItemInWorldManager.thisPlayerMP = player;

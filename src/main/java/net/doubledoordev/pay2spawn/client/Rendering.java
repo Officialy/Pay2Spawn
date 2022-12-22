@@ -38,7 +38,7 @@ import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.model.ModelBiped;
 import net.minecraft.client.renderer.ThreadDownloadImageData;
 import net.minecraft.client.renderer.entity.*;
-import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.monster.EntityZombie;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.RenderLivingEvent;
@@ -73,7 +73,7 @@ public class Rendering
     @SubscribeEvent
     public void renderLivingEvent(RenderLivingEvent.Pre event)
     {
-        if (event.entity instanceof EntityZombie && ((EntityLiving) event.entity).hasCustomNameTag() && !(event.renderer instanceof CustomRender))
+        if (event.entity instanceof EntityZombie && ((LivingEntity) event.entity).hasCustomNameTag() && !(event.renderer instanceof CustomRender))
         {
             event.setCanceled(true);
             customRender.doRender(event.entity, event.x, event.y, event.z, 0, 0);
@@ -89,7 +89,7 @@ public class Rendering
         }
 
         @Override
-        public ResourceLocation getEntityTexture(EntityLiving p_110775_1_)
+        public ResourceLocation getEntityTexture(LivingEntity p_110775_1_)
         {
             String name = p_110775_1_.getCustomNameTag();
             ResourceLocation location = AbstractClientPlayer.getLocationSkin(name);

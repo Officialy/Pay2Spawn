@@ -31,11 +31,12 @@
 package net.doubledoordev.pay2spawn.util.shapes;
 
 import com.google.gson.JsonObject;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.Tesselator;
 import net.doubledoordev.pay2spawn.types.guis.StructureTypeGui;
 import net.doubledoordev.pay2spawn.types.guis.shapes.PointIGui;
 import net.doubledoordev.pay2spawn.util.Helper;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundTag;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -48,17 +49,15 @@ import static net.doubledoordev.pay2spawn.util.Constants.*;
  *
  * @author Dries007
  */
-public class PointI implements IShape
-{
-    public static final HashMap<String, String> typeMap             = new HashMap<>();
-    public static final String                  HOLLOWCENTER_KEY    = "hollow";
-    public static final String                  REPLACEABLEONLY_KEY = "replaceableOnly";
-    public static final String                  X_KEY               = "x";
-    public static final String                  Y_KEY               = "y";
-    public static final String                  Z_KEY               = "z";
+public class PointI implements IShape {
+    public static final HashMap<String, String> typeMap = new HashMap<>();
+    public static final String HOLLOWCENTER_KEY = "hollow";
+    public static final String REPLACEABLEONLY_KEY = "replaceableOnly";
+    public static final String X_KEY = "x";
+    public static final String Y_KEY = "y";
+    public static final String Z_KEY = "z";
 
-    static
-    {
+    static {
         typeMap.put(HOLLOWCENTER_KEY, NBTTypes[BYTE]);
         typeMap.put(REPLACEABLEONLY_KEY, NBTTypes[BYTE]);
 
@@ -70,83 +69,68 @@ public class PointI implements IShape
     int x, y, z;
     boolean hollow, replaceableOnly;
 
-    public PointI(int x, int y, int z)
-    {
+    public PointI(int x, int y, int z) {
         this.x = x;
         this.y = y;
         this.z = z;
     }
 
-    public PointI()
-    {
+    public PointI() {
         this.x = 0;
         this.y = 0;
         this.z = 0;
     }
 
-    public PointI(NBTTagCompound compound)
-    {
+    public PointI(CompoundTag compound) {
         fromNBT(compound);
     }
 
-    public int getX()
-    {
+    public int getX() {
         return x;
     }
 
-    public void setX(int x)
-    {
+    public void setX(int x) {
         this.x = x;
     }
 
-    public int getY()
-    {
+    public int getY() {
         return y;
     }
 
-    public void setY(int y)
-    {
+    public void setY(int y) {
         this.y = y;
     }
 
-    public int getZ()
-    {
+    public int getZ() {
         return z;
     }
 
-    public void setZ(int z)
-    {
+    public void setZ(int z) {
         this.z = z;
     }
 
-    public double distanceTo(PointI p)
-    {
+    public double distanceTo(PointI p) {
         return Math.sqrt((diffX(p) * diffX(p)) + (diffY(p) * diffY(p)) + (diffZ(p) * diffZ(p)));
     }
 
-    public double diffX(PointI p)
-    {
+    public double diffX(PointI p) {
         return this.x - p.x;
     }
 
-    public double diffY(PointI p)
-    {
+    public double diffY(PointI p) {
         return this.y - p.y;
     }
 
-    public double diffZ(PointI p)
-    {
+    public double diffZ(PointI p) {
         return this.z - p.z;
     }
 
-    public boolean isValid()
-    {
+    public boolean isValid() {
         return this.y >= 0;
     }
 
     @Override
-    public int hashCode()
-    {
+    public int hashCode() {
         int result = x;
         result = 31 * result + y;
         result = 31 * result + z;
@@ -154,8 +138,7 @@ public class PointI implements IShape
     }
 
     @Override
-    public boolean equals(Object o)
-    {
+    public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof PointI)) return false;
 
@@ -165,33 +148,29 @@ public class PointI implements IShape
     }
 
     @Override
-    public String toString()
-    {
+    public String toString() {
         return "[" + x + ";" + y + ";" + z + "]";
     }
 
     @Override
-    public NBTTagCompound toNBT()
-    {
-        NBTTagCompound compound = new NBTTagCompound();
-        compound.setInteger("x", x);
-        compound.setInteger("y", y);
-        compound.setInteger("z", z);
+    public CompoundTag toNBT() {
+        CompoundTag compound = new CompoundTag();
+        compound.putInt("x", x);
+        compound.putInt("y", y);
+        compound.putInt("z", z);
         return compound;
     }
 
     @Override
-    public IShape fromNBT(NBTTagCompound compound)
-    {
-        x = compound.getInteger("x");
-        y = compound.getInteger("y");
-        z = compound.getInteger("z");
+    public IShape fromNBT(CompoundTag compound) {
+        x = compound.getInt("x");
+        y = compound.getInt("y");
+        z = compound.getInt("z");
         return this;
     }
 
     @Override
-    public IShape move(int x, int y, int z)
-    {
+    public IShape move(int x, int y, int z) {
         this.x += x;
         this.y += y;
         this.z += z;
@@ -200,20 +179,17 @@ public class PointI implements IShape
     }
 
     @Override
-    public Collection<PointI> getPoints()
-    {
+    public Collection<PointI> getPoints() {
         return Arrays.asList(this);
     }
 
     @Override
-    public PointI getCenter()
-    {
+    public PointI getCenter() {
         return this;
     }
 
     @Override
-    public IShape setCenter(PointI pointI)
-    {
+    public IShape setCenter(PointI pointI) {
         x = pointI.x;
         y = pointI.y;
         z = pointI.z;
@@ -221,86 +197,74 @@ public class PointI implements IShape
     }
 
     @Override
-    public boolean getHollow()
-    {
+    public boolean getHollow() {
         return hollow;
     }
 
     @Override
-    public IShape setHollow(boolean hollow)
-    {
+    public IShape setHollow(boolean hollow) {
         this.hollow = hollow;
         return this;
     }
 
     @Override
-    public boolean getReplaceableOnly()
-    {
+    public boolean getReplaceableOnly() {
         return replaceableOnly;
     }
 
     @Override
-    public IShape setReplaceableOnly(boolean replaceableOnly)
-    {
+    public IShape setReplaceableOnly(boolean replaceableOnly) {
         this.replaceableOnly = replaceableOnly;
         return this;
     }
 
     @Override
-    public void openGui(int i, JsonObject jsonObject, StructureTypeGui instance)
-    {
+    public void openGui(int i, JsonObject jsonObject, StructureTypeGui instance) {
         new PointIGui(i, jsonObject, instance, typeMap);
     }
 
     @Override
-    public void render(Tessellator tess)
-    {
+    public void render(BufferBuilder tess) {
         Helper.renderPoint(this, tess);
     }
 
     @Override
-    public IShape rotate(int baseRotation)
-    {
-        switch (baseRotation)
-        {
-            case 1:
+    public IShape rotate(int baseRotation) {
+        switch (baseRotation) {
+            case 1 -> {
                 int tempx = x;
                 x = -z;
                 z = -tempx;
-                break;
-            case 2:
+            }
+            case 2 -> {
                 x = -x;
                 z = -z;
-                break;
-            case 3:
+            }
+            case 3 -> {
                 int tempz = z;
                 z = x;
                 x = tempz;
-                break;
+            }
         }
         return this;
     }
 
-    public PointI addX(int x)
-    {
+    public PointI addX(int x) {
         this.x += x;
         return this;
     }
 
-    public PointI addY(int y)
-    {
+    public PointI addY(int y) {
         this.y += y;
         return this;
     }
 
-    public PointI addZ(int z)
-    {
+    public PointI addZ(int z) {
         this.z += z;
         return this;
     }
 
-    public IShape copy()
-    {
+    public IShape copy() {
         return new PointI(x, y, z);
     }
 }

@@ -34,7 +34,6 @@ import net.doubledoordev.pay2spawn.checkers.CheckerHandler;
 import net.doubledoordev.pay2spawn.hud.Hud;
 import net.doubledoordev.pay2spawn.types.TypeRegistry;
 import net.doubledoordev.pay2spawn.util.Helper;
-import net.minecraftforge.common.config.Configuration;
 
 import java.io.File;
 import java.util.regex.Pattern;

@@ -59,7 +59,7 @@ public class Hud
 
     private Hud()
     {
-        FMLCommonHandler.instance().bus().register(this);
+        MinecraftForge.EVENT_BUS.register(this);
         folder = new File(Pay2Spawn.getFolder(), "textFiles");
         //noinspection ResultOfMethodCallIgnored
         folder.mkdir();

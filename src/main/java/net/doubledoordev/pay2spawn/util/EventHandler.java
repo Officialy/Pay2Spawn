@@ -104,12 +104,12 @@ public class EventHandler
         ArrayList<String> bottomLeft = new ArrayList<>();
         ArrayList<String> bottomRight = new ArrayList<>();
 
-        FontRenderer fontRenderer = Minecraft.getMinecraft().fontRenderer;
+        FontRenderer fontRenderer = Minecraft.getInstance().fontRenderer;
 
         Hud.INSTANCE.render(event.left, event.right, bottomLeft, bottomRight);
 
         int baseHeight = event.resolution.getScaledHeight() - 25 - bottomLeft.size() * 10;
-        if (!Minecraft.getMinecraft().ingameGUI.getChatGUI().getChatOpen())
+        if (!Minecraft.getInstance().ingameGUI.getChatGUI().getChatOpen())
         {
             for (int x = 0; x < bottomLeft.size(); x++)
             {
@@ -119,7 +119,7 @@ public class EventHandler
         }
 
         baseHeight = event.resolution.getScaledHeight() - 25 - bottomRight.size() * 10;
-        if (!Minecraft.getMinecraft().ingameGUI.getChatGUI().getChatOpen())
+        if (!Minecraft.getInstance().ingameGUI.getChatGUI().getChatOpen())
         {
             for (int x = 0; x < bottomRight.size(); x++)
             {

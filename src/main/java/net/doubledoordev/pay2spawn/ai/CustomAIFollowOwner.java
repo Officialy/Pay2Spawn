@@ -31,10 +31,10 @@
 package net.doubledoordev.pay2spawn.ai;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.pathfinding.PathNavigate;
-import net.minecraft.util.MathHelper;
+import net.minecraft.util.Mth;
 import net.minecraft.world.World;
 
 /**
@@ -43,7 +43,7 @@ import net.minecraft.world.World;
  */
 public class CustomAIFollowOwner extends EntityAIBase
 {
-    EntityLiving mob;
+    LivingEntity mob;
     World theWorld;
     double speed;
     PathNavigate mobPathfinder;
@@ -53,10 +53,10 @@ public class CustomAIFollowOwner extends EntityAIBase
     boolean avoidsWater;
     Entity owner;
 
-    public CustomAIFollowOwner(EntityLiving mob, double speed, float minDist, float maxDist)
+    public CustomAIFollowOwner(LivingEntity mob, double speed, float minDist, float maxDist)
     {
         this.mob = mob;
-        this.theWorld = mob.worldObj;
+        this.theWorld = mob.level;
         this.speed = speed;
         this.mobPathfinder = mob.getNavigator();
         this.minDist = minDist;
@@ -117,9 +117,9 @@ public class CustomAIFollowOwner extends EntityAIBase
                 {
                     if (this.mob.getDistanceSqToEntity(this.owner) >= 144.0D)
                     {
-                        int i = MathHelper.floor_double(this.owner.posX) - 2;
-                        int j = MathHelper.floor_double(this.owner.posZ) - 2;
-                        int k = MathHelper.floor_double(this.owner.boundingBox.minY);
+                        int i = Mth.floor(this.owner.getX()) - 2;
+                        int j = Mth.floor(this.owner.getZ()) - 2;
+                        int k = Mth.floor(this.owner.boundingBox.minY);
 
                         for (int l = 0; l <= 4; ++l)
                         {
@@ -127,7 +127,7 @@ public class CustomAIFollowOwner extends EntityAIBase
                             {
                                 if ((l < 1 || i1 < 1 || l > 3 || i1 > 3) && World.doesBlockHaveSolidTopSurface(this.theWorld, i + l, k - 1, j + i1) && !this.theWorld.getBlock(i + l, k, j + i1).isNormalCube() && !this.theWorld.getBlock(i + l, k + 1, j + i1).isNormalCube())
                                 {
-                                    this.mob.setLocationAndAngles((double) ((float) (i + l) + 0.5F), (double) k, (double) ((float) (j + i1) + 0.5F), this.mob.rotationYaw, this.mob.rotationPitch);
+                                    this.mob.setLocationAndAngles((double) ((float) (i + l) + 0.5F), (double) k, (double) ((float) (j + i1) + 0.5F), this.mob.getYRot(), this.mob.rotationPitch);
                                     this.mobPathfinder.clearPathEntity();
                                     return;
                                 }

@@ -43,30 +43,20 @@ import static net.doubledoordev.pay2spawn.util.Constants.*;
  *
  * @author Dries007
  */
-public class RndNumberRange implements IRandomResolver
-{
+public class RndNumberRange implements IRandomResolver {
     private final static Pattern PATTERN = Pattern.compile("\\$random\\((-?\\w+), ?(-?\\w+)\\)");
 
     @Override
-    public String solverRandom(int type, String value)
-    {
+    public String solverRandom(int type, String value) {
         Matcher matcher = PATTERN.matcher(value);
         matcher.find();
-        switch (type)
-        {
-            case BYTE:
-            case SHORT:
-            case INT:
-            case LONG:
-            case STRING:
-            {
+        switch (type) {
+            case BYTE, SHORT, INT, LONG, STRING -> {
                 int begin = Integer.parseInt(matcher.group(1));
                 int end = Integer.parseInt(matcher.group(2));
                 return matcher.replaceFirst("" + (begin + RANDOM.nextInt(end - begin)));
             }
-            case FLOAT:
-            case DOUBLE:
-            {
+            case FLOAT, DOUBLE -> {
                 double begin = Double.parseDouble(matcher.group(1));
                 double end = Double.parseDouble(matcher.group(2));
                 return matcher.replaceFirst("" + (begin + (end - begin) * RANDOM.nextDouble()));
@@ -76,8 +66,7 @@ public class RndNumberRange implements IRandomResolver
     }
 
     @Override
-    public boolean matches(int type, String value)
-    {
+    public boolean matches(int type, String value) {
         return type != BYTE_ARRAY && type != LIST && type != INT_ARRAY && PATTERN.matcher(value).find();
     }
 }

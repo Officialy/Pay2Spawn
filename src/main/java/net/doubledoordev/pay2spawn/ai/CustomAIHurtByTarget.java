@@ -30,8 +30,8 @@
 
 package net.doubledoordev.pay2spawn.ai;
 
-import net.minecraft.entity.EntityCreature;
-import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.AmbientCreature;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.EntityAIHurtByTarget;
 
 /**
@@ -39,13 +39,13 @@ import net.minecraft.entity.ai.EntityAIHurtByTarget;
  */
 public class CustomAIHurtByTarget extends EntityAIHurtByTarget
 {
-    public CustomAIHurtByTarget(EntityCreature mob, boolean entityCallsForHelp)
+    public CustomAIHurtByTarget(AmbientCreature mob, boolean entityCallsForHelp)
     {
         super(mob, entityCallsForHelp);
     }
 
     @Override
-    protected boolean isSuitableTarget(EntityLivingBase p_75296_1_, boolean p_75296_2_)
+    protected boolean isSuitableTarget(LivingEntity p_75296_1_, boolean p_75296_2_)
     {
         return !CustomAI.isOnSameTeam(taskOwner, p_75296_1_) && super.isSuitableTarget(p_75296_1_, p_75296_2_);
     }

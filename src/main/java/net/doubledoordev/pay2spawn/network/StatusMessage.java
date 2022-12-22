@@ -30,18 +30,15 @@
 
 package net.doubledoordev.pay2spawn.network;
 
-import cpw.mods.fml.common.network.simpleimpl.IMessage;
-import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
-import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import io.netty.buffer.ByteBuf;
 import net.doubledoordev.pay2spawn.Pay2Spawn;
 import net.doubledoordev.pay2spawn.configurator.ConfiguratorManager;
 import net.doubledoordev.pay2spawn.permissions.PermissionsHandler;
 import net.doubledoordev.pay2spawn.util.Helper;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.ChatFormatting;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
 
 /**
  * Used for status things
@@ -69,24 +66,24 @@ public class StatusMessage implements IMessage
 
     }
 
-    public static void sendHandshakeToPlayer(EntityPlayerMP player)
+    public static void sendHandshakeToPlayer(ServerPlayer player)
     {
         Pay2Spawn.getSnw().sendTo(new StatusMessage(Type.HANDSHAKE), player);
     }
 
-    private static void sendForceToPlayer(EntityPlayerMP player)
+    private static void sendForceToPlayer(ServerPlayer player)
     {
         Pay2Spawn.getSnw().sendTo(new StatusMessage(Type.FORCE), player);
     }
 
-    private static void sendConfigToPlayer(EntityPlayerMP player)
+    private static void sendConfigToPlayer(ServerPlayer player)
     {
         Pay2Spawn.getSnw().sendTo(new StatusMessage(Type.CONFIGSYNC, serverConfig), player);
     }
 
     public static void sendConfigToAllPlayers()
     {
-        Pay2Spawn.getSnw().sendToAll(new StatusMessage(Type.CONFIGSYNC, serverConfig));
+        Pay2Spawn.getSnw().sendToServer(new StatusMessage(Type.CONFIGSYNC, serverConfig));
     }
 
     @Override
@@ -128,7 +125,7 @@ public class StatusMessage implements IMessage
                     case CONFIGSYNC:
                         Pay2Spawn.reloadDBFromServer(message.extraData[0]);
                         ConfiguratorManager.exit();
-                        Helper.msg(EnumChatFormatting.GOLD + "[P2S] Using config specified by the server.");
+                        Helper.msg(ChatFormatting.GOLD + "[P2S] Using config specified by the server.");
                         break;
                     case FORCE:
                         Pay2Spawn.forceOn = true;
@@ -152,8 +149,8 @@ public class StatusMessage implements IMessage
                         if (MinecraftServer.getServer().isDedicatedServer() && Pay2Spawn.getConfig().forceP2S) sendForceToPlayer(ctx.getServerHandler().playerEntity);
                         break;
                     case STATUS:
-                        EntityPlayer sender = MinecraftServer.getServer().getConfigurationManager().func_152612_a(message.extraData[0]);
-                        Helper.sendChatToPlayer(sender, ctx.getServerHandler().playerEntity.getCommandSenderName() + " has Pay2Spawn " + (Boolean.parseBoolean(message.extraData[1]) ? "enabled." : "disabled."), EnumChatFormatting.AQUA);
+                        Player sender = MinecraftServer.getServer().getConfigurationManager().func_152612_a(message.extraData[0]);
+                        Helper.sendChatToPlayer(sender, ctx.getServerHandler().playerEntity.getCommandSenderName() + " has Pay2Spawn " + (Boolean.parseBoolean(message.extraData[1]) ? "enabled." : "disabled."), ChatFormatting.AQUA);
                         break;
                 }
             }

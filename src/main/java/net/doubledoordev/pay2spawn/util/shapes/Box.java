@@ -33,7 +33,7 @@ package net.doubledoordev.pay2spawn.util.shapes;
 import com.google.gson.JsonObject;
 import net.doubledoordev.pay2spawn.types.guis.StructureTypeGui;
 import net.doubledoordev.pay2spawn.types.guis.shapes.BoxGui;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundTag;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -46,14 +46,12 @@ import static net.doubledoordev.pay2spawn.util.Constants.NBTTypes;
  *
  * @author Dries007
  */
-public class Box extends AbstractShape
-{
+public class Box extends AbstractShape {
     public static final String X_KEY = "x";
     public static final String Y_KEY = "y";
     public static final String Z_KEY = "z";
 
-    static
-    {
+    static {
         typeMap.put(X_KEY, NBTTypes[INT]);
         typeMap.put(Y_KEY, NBTTypes[INT]);
         typeMap.put(Z_KEY, NBTTypes[INT]);
@@ -61,87 +59,76 @@ public class Box extends AbstractShape
 
     int x, y, z;
 
-    public Box(int x, int y, int z)
-    {
+    public Box(int x, int y, int z) {
         super();
         this.x = x;
         this.y = y;
         this.z = z;
     }
 
-    public Box(PointI center, int x, int y, int z)
-    {
+    public Box(PointI center, int x, int y, int z) {
         super(center);
         this.x = x;
         this.y = y;
         this.z = z;
     }
 
-    Box()
-    {
+    Box() {
         super();
     }
 
     @Override
-    public NBTTagCompound toNBT()
-    {
-        NBTTagCompound compound = super.toNBT();
-        compound.setInteger(X_KEY, x);
-        compound.setInteger(Y_KEY, y);
-        compound.setInteger(Z_KEY, z);
+    public CompoundTag toNBT() {
+        CompoundTag compound = super.toNBT();
+        compound.putInt(X_KEY, x);
+        compound.putInt(Y_KEY, y);
+        compound.putInt(Z_KEY, z);
         return compound;
     }
 
     @Override
-    public IShape fromNBT(NBTTagCompound compound)
-    {
+    public IShape fromNBT(CompoundTag compound) {
         super.fromNBT(compound);
-        x = compound.getInteger(X_KEY);
-        y = compound.getInteger(Y_KEY);
-        z = compound.getInteger(Z_KEY);
+        x = compound.getInt(X_KEY);
+        y = compound.getInt(Y_KEY);
+        z = compound.getInt(Z_KEY);
         return this;
     }
 
     @Override
-    public IShape rotate(int baseRotation)
-    {
+    public IShape rotate(int baseRotation) {
         super.rotate(baseRotation);
 
-        switch (baseRotation)
-        {
-            case 1:
+        switch (baseRotation) {
+            case 1 -> {
                 int tempx = x;
                 x = -z;
                 z = -tempx;
-                break;
-            case 2:
+            }
+            case 2 -> {
                 x = -x;
                 z = -z;
-                break;
-            case 3:
+            }
+            case 3 -> {
                 int tempz = z;
                 z = x;
                 x = tempz;
-                break;
+            }
         }
 
         return this;
     }
 
     @Override
-    public Collection<PointI> getPoints()
-    {
+    public Collection<PointI> getPoints() {
         HashSet<PointI> points = new HashSet<>();
 
         int absx = Math.abs(this.x);
         int absz = Math.abs(this.z);
         int absy = Math.abs(this.y);
-        for (int x = -absx; x <= absx; x++)
-        {
-            for (int z = -absz; z <= absz; z++)
-            {
-                for (int y = -absy; y <= absy; y++)
-                {
+        for (int x = -absx; x <= absx; x++) {
+            for (int z = -absz; z <= absz; z++) {
+                for (int y = -absy; y <= absy; y++) {
                     points.add(new PointI(center.x + x, center.y + y, center.z + z));
                 }
             }
@@ -153,8 +140,7 @@ public class Box extends AbstractShape
     }
 
     @Override
-    public void openGui(int index, JsonObject jsonObject, StructureTypeGui instance)
-    {
+    public void openGui(int index, JsonObject jsonObject, StructureTypeGui instance) {
         new BoxGui(index, jsonObject, instance, typeMap);
     }
 }

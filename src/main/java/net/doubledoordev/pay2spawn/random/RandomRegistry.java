@@ -30,16 +30,13 @@
 
 package net.doubledoordev.pay2spawn.random;
 
-import cpw.mods.fml.common.registry.FMLControlledNamespacedRegistry;
-import cpw.mods.fml.common.registry.GameData;
-import net.minecraft.block.Block;
-import net.minecraft.item.Item;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.Block;
+import net.minecraftforge.registries.ForgeRegistries;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.regex.Pattern;
-
-import static net.doubledoordev.pay2spawn.util.Constants.RANDOM;
 
 /**
  * Handles random tags placed inside the NBT data from the JSON.
@@ -47,12 +44,10 @@ import static net.doubledoordev.pay2spawn.util.Constants.RANDOM;
  *
  * @author Dries007
  */
-public class RandomRegistry
-{
+public class RandomRegistry {
     private static final HashMap<Class<? extends IRandomResolver>, IRandomResolver> RANDOM_RESOLVERS = new HashMap<>();
 
-    static
-    {
+    static {
         addRandomResolver(new RndVariable());
         addRandomResolver(new RndBoolean());
         addRandomResolver(new RndColors());
@@ -61,16 +56,14 @@ public class RandomRegistry
         addRandomResolver(new RndNumberRange());
         addRandomResolver(new ItemId<Item>() {
             @Override
-            public FMLControlledNamespacedRegistry<Item> getRegistry()
-            {
-                return GameData.getItemRegistry();
+            public @NotNull Collection<Item> getRegistry() {
+                return ForgeRegistries.ITEMS.getValues();
             }
         });
         addRandomResolver(new ItemId<Block>() {
             @Override
-            public FMLControlledNamespacedRegistry<Block> getRegistry()
-            {
-                return GameData.getBlockRegistry();
+            public @NotNull Collection<Block> getRegistry() {
+                return ForgeRegistries.BLOCKS.getValues();
             }
         });
         addRandomResolver(new ASCIIFilter());
@@ -81,8 +74,7 @@ public class RandomRegistry
      *
      * @param resolver the instance of the resolver
      */
-    public static void addRandomResolver(IRandomResolver resolver)
-    {
+    public static void addRandomResolver(IRandomResolver resolver) {
         RANDOM_RESOLVERS.put(resolver.getClass(), resolver);
     }
 
@@ -93,14 +85,11 @@ public class RandomRegistry
      * @param value The to be randomised string
      * @return the original or a randomised version
      */
-    public static String solveRandom(int type, String value)
-    {
+    public static String solveRandom(int type, String value) {
         String oldValue;
-        do
-        {
+        do {
             oldValue = value;
-            for (IRandomResolver resolver : RANDOM_RESOLVERS.values())
-            {
+            for (IRandomResolver resolver : RANDOM_RESOLVERS.values()) {
                 if (resolver.matches(type, value)) value = resolver.solverRandom(type, value);
             }
         }
@@ -109,8 +98,7 @@ public class RandomRegistry
         return value;
     }
 
-    public static IRandomResolver getInstanceFromClass(Class<? extends IRandomResolver> aClass)
-    {
+    public static IRandomResolver getInstanceFromClass(Class<? extends IRandomResolver> aClass) {
         return RANDOM_RESOLVERS.get(aClass);
     }
 }

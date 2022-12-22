@@ -33,7 +33,7 @@ package net.doubledoordev.pay2spawn.configurator;
 import cpw.mods.fml.common.FMLCommonHandler;
 import net.doubledoordev.pay2spawn.Pay2Spawn;
 import net.doubledoordev.pay2spawn.util.Helper;
-import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.ChatFormatting;
 
 /**
  * Manages instances of the NBTgrabber and the configurator
@@ -44,7 +44,7 @@ public class ConfiguratorManager
 {
     public static void openNbt()
     {
-        if (FMLCommonHandler.instance().getEffectiveSide().isClient())
+        if (FMLLoader.getDist().isClient())
         {
             try
             {
@@ -63,10 +63,10 @@ public class ConfiguratorManager
 
     public static void openCfg()
     {
-        if (!Pay2Spawn.getRewardsDB().editable) Helper.msg(EnumChatFormatting.GOLD + "[P2S] You can't edit a server side config.");
+        if (!Pay2Spawn.getRewardsDB().editable) Helper.msg(ChatFormatting.GOLD + "[P2S] You can't edit a server side config.");
         else
         {
-            if (FMLCommonHandler.instance().getEffectiveSide().isClient())
+            if (FMLLoader.getDist().isClient())
             {
                 try
                 {

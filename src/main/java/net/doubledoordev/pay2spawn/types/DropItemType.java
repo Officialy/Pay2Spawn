@@ -33,9 +33,9 @@ package net.doubledoordev.pay2spawn.types;
 import com.google.gson.JsonObject;
 import net.doubledoordev.pay2spawn.permissions.Node;
 import net.doubledoordev.pay2spawn.types.guis.DropItemTypeGui;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.entity.player.Player;
+import net.minecraft.entity.player.ServerPlayer;
+import net.minecraft.nbt.CompoundTag;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -71,17 +71,17 @@ public class DropItemType extends TypeBase
     }
 
     @Override
-    public NBTTagCompound getExample()
+    public CompoundTag getExample()
     {
-        NBTTagCompound compound = new NBTTagCompound();
-        compound.setInteger(TYPE_KEY, ALL);
+        CompoundTag compound = new CompoundTag();
+        compound.putInt(TYPE_KEY, ALL);
         return compound;
     }
 
     @Override
-    public void spawnServerSide(EntityPlayerMP player, NBTTagCompound dataFromClient, NBTTagCompound rewardData)
+    public void spawnServerSide(ServerPlayer player, CompoundTag dataFromClient, CompoundTag rewardData)
     {
-        switch (dataFromClient.getInteger(TYPE_KEY))
+        switch (dataFromClient.getInt(TYPE_KEY))
         {
             case HOLDING_1:
                 player.dropOneItem(false);
@@ -120,7 +120,7 @@ public class DropItemType extends TypeBase
     }
 
     @Override
-    public Node getPermissionNode(EntityPlayer player, NBTTagCompound dataFromClient)
+    public Node getPermissionNode(Player player, CompoundTag dataFromClient)
     {
         return new Node(NODENAME);
     }

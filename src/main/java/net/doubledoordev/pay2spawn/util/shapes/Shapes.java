@@ -30,7 +30,7 @@
 
 package net.doubledoordev.pay2spawn.util.shapes;
 
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundTag;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -40,14 +40,12 @@ import java.util.HashMap;
  *
  * @author Dries007
  */
-public class Shapes
-{
-    public static final String                  SHAPE_KEY = "shape";
-    public static final HashMap<String, IShape> MAP       = new HashMap<>();
-    public static final ArrayList<String>       LIST      = new ArrayList<>();
+public class Shapes {
+    public static final String SHAPE_KEY = "shape";
+    public static final HashMap<String, IShape> MAP = new HashMap<>();
+    public static final ArrayList<String> LIST = new ArrayList<>();
 
-    static
-    {
+    static {
         register(new Box());
         register(new Cylinder());
         register(new Pillar());
@@ -55,27 +53,23 @@ public class Shapes
         register(new Sphere());
     }
 
-    private static void register(IShape shape)
-    {
+    private static void register(IShape shape) {
         LIST.add(shape.getClass().getSimpleName());
         MAP.put(shape.getClass().getSimpleName(), shape);
     }
 
-    public static IShape loadShape(NBTTagCompound compound)
-    {
+    public static IShape loadShape(CompoundTag compound) {
         return MAP.get(compound.getString(SHAPE_KEY)).fromNBT(compound);
     }
 
-    public static NBTTagCompound addShapeType(NBTTagCompound shapeData, Class<? extends IShape> clazz)
-    {
-        shapeData.setString(SHAPE_KEY, clazz.getSimpleName());
+    public static CompoundTag addShapeType(CompoundTag shapeData, Class<? extends IShape> clazz) {
+        shapeData.putString(SHAPE_KEY, clazz.getSimpleName());
         return shapeData;
     }
 
-    public static NBTTagCompound storeShape(IShape shape)
-    {
-        NBTTagCompound compound = shape.toNBT();
-        compound.setString(SHAPE_KEY, shape.getClass().getSimpleName());
+    public static CompoundTag storeShape(IShape shape) {
+        CompoundTag compound = shape.toNBT();
+        compound.putString(SHAPE_KEY, shape.getClass().getSimpleName());
         return compound;
     }
 }

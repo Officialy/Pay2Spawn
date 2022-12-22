@@ -30,9 +30,8 @@
 
 package net.doubledoordev.pay2spawn.permissions;
 
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerPlayer;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -48,7 +47,7 @@ public class PermissionsHandler
     private static PermissionsDB   permissionsDB = new PermissionsDB();
     private static HashSet<String> nodes         = new HashSet<>();
 
-    public static boolean hasPermissionNode(EntityPlayer player, Node node)
+    public static boolean hasPermissionNode(Player player, Node node)
     {
         return permissionsDB.check(player.getCommandSenderName(), node);
     }
@@ -65,10 +64,10 @@ public class PermissionsHandler
             nodes.add(node.toString());
     }
 
-    public static boolean needPermCheck(EntityPlayerMP player)
+    public static boolean needPermCheck(ServerPlayer player)
     {
-        MinecraftServer mcs = MinecraftServer.getServer();
-        return !(mcs.isSinglePlayer() || MinecraftServer.getServer().getConfigurationManager().func_152596_g(player.getGameProfile()));
+        MinecraftServer mcs = player.getServer();
+        return !(mcs.isSingleplayer() || mcs.getConfigurationManager().func_152596_g(player.getGameProfile()));
     }
 
     public static PermissionsDB getDB()

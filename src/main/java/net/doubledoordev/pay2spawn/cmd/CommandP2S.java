@@ -40,8 +40,8 @@ import net.doubledoordev.pay2spawn.util.Helper;
 import net.doubledoordev.pay2spawn.util.Statistics;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.entity.player.Player;
+import net.minecraft.util.ChatFormatting;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -78,8 +78,8 @@ public class CommandP2S extends CommandBase
     {
         if (args.length == 0)
         {
-            Helper.msg(EnumChatFormatting.AQUA + HELP);
-            Helper.msg(EnumChatFormatting.AQUA + "Protip: Use tab completion!");
+            Helper.msg(ChatFormatting.AQUA + HELP);
+            Helper.msg(ChatFormatting.AQUA + "Protip: Use tab completion!");
             return;
         }
         switch (args[0])
@@ -88,13 +88,13 @@ public class CommandP2S extends CommandBase
                 if (Pay2Spawn.getRewardsDB().editable)
                 {
                     Pay2Spawn.reloadDB();
-                    Helper.msg(EnumChatFormatting.GREEN + "Reload done!");
+                    Helper.msg(ChatFormatting.GREEN + "Reload done!");
                 }
-                else Helper.msg(EnumChatFormatting.RED + "[P2S] If you are OP, use the server side command for this.");
+                else Helper.msg(ChatFormatting.RED + "[P2S] If you are OP, use the server side command for this.");
                 break;
             case "configure":
                 if (Pay2Spawn.getRewardsDB().editable) ConfiguratorManager.openCfg();
-                else Helper.msg(EnumChatFormatting.RED + "[P2S] You can't do that with a server side config.");
+                else Helper.msg(ChatFormatting.RED + "[P2S] You can't do that with a server side config.");
                 break;
             case "getnbt":
                 ConfiguratorManager.openNbt();
@@ -110,23 +110,23 @@ public class CommandP2S extends CommandBase
                 }
                 break;
             case "off":
-                if (Pay2Spawn.forceOn) Helper.msg(EnumChatFormatting.RED + "Forced on by server.");
+                if (Pay2Spawn.forceOn) Helper.msg(ChatFormatting.RED + "Forced on by server.");
                 else
                 {
                     Pay2Spawn.enable = false;
-                    Helper.msg(EnumChatFormatting.GOLD + "[P2S] Disabled on the client.");
+                    Helper.msg(ChatFormatting.GOLD + "[P2S] Disabled on the client.");
                 }
                 break;
             case "on":
-                if (Pay2Spawn.forceOn) Helper.msg(EnumChatFormatting.RED + "Forced on by server.");
+                if (Pay2Spawn.forceOn) Helper.msg(ChatFormatting.RED + "Forced on by server.");
                 else
                 {
                     Pay2Spawn.enable = true;
-                    Helper.msg(EnumChatFormatting.GOLD + "[P2S] Enabled on the client.");
+                    Helper.msg(ChatFormatting.GOLD + "[P2S] Enabled on the client.");
                 }
                 break;
             case "donate":
-                if (args.length == 1) Helper.msg(EnumChatFormatting.RED + "Use '/p2s donate <amount> [name]'.");
+                if (args.length == 1) Helper.msg(ChatFormatting.RED + "Use '/p2s donate <amount> [name]'.");
                 else
                 {
                     String name = "Anonymous";
@@ -136,7 +136,7 @@ public class CommandP2S extends CommandBase
                 }
                 break;
             case "adjusttotal":
-                if (args.length == 1) Helper.msg(EnumChatFormatting.RED + "Use '/p2s adjusttotal <amount>'. You can use + and -");
+                if (args.length == 1) Helper.msg(ChatFormatting.RED + "Use '/p2s adjusttotal <amount>'. You can use + and -");
                 else
                 {
                     double amount = CommandBase.parseDouble(sender, args[1]);
@@ -145,10 +145,10 @@ public class CommandP2S extends CommandBase
                 break;
             case "resetsubs":
                 TwitchChecker.INSTANCE.reset();
-                Helper.msg(EnumChatFormatting.GOLD + "[P2S] Subs have been resetted!");
+                Helper.msg(ChatFormatting.GOLD + "[P2S] Subs have been resetted!");
                 break;
             case "test":
-                if (args.length == 1) Helper.msg(EnumChatFormatting.RED + "Use '/p2s test <amount> <repeat delay in sec> [name]' use '/p2s test end' to stop the testing.");
+                if (args.length == 1) Helper.msg(ChatFormatting.RED + "Use '/p2s test <amount> <repeat delay in sec> [name]' use '/p2s test end' to stop the testing.");
                 else
                 {
                     if (args[1].equalsIgnoreCase("end") && timer != null)
@@ -172,11 +172,11 @@ public class CommandP2S extends CommandBase
                             }
                         }, 0, delay);
                     }
-                    else Helper.msg(EnumChatFormatting.RED + "Use '/p2s test <amount> <repeat delay in sec> [name]' use '/p2s test end' to stop the testing.");
+                    else Helper.msg(ChatFormatting.RED + "Use '/p2s test <amount> <repeat delay in sec> [name]' use '/p2s test end' to stop the testing.");
                 }
                 break;
             default:
-                Helper.msg(EnumChatFormatting.RED + "Unknown command. Protip: Use tab completion!");
+                Helper.msg(ChatFormatting.RED + "Unknown command. Protip: Use tab completion!");
                 break;
         }
     }
@@ -190,7 +190,7 @@ public class CommandP2S extends CommandBase
     @Override
     public boolean canCommandSenderUseCommand(ICommandSender sender)
     {
-        return sender instanceof EntityPlayer;
+        return sender instanceof Player;
     }
 
     @Override

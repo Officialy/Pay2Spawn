@@ -38,7 +38,7 @@ import net.doubledoordev.pay2spawn.network.NbtRequestMessage;
 import net.doubledoordev.pay2spawn.network.TestMessage;
 import net.doubledoordev.pay2spawn.util.IIHasCallback;
 import net.minecraft.client.Minecraft;
-import net.minecraft.entity.player.InventoryPlayer;
+import net.minecraft.entity.player.Inventory;
 
 import javax.swing.*;
 import java.awt.*;
@@ -163,7 +163,7 @@ public class ItemsTypeGui extends HelperGuiBase implements IIHasCallback
             @Override
             public void actionPerformed(ActionEvent e)
             {
-                for (int i = 0; i < InventoryPlayer.getHotbarSize(); i++) NbtRequestMessage.requestItem(instance, i);
+                for (int i = 0; i < Inventory.getHotbarSize(); i++) NbtRequestMessage.requestItem(instance, i);
             }
         });
         importinventoryBtn.addActionListener(new ActionListener()
@@ -171,7 +171,7 @@ public class ItemsTypeGui extends HelperGuiBase implements IIHasCallback
             @Override
             public void actionPerformed(ActionEvent e)
             {
-                for (int i = 0; i < Minecraft.getMinecraft().thePlayer.inventory.getSizeInventory(); i++) NbtRequestMessage.requestItem(instance, i);
+                for (int i = 0; i < Minecraft.getInstance().player.inventory.getSizeInventory(); i++) NbtRequestMessage.requestItem(instance, i);
             }
         });
     }

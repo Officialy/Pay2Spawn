@@ -35,13 +35,13 @@ import com.google.gson.JsonObject;
 import net.doubledoordev.pay2spawn.Pay2Spawn;
 import net.doubledoordev.pay2spawn.permissions.Node;
 import net.doubledoordev.pay2spawn.types.guis.FireworksTypeGui;
-import net.minecraft.entity.item.EntityFireworkRocket;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.item.FireworkRocketEntity;
+import net.minecraft.entity.player.Player;
+import net.minecraft.entity.player.ServerPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 
 import java.lang.reflect.Field;
 import java.util.Collection;
@@ -95,7 +95,7 @@ public class FireworksType extends TypeBase
     {
         try
         {
-            Field f = EntityFireworkRocket.class.getDeclaredFields()[id];
+            Field f = FireworkRocketEntity.class.getDeclaredFields()[id];
             f.setAccessible(true);
             return f;
         }
@@ -113,46 +113,46 @@ public class FireworksType extends TypeBase
     }
 
     @Override
-    public NBTTagCompound getExample()
+    public CompoundTag getExample()
     {
         /**
          * YOU CAN'T TOUCH THIS.
          * No srsly. Touch it and you rebuild it from scratch!
          */
         ItemStack out = new ItemStack((Item) Item.itemRegistry.getObject("fireworks"));
-        NBTTagCompound tag = new NBTTagCompound();
-        NBTTagCompound fireworks = new NBTTagCompound();
-        fireworks.setByte(FLIGHT_KEY, (byte) 0);
+        CompoundTag tag = new CompoundTag();
+        CompoundTag fireworks = new CompoundTag();
+        fireworks.putByte(FLIGHT_KEY, (byte) 0);
 
-        NBTTagList explosions = new NBTTagList();
-        NBTTagCompound explosion = new NBTTagCompound();
-        explosion.setByte(TYPE_KEY, (byte) 0);
-        explosion.setByte(FLICKER_KEY, (byte) 0);
-        explosion.setByte(TRAIL_KEY, (byte) 0);
-        explosion.setIntArray(COLORS_KEY, new int[]{0x12DE5D, 0x7B2FBE});
-        explosion.setIntArray(FADECOLORS_KEY, new int[]{0xA9CF42, 0xF50CBF});
-        explosions.appendTag(explosion);
-        explosion = new NBTTagCompound();
-        explosion.setByte(TYPE_KEY, (byte) 1);
-        explosion.setByte(FLICKER_KEY, (byte) 1);
-        explosion.setByte(TRAIL_KEY, (byte) 0);
-        explosion.setIntArray(COLORS_KEY, new int[]{0x12DE5D, 0x7B2FBE});
-        explosion.setIntArray(FADECOLORS_KEY, new int[]{0xA9CF42, 0xF50CBF});
-        explosions.appendTag(explosion);
-        fireworks.setTag(EXPLOSIONS_KEY, explosions);
-        tag.setTag(FIREWORKS_KEY, fireworks);
-        out.setTagCompound(tag);
+        ListTag explosions = new ListTag();
+        CompoundTag explosion = new CompoundTag();
+        explosion.putByte(TYPE_KEY, (byte) 0);
+        explosion.putByte(FLICKER_KEY, (byte) 0);
+        explosion.putByte(TRAIL_KEY, (byte) 0);
+        explosion.putIntArray(COLORS_KEY, new int[]{0x12DE5D, 0x7B2FBE});
+        explosion.putIntArray(FADECOLORS_KEY, new int[]{0xA9CF42, 0xF50CBF});
+        explosions.add(explosion);
+        explosion = new CompoundTag();
+        explosion.putByte(TYPE_KEY, (byte) 1);
+        explosion.putByte(FLICKER_KEY, (byte) 1);
+        explosion.putByte(TRAIL_KEY, (byte) 0);
+        explosion.putIntArray(COLORS_KEY, new int[]{0x12DE5D, 0x7B2FBE});
+        explosion.putIntArray(FADECOLORS_KEY, new int[]{0xA9CF42, 0xF50CBF});
+        explosions.add(explosion);
+        fireworks.put(EXPLOSIONS_KEY, explosions);
+        tag.put(FIREWORKS_KEY, fireworks);
+        out.setTag(tag);
 
-        tag = out.writeToNBT(new NBTTagCompound());
+        tag = out.writeToNBT(new CompoundTag());
 
-        tag.setInteger(RADIUS_KEY, 10);
-        tag.setInteger(AMOUNT_KEY, 10);
+        tag.putInt(RADIUS_KEY, 10);
+        tag.putInt(AMOUNT_KEY, 10);
 
         return tag;
     }
 
     @Override
-    public void spawnServerSide(EntityPlayerMP player, NBTTagCompound dataFromClient, NBTTagCompound rewardData)
+    public void spawnServerSide(ServerPlayer player, CompoundTag dataFromClient, CompoundTag rewardData)
     {
         ItemStack itemStack = ItemStack.loadItemStackFromNBT(dataFromClient);
 
@@ -163,21 +163,21 @@ public class FireworksType extends TypeBase
         }
 
         int flight = 0;
-        NBTTagCompound nbttagcompound1 = itemStack.getTagCompound().getCompoundTag(FIREWORKS_KEY);
+        CompoundTag nbttagcompound1 = itemStack.get().getCompound(FIREWORKS_KEY);
         if (nbttagcompound1 != null) flight += nbttagcompound1.getByte(FLIGHT_KEY);
 
         try
         {
-            int rndFirework = RANDOM.nextInt(dataFromClient.getInteger(AMOUNT_KEY));
-            int rad = dataFromClient.getInteger(RADIUS_KEY);
-            double angle = 2 * Math.PI / dataFromClient.getInteger(AMOUNT_KEY);
-            for (int i = 0; i < dataFromClient.getInteger(AMOUNT_KEY); i++)
+            int rndFirework = RANDOM.nextInt(dataFromClient.getInt(AMOUNT_KEY));
+            int rad = dataFromClient.getInt(RADIUS_KEY);
+            double angle = 2 * Math.PI / dataFromClient.getInt(AMOUNT_KEY);
+            for (int i = 0; i < dataFromClient.getInt(AMOUNT_KEY); i++)
             {
-                EntityFireworkRocket entityfireworkrocket = new EntityFireworkRocket(player.worldObj, player.posX + rad * Math.cos(angle * i), player.posY, player.posZ + rad * Math.sin(angle * i), itemStack.copy());
+                FireworkRocketEntity entityfireworkrocket = new FireworkRocketEntity(player.level, player.getX() + rad * Math.cos(angle * i), player.getY(), player.getZ() + rad * Math.sin(angle * i), itemStack.copy());
                 fireworkAgeField.set(entityfireworkrocket, 1);
                 lifetimeField.set(entityfireworkrocket, 10 + 10 * flight);
-                player.worldObj.spawnEntityInWorld(entityfireworkrocket);
-                if (i == rndFirework && dataFromClient.hasKey(RIDETHISMOB_KEY) && dataFromClient.getBoolean(RIDETHISMOB_KEY)) player.mountEntity(entityfireworkrocket);
+                player.level.addFreshEntity(entityfireworkrocket);
+                if (i == rndFirework && dataFromClient.contains(RIDETHISMOB_KEY) && dataFromClient.getBoolean(RIDETHISMOB_KEY)) player.mountEntity(entityfireworkrocket);
             }
         }
         catch (IllegalAccessException e)
@@ -201,7 +201,7 @@ public class FireworksType extends TypeBase
     }
 
     @Override
-    public Node getPermissionNode(EntityPlayer player, NBTTagCompound dataFromClient)
+    public Node getPermissionNode(Player player, CompoundTag dataFromClient)
     {
         return new Node(NODENAME);
     }

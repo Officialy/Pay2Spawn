@@ -30,7 +30,7 @@
 
 package net.doubledoordev.pay2spawn.ai;
 
-import net.minecraft.entity.EntityCreature;
+import net.minecraft.entity.AmbientCreature;
 import net.minecraft.entity.ai.EntityAIAttackOnCollide;
 
 /**
@@ -38,14 +38,14 @@ import net.minecraft.entity.ai.EntityAIAttackOnCollide;
  */
 public class CustomAIAttackOnCollide extends EntityAIAttackOnCollide
 {
-    EntityCreature mob;
-    public CustomAIAttackOnCollide(EntityCreature mob, Class target, double speed, boolean longMemory)
+    AmbientCreature mob;
+    public CustomAIAttackOnCollide(AmbientCreature mob, Class target, double speed, boolean longMemory)
     {
         super(mob, target, speed, longMemory);
         this.mob = mob;
     }
 
-    public CustomAIAttackOnCollide(EntityCreature mob, double speed, boolean longMemory)
+    public CustomAIAttackOnCollide(AmbientCreature mob, double speed, boolean longMemory)
     {
         super(mob, speed, longMemory);
         this.mob = mob;

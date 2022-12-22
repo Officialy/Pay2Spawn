@@ -36,10 +36,10 @@ import cpw.mods.fml.common.gameevent.PlayerEvent;
 import cpw.mods.fml.common.network.FMLNetworkEvent;
 import net.doubledoordev.pay2spawn.Pay2Spawn;
 import net.doubledoordev.pay2spawn.util.Helper;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.ServerPlayer;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.ChatFormatting;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -57,7 +57,7 @@ public class ConnectionHandler
 
     private ConnectionHandler()
     {
-        FMLCommonHandler.instance().bus().register(this);
+        MinecraftForge.EVENT_BUS.register(this);
     }
 
     public void init()
@@ -68,8 +68,8 @@ public class ConnectionHandler
     @SubscribeEvent
     public void playerLoggedIn(PlayerEvent.PlayerLoggedInEvent event)
     {
-        if (event.player instanceof EntityPlayerMP) // Cheap server detection
-            StatusMessage.sendHandshakeToPlayer((EntityPlayerMP) event.player);
+        if (event.player instanceof ServerPlayer) // Cheap server detection
+            StatusMessage.sendHandshakeToPlayer((ServerPlayer) event.player);
     }
 
     @SubscribeEvent
@@ -100,7 +100,7 @@ public class ConnectionHandler
             @Override
             public void run()
             {
-                if (!Pay2Spawn.doesServerHaveMod()) Helper.msg(EnumChatFormatting.RED + NAME + " isn't on the server. No rewards will spawn!");
+                if (!Pay2Spawn.doesServerHaveMod()) Helper.msg(ChatFormatting.RED + NAME + " isn't on the server. No rewards will spawn!");
             }
         }, 5 * 1000);
     }
