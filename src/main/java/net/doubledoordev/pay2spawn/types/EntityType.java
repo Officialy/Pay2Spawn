@@ -140,7 +140,7 @@ public class EntityType extends TypeBase
         if (!dataFromClient.contains(AMOUNT_KEY)) dataFromClient.putInt(AMOUNT_KEY, 1);
         for (int i = 0; i < dataFromClient.getInt(AMOUNT_KEY); i++)
         {
-            Entity entity = EntityList.createEntityByName(dataFromClient.getString(ENTITYNAME_KEY), player.getEntityWorld());
+            Entity entity = EntityList.createEntityByName(dataFromClient.getString(ENTITYNAME_KEY), player.getLevel());
 
             if (entity != null)
             {
@@ -154,12 +154,12 @@ public class EntityType extends TypeBase
                 if (dataFromClient.getBoolean(RANDOM_KEY) && entity instanceof LivingEntity) ((LivingEntity) entity).onSpawnWithEgg(null);
 
                 entity.getEntityData().put(Constants.NAME, p2sTag.copy());
-                player.getEntityWorld().addFreshEntity(entity);
+                player.getLevel().addFreshEntity(entity);
 
                 Entity entity1 = entity;
                 for (CompoundTag tag = dataFromClient; tag.contains(RIDING_KEY); tag = tag.getCompound(RIDING_KEY))
                 {
-                    Entity entity2 = EntityList.createEntityByName(tag.getCompound(RIDING_KEY).getString(ENTITYNAME_KEY), player.getEntityWorld());
+                    Entity entity2 = EntityList.createEntityByName(tag.getCompound(RIDING_KEY).getString(ENTITYNAME_KEY), player.getLevel());
 
                     Node node = this.getPermissionNode(player, tag.getCompound(EntityType.RIDING_KEY));
                     if (BanHelper.isBanned(node))

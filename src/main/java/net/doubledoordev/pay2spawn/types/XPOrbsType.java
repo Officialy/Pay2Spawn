@@ -33,10 +33,10 @@ package net.doubledoordev.pay2spawn.types;
 import com.google.gson.JsonObject;
 import net.doubledoordev.pay2spawn.permissions.Node;
 import net.doubledoordev.pay2spawn.types.guis.XPOrbsGui;
-import net.minecraft.entity.item.EntityXPOrb;
-import net.minecraft.entity.player.Player;
-import net.minecraft.entity.player.ServerPlayer;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.ExperienceOrb;
+import net.minecraft.world.entity.player.Player;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -47,69 +47,59 @@ import static net.doubledoordev.pay2spawn.util.Constants.*;
 /**
  * @author Dries007
  */
-public class XPOrbsType extends TypeBase
-{
-    public static final String NODENAME         = "xporbs";
+public class XPOrbsType extends TypeBase {
+    public static final String NODENAME = "xporbs";
     public static final String AMOUNTOFORBS_KEY = "amoutOfOrbs";
 
     public static final HashMap<String, String> typeMap = new HashMap<>();
 
-    static
-    {
+    static {
         typeMap.put(AMOUNTOFORBS_KEY, NBTTypes[INT]);
     }
 
     @Override
-    public String getName()
-    {
+    public String getName() {
         return NODENAME;
     }
 
     @Override
-    public CompoundTag getExample()
-    {
+    public CompoundTag getExample() {
         CompoundTag out = new CompoundTag();
         out.putInt(AMOUNTOFORBS_KEY, 100);
         return out;
     }
 
     @Override
-    public void spawnServerSide(ServerPlayer player, CompoundTag dataFromClient, CompoundTag rewardData)
-    {
-        for (int i = 0; i < dataFromClient.getInt(AMOUNTOFORBS_KEY); i++)
-        {
+    public void spawnServerSide(ServerPlayer player, CompoundTag dataFromClient, CompoundTag rewardData) {
+        for (int i = 0; i < dataFromClient.getInt(AMOUNTOFORBS_KEY); i++) {
             double X = player.getX(), Y = player.getY(), Z = player.getZ();
 
             X += (0.5 - RANDOM.nextDouble());
             Z += (0.5 - RANDOM.nextDouble());
 
-            player.level.addFreshEntity(new EntityXPOrb(player.level, X, Y, Z, RANDOM.nextInt(5) + 1));
+            player.level.addFreshEntity(new ExperienceOrb(player.level, X, Y, Z, RANDOM.nextInt(5) + 1));
         }
     }
 
     @Override
-    public void openNewGui(int rewardID, JsonObject data)
-    {
+    public void openNewGui(int rewardID, JsonObject data) {
         new XPOrbsGui(rewardID, getName(), data, typeMap);
     }
 
     @Override
-    public Collection<Node> getPermissionNodes()
-    {
+    public Collection<Node> getPermissionNodes() {
         HashSet<Node> nodes = new HashSet<>();
         nodes.add(new Node(NODENAME));
         return nodes;
     }
 
     @Override
-    public Node getPermissionNode(Player player, CompoundTag dataFromClient)
-    {
+    public Node getPermissionNode(Player player, CompoundTag dataFromClient) {
         return new Node(NODENAME);
     }
 
     @Override
-    public String replaceInTemplate(String id, JsonObject jsonObject)
-    {
+    public String replaceInTemplate(String id, JsonObject jsonObject) {
         return id;
     }
 }

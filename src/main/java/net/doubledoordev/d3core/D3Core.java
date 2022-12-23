@@ -35,12 +35,17 @@ package net.doubledoordev.d3core;
 import net.doubledoordev.d3core.permissions.PermissionsDB;
 import net.doubledoordev.d3core.util.*;
 import net.doubledoordev.d3core.util.libs.org.mcstats.Metrics;
+import net.doubledoordev.oldforge.Configuration;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.javafmlmod.FMLModContainer;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.impl.Log4JLogger;
+import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.maven.artifact.versioning.ArtifactVersion;
+import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 
@@ -68,7 +73,7 @@ public class D3Core implements ID3Mod
     public static boolean aprilFools = true;
     private File folder;
 
-    private Log4JLogger        logger = new Log4JLogger(MODID);
+    private static final Logger logger = LogManager.getLogger();
     private DevPerks      devPerks;
     private Configuration configuration;
 
@@ -239,20 +244,8 @@ public class D3Core implements ID3Mod
         }
         event.player.addChatComponentMessage(IChatComponent.Serializer.func_150699_a("{\"text\":\"\",\"extra\":[{\"text\":\"Download here!\",\"color\":\"gold\",\"clickEvent\":{\"action\":\"open_url\",\"value\":\"http://doubledoordev.net\"}},{\"text\":\" <- That is a link btw :p\"}]}"));
     }
-
-    @SubscribeEvent
-    public void onConfigChanged(ConfigChangedEvent.OnConfigChangedEvent eventArgs)
-    {
-        for (ModContainer modContainer : Loader.instance().getActiveModList())
-        {
-            if (modContainer.getMod() instanceof ID3Mod)
-            {
-                ((ID3Mod) modContainer.getMod()).syncConfig();
-            }
-        }
-    }
-
-    @Override
+    
+ /*   @Override
     public void syncConfig()
     {
         configuration.setCategoryLanguageKey(MODID, "d3.core.config.core").setCategoryComment(MODID, LanguageRegistry.instance().getStringLocalization("d3.core.config.core"));
@@ -300,13 +293,8 @@ public class D3Core implements ID3Mod
         VOID_REFUNDS.config(configuration);
 
         if (configuration.hasChanged()) configuration.save();
-    }
+    }*/
 
-    @Override
-    public void addConfigElements(List<IConfigElement> list)
-    {
-        list.add(new ConfigElement(configuration.getCategory(MODID.toLowerCase())));
-    }
 
     public static Logger getLogger()
     {

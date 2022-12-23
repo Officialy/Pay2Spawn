@@ -53,9 +53,11 @@ import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.simple.SimpleChannel;
 import net.minecraftforge.server.ServerLifecycleHooks;
+import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.swing.*;
@@ -86,14 +88,10 @@ public class Pay2Spawn implements ID3Mod {
     private RewardsDB rewardsDB;
     private P2SConfig config;
     private File configFolder;
-    private Logger logger;
+    private static final Logger logger = LogManager.getLogger();
     private SimpleChannel snw;
     private boolean newConfig;
     private static final String PROTOCOL_VERSION = "1.0";
-
-    public static String getVersion() {
-        return instance.metadata.version;
-    }
 
     public static RewardsDB getRewardsDB() {
         return instance.rewardsDB;
@@ -152,17 +150,16 @@ public class Pay2Spawn implements ID3Mod {
         forceOn = false;
     }
 
-    @NetworkCheckHandler
+/*    @NetworkCheckHandler
     public boolean networkCheckHandler(Map<String, String> data, Dist side) {
         if (side.isClient()) serverHasMod = data.containsKey(MODID);
         return !data.containsKey(MODID) || data.get(MODID).equals(metadata.version);
-    }
+    }*/
 
     public Pay2Spawn() throws IOException {
         instance = this;
-        logger = event.getModLog();
 
-        configFolder = new File(event.getModConfigurationDirectory(), NAME);
+        configFolder = new File(FMLLoader.getGamePath()+"/"+"config"+"/", NAME);
         //noinspection ResultOfMethodCallIgnored
         configFolder.mkdirs();
 
@@ -173,7 +170,7 @@ public class Pay2Spawn implements ID3Mod {
 
         int id = 0;
         snw = NetworkRegistry.newSimpleChannel(new ResourceLocation(MODID, "main"), () -> PROTOCOL_VERSION, PROTOCOL_VERSION::equals, PROTOCOL_VERSION::equals);
-        snw.registerMessage(id++, MessageMessage::toBytes, MessageMessage::fromBytes, MessageMessage::handle);
+       /* snw.registerMessage(id++, MessageMessage::toBytes, MessageMessage::fromBytes, MessageMessage::handle);
         snw.registerMessage(id++, MusicMessage.Handler.class, MusicMessage.class,  Dist.CLIENT);
         snw.registerMessage(id++, NbtRequestMessage.Handler.class, NbtRequestMessage.class, Dist.CLIENT);
         snw.registerMessage(id++, NbtRequestMessage.Handler.class, NbtRequestMessage.class, Dist.DEDICATED_SERVER);
@@ -184,7 +181,7 @@ public class Pay2Spawn implements ID3Mod {
         snw.registerMessage(id++, StructureImportMessage.Handler.class, StructureImportMessage.class, Dist.DEDICATED_SERVER);
         snw.registerMessage(id++, StructureImportMessage.Handler.class, StructureImportMessage.class, Dist.CLIENT);
         snw.registerMessage(id++, HTMLuploadMessage.Handler.class, HTMLuploadMessage.class,  Dist.DEDICATED_SERVER);
-        snw.registerMessage(id++, CrashMessage.Handler.class, CrashMessage.class,  Dist.CLIENT);
+        snw.registerMessage(id++, CrashMessage.Handler.class, CrashMessage.class,  Dist.CLIENT);*/
 
         TypeRegistry.preInit();
         Statistics.preInit();
@@ -197,13 +194,13 @@ public class Pay2Spawn implements ID3Mod {
 
         rewardsDB = new RewardsDB(getRewardDBFile());
 
-        if (event.getSide().isClient()) {
+       /* if (FMLLoader.getDist().isClient()) {
             CheckerHandler.init();
             new EventHandler();
             ClientCommandHandler.instance.registerCommand(new CommandP2S());
-        }
+        }*/
 
-        CustomAI.INSTANCE.init();
+//        CustomAI.INSTANCE.init();
 
         ClientTickHandler.INSTANCE.init();
         ConnectionHandler.INSTANCE.init();
@@ -220,7 +217,7 @@ public class Pay2Spawn implements ID3Mod {
             e.printStackTrace();
         }
 
-        if (newConfig && event.getSide().isClient()) {
+        if (newConfig && FMLLoader.getDist().isClient()) {
             JOptionPane pane = new JOptionPane();
             pane.setMessageType(JOptionPane.WARNING_MESSAGE);
             pane.setMessage("Please configure Pay2Spawn properly BEFORE you try launching this instance again.\n" +
@@ -239,7 +236,7 @@ public class Pay2Spawn implements ID3Mod {
 
             }
 
-            if (event.getSide().isClient()) {
+            if (FMLLoader.getDist().isClient()) {
                 JOptionPane pane = new JOptionPane();
                 pane.setMessageType(JOptionPane.INFORMATION_MESSAGE);
                 pane.setMessage("You can now (and should) use string id's (minecraft:stone) instead of actual id's.\n" +
@@ -257,7 +254,7 @@ public class Pay2Spawn implements ID3Mod {
 
         config.syncConfig();
 
-        if (event.getSide().isClient()) {
+        if (FMLLoader.getDist().isClient()) {
             Rendering.init();
         }
     }

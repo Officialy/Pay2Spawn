@@ -37,8 +37,12 @@ import net.doubledoordev.pay2spawn.util.Helper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.targeting.TargetingConditions;
+import net.minecraft.world.entity.animal.horse.SkeletonHorse;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.AABB;
 
 import java.util.Collection;
@@ -56,34 +60,30 @@ import static net.doubledoordev.pay2spawn.util.Constants.*;
  *
  * @author Dries007
  */
-public class LightningType extends TypeBase
-{
-    public static final String NODENAME   = "lightning";
+public class LightningType extends TypeBase {
+    public static final String NODENAME = "lightning";
     public static final String SPREAD_KEY = "spread";
-    public static final String TYPE_KEY   = "type";
+    public static final String TYPE_KEY = "type";
 
-    public static final int PLAYER_ENTITY  = 0;
+    public static final int PLAYER_ENTITY = 0;
     public static final int NEAREST_ENTITY = 1;
-    public static final int RND_ENTITY     = 2;
-    public static final int RND_SPOT       = 3;
+    public static final int RND_ENTITY = 2;
+    public static final int RND_SPOT = 3;
 
     public static final HashMap<String, String> typeMap = new HashMap<>();
 
-    static
-    {
+    static {
         typeMap.put(SPREAD_KEY, NBTTypes[INT]);
         typeMap.put(TYPE_KEY, NBTTypes[INT]);
     }
 
     @Override
-    public String getName()
-    {
+    public String getName() {
         return NODENAME;
     }
 
     @Override
-    public CompoundTag getExample()
-    {
+    public CompoundTag getExample() {
         CompoundTag nbt = new CompoundTag();
         nbt.putInt(SPREAD_KEY, 10);
         nbt.putInt(TYPE_KEY, RND_ENTITY);
@@ -91,65 +91,74 @@ public class LightningType extends TypeBase
     }
 
     @Override
-    public void spawnServerSide(ServerPlayer player, CompoundTag dataFromClient, CompoundTag rewardData)
-    {
+    public void spawnServerSide(ServerPlayer player, CompoundTag dataFromClient, CompoundTag rewardData) {
         if (!dataFromClient.contains(SPREAD_KEY)) dataFromClient.putInt(SPREAD_KEY, 10);
         double spread = dataFromClient.getInt(SPREAD_KEY);
         double X = player.getX(), Y = player.getY() - 1, Z = player.getZ();
         if (!dataFromClient.contains(TYPE_KEY)) dataFromClient.putInt(TYPE_KEY, RND_SPOT);
 
-        switch (dataFromClient.getInt(TYPE_KEY))
-        {
-            case PLAYER_ENTITY:
-            {
-                player.getEntityWorld().addWeatherEffect(new LightningBolt(player.getEntityWorld(), X, Y, Z));
+        switch (dataFromClient.getInt(TYPE_KEY)) {
+            case PLAYER_ENTITY: {
+                LightningBolt lightning = EntityType.LIGHTNING_BOLT.create(player.getLevel());
+                lightning.setPos(X, Y, Z);
+                player.getLevel().addFreshEntity(lightning);
                 break;
             }
-            case NEAREST_ENTITY:
-            {
-                AABB AABB = AABB.getBoundingBox(X - spread, Y - spread, Z - spread, X + spread, Y + spread, Z + spread);
-                Entity entity = player.getEntityWorld().findNearestEntityWithinAABB(LivingEntity.class, AABB, player);
-                if (entity != null) player.getEntityWorld().addWeatherEffect(new LightningBolt(player.getEntityWorld(), entity.getX(), entity.getY(), entity.getZ()));
-                else player.getEntityWorld().addWeatherEffect(new LightningBolt(player.getEntityWorld(), X, Y, Z));
+            case NEAREST_ENTITY: {
+                AABB AABB = new AABB(X - spread, Y - spread, Z - spread, X + spread, Y + spread, Z + spread);
+                Entity entity = player.getLevel().getNearestEntity(LivingEntity.class, TargetingConditions.forNonCombat(), player, 0, 0, 0, AABB); //todo ints?
+                if (entity != null) {
+
+                    LightningBolt lightning = EntityType.LIGHTNING_BOLT.create(player.getLevel());
+                    lightning.setPos(entity.getX(), entity.getY(), entity.getZ());
+                    player.getLevel().addFreshEntity(lightning);
+                } else {
+                    LightningBolt lightning = EntityType.LIGHTNING_BOLT.create(player.getLevel());
+                    lightning.setPos(X, Y, Z);
+                    player.getLevel().addFreshEntity(lightning);
+                }
                 break;
             }
-            case RND_SPOT:
-            {
+            case RND_SPOT: {
                 X += (spread - (RANDOM.nextDouble() * spread * 2));
                 Z += (spread - (RANDOM.nextDouble() * spread * 2));
                 Y += (3 - RANDOM.nextDouble() * 6);
-                player.getEntityWorld().addWeatherEffect(new LightningBolt(player.getEntityWorld(), X, Y, Z));
+                LightningBolt lightning = EntityType.LIGHTNING_BOLT.create(player.getLevel());
+                lightning.setPos(X, Y, Z);
+                player.getLevel().addFreshEntity(lightning);
                 break;
             }
-            case RND_ENTITY:
-            {
-                IEntitySelector iEntitySelector = new IEntitySelector()
-                {
+          /* todo case RND_ENTITY: {
+                *//*IEntitySelector iEntitySelector = new IEntitySelector() {
                     @Override
-                    public boolean isEntityApplicable(Entity entity)
-                    {
+                    public boolean isEntityApplicable(Entity entity) {
                         return entity instanceof LivingEntity;
                     }
-                };
+                };*//*
                 AABB aabb = new AABB(X - spread, Y - spread, Z - spread, X + spread, Y + spread, Z + spread);
                 //noinspection unchecked
-                List<LivingEntity> entity = player.getEntityWorld().getEntitiesWithinAABBExcludingEntity(player, aabb, iEntitySelector);
+                List<LivingEntity> entity = player.level.getEntitiesWithinAABBExcludingEntity(player, aabb, iEntitySelector);
                 LivingEntity entityLiving = Helper.getRandomFromSet(entity);
-                if (getEntityLiving() != null) player.getEntityWorld().addWeatherEffect(new LightningBolt(player.getEntityWorld(), entityLiving.getX(), entityLiving.getY(), entityLiving.getZ()));
-                else player.getEntityWorld().addWeatherEffect(new LightningBolt(player.getEntityWorld(), X, Y, Z));
-            }
+                if (entityLiving != null) {
+                    LightningBolt lightning = EntityType.LIGHTNING_BOLT.create(player.getLevel());
+                    lightning.setPos(entityLiving.getX(), entityLiving.getY(), entityLiving.getZ());
+                    player.getLevel().addFreshEntity(lightning);
+                } else {
+                    LightningBolt lightning = EntityType.LIGHTNING_BOLT.create(player.getLevel());
+                    lightning.setPos(X, Y, Z);
+                    player.getLevel().addFreshEntity(lightning);
+                }
+            }*/
         }
     }
 
     @Override
-    public void openNewGui(int rewardID, JsonObject data)
-    {
+    public void openNewGui(int rewardID, JsonObject data) {
         new LightningTypeGui(rewardID, getName(), data, typeMap);
     }
 
     @Override
-    public Collection<Node> getPermissionNodes()
-    {
+    public Collection<Node> getPermissionNodes() {
         HashSet<Node> nodes = new HashSet<>();
         nodes.add(new Node(NODENAME, "player"));
         nodes.add(new Node(NODENAME, "nearest"));
@@ -159,40 +168,34 @@ public class LightningType extends TypeBase
     }
 
     @Override
-    public Node getPermissionNode(Player player, CompoundTag dataFromClient)
-    {
+    public Node getPermissionNode(Player player, CompoundTag dataFromClient) {
         if (!dataFromClient.contains(TYPE_KEY)) dataFromClient.putInt(TYPE_KEY, RND_SPOT);
-        switch (dataFromClient.getInt(TYPE_KEY))
-        {
-            case PLAYER_ENTITY:
-                return new Node(NODENAME, "player");
-            case NEAREST_ENTITY:
-                return new Node(NODENAME, "nearest");
-            case RND_SPOT:
-                return new Node(NODENAME, "rnd_entity");
-            case RND_ENTITY:
-                return new Node(NODENAME, "rnd_spot");
-            default:
-                return new Node(NODENAME, "player");
-        }
+        return switch (dataFromClient.getInt(TYPE_KEY)) {
+            case PLAYER_ENTITY -> new Node(NODENAME, "player");
+            case NEAREST_ENTITY -> new Node(NODENAME, "nearest");
+            case RND_SPOT -> new Node(NODENAME, "rnd_entity");
+            case RND_ENTITY -> new Node(NODENAME, "rnd_spot");
+            default -> new Node(NODENAME, "player");
+        };
     }
 
     @Override
-    public String replaceInTemplate(String id, JsonObject jsonObject)
-    {
-        switch (id)
-        {
+    public String replaceInTemplate(String id, JsonObject jsonObject) {
+        switch (id) {
             case "target":
-                switch (Integer.parseInt(jsonObject.get(TYPE_KEY).getAsString().split(":", 2)[1]))
-                {
-                    case PLAYER_ENTITY:
+                switch (Integer.parseInt(jsonObject.get(TYPE_KEY).getAsString().split(":", 2)[1])) {
+                    case PLAYER_ENTITY -> {
                         return "the streamer";
-                    case NEAREST_ENTITY:
+                    }
+                    case NEAREST_ENTITY -> {
                         return "the nearest entity";
-                    case RND_SPOT:
+                    }
+                    case RND_SPOT -> {
                         return "a random near spot";
-                    case RND_ENTITY:
+                    }
+                    case RND_ENTITY -> {
                         return "a random near entity";
+                    }
                 }
         }
         return id;

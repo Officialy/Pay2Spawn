@@ -39,5 +39,4 @@ public interface ID3Mod
 {
     void syncConfig();
 
-    void addConfigElements(List<IConfigElement> list);
 }

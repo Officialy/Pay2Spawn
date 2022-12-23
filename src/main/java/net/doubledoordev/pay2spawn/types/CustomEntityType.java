@@ -93,7 +93,7 @@ public class CustomEntityType extends TypeBase
         if (!dataFromClient.contains(AMOUNT_KEY)) dataFromClient.putInt(AMOUNT_KEY, 1);
         for (int i = 0; i < dataFromClient.getInt(AMOUNT_KEY); i++)
         {
-            Entity entity = EntityList.createEntityFromNBT(dataFromClient, player.getEntityWorld());
+            Entity entity = EntityList.createEntityFromNBT(dataFromClient, player.getLevel());
 
             if (entity != null)
             {
@@ -111,7 +111,7 @@ public class CustomEntityType extends TypeBase
                 Entity entity1 = entity;
                 for (CompoundTag tag = dataFromClient; tag.contains(RIDING_KEY); tag = tag.getCompound(RIDING_KEY))
                 {
-                    Entity entity2 = EntityList.createEntityFromNBT(tag.getCompound(RIDING_KEY), player.getEntityWorld());
+                    Entity entity2 = EntityList.createEntityFromNBT(tag.getCompound(RIDING_KEY), player.getLevel());
 
                     Node node = this.getPermissionNode(player, tag.getCompound(RIDING_KEY));
                     if (BanHelper.isBanned(node))
@@ -171,7 +171,7 @@ public class CustomEntityType extends TypeBase
     @Override
     public Node getPermissionNode(Player player, CompoundTag dataFromClient)
     {
-        return new Node(NODENAME, EntityList.getEntityString(EntityList.createEntityFromNBT(dataFromClient, player.getEntityWorld())));
+        return new Node(NODENAME, EntityList.getEntityString(EntityList.createEntityFromNBT(dataFromClient, player.getLevel())));
     }
 
     @Override

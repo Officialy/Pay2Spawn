@@ -1,9 +1,12 @@
 package net.doubledoordev.d3core.util.libs.org.mcstats;
 
+import net.doubledoordev.d3core.D3Core;
+import net.doubledoordev.oldforge.Configuration;
 import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.loading.FMLLoader;
 
 import java.io.*;
 import java.net.Proxy;
@@ -24,7 +27,7 @@ public class Metrics
     /**
      * The base url of the metrics domain
      */
-    private static final String BASE_URL = "http://report.mcstats.org";
+    private static final String BASE_URL = "http://report.mcstats.org"; //todo this is down lol?
 
     /**
      * The url used to report a server's status
@@ -205,7 +208,7 @@ public class Metrics
                     {
                         if (debug)
                         {
-                            FMLLog.info("[Metrics] Exception - %s", e.getMessage());
+                            D3Core.getLogger().info("[Metrics] Exception - %s", e.getMessage());
                         }
                     }
                     finally
@@ -280,7 +283,7 @@ public class Metrics
      */
     public File getConfigFile()
     {
-        return new File(Loader.instance().getConfigDir(), "PluginMetrics.cfg");
+        return new File(FMLLoader.getGamePath()+"/"+"config"+"/", "PluginMetrics.cfg");
     }
 
     /**
@@ -290,18 +293,18 @@ public class Metrics
     {
         // Server software specific section
         String pluginName = modname;
-        boolean onlineMode = MinecraftServer.getServer().isServerInOnlineMode();
+        boolean onlineMode = true;//todo MinecraftServer.getServer().isServerInOnlineMode();
         String pluginVersion = modversion;
-        String serverVersion;
-        if (MinecraftServer.getServer().isDedicatedServer())
+        String serverVersion = "MinecraftForge idkwhattoputherern";
+       /* todo if (MinecraftServer.getServer().isDedicatedServer())
         {
             serverVersion = "MinecraftForge (MC: " + MinecraftServer.getServer().getMinecraftVersion() + ")";
         }
         else
         {
             serverVersion = "MinecraftForgeSSP (MC: " + MinecraftServer.getServer().getMinecraftVersion() + ")";
-        }
-        int playersOnline = MinecraftServer.getServer().getCurrentPlayerCount();
+        }*/
+        int playersOnline = 1;//todo MinecraftServer.getServer().getCurrentPlayerCount();
 
         // END server software specific section -- all code below does not use any code outside of this class / Java
 
