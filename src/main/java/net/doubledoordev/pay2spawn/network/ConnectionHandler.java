@@ -30,16 +30,14 @@
 
 package net.doubledoordev.pay2spawn.network;
 
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.common.gameevent.PlayerEvent;
-import cpw.mods.fml.common.network.FMLNetworkEvent;
 import net.doubledoordev.pay2spawn.Pay2Spawn;
 import net.doubledoordev.pay2spawn.util.Helper;
-import net.minecraft.entity.player.ServerPlayer;
-import net.minecraft.network.NetHandlerPlayServer;
+import net.minecraft.ChatFormatting;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.ChatFormatting;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -68,8 +66,8 @@ public class ConnectionHandler
     @SubscribeEvent
     public void playerLoggedIn(PlayerEvent.PlayerLoggedInEvent event)
     {
-        if (event.player instanceof ServerPlayer) // Cheap server detection
-            StatusMessage.sendHandshakeToPlayer((ServerPlayer) event.player);
+        if (event.getPlayer() instanceof ServerPlayer) // Cheap server detection
+            StatusMessage.sendHandshakeToPlayer((ServerPlayer) event.getPlayer());
     }
 
     @SubscribeEvent

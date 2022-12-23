@@ -48,13 +48,13 @@ public class CommandGroup extends CommandPermissionBase
     }
 
     @Override
-    public String getCommandUsage(ICommandSender p_71518_1_)
+    public String getCommandUsage(CommandSourceStack p_71518_1_)
     {
         return "commands.d3group.usage";
     }
 
     @Override
-    public void processCommand(ICommandSender sender, String[] args)
+    public void processCommand(CommandSourceStack sender, String[] args)
     {
         if (args.length == 0) throw new WrongUsageException(getCommandUsage(sender));
         switch (args[0].toLowerCase())

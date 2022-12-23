@@ -35,7 +35,7 @@ import net.doubledoordev.pay2spawn.Pay2Spawn;
 import net.doubledoordev.pay2spawn.checkers.CheckerHandler;
 import net.doubledoordev.pay2spawn.util.Donation;
 import net.doubledoordev.pay2spawn.util.Helper;
-import net.minecraftforge.common.config.Configuration;
+import net.doubledoordev.oldforge.Configuration;
 
 import java.util.ArrayList;
 import java.util.Collections;

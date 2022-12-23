@@ -47,7 +47,7 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.tileentity.TileEntityMobSpawner;
-import net.minecraftforge.common.config.Configuration;
+import net.doubledoordev.oldforge.Configuration;
 
 import java.util.*;
 

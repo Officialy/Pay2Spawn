@@ -30,15 +30,21 @@
 
 package net.doubledoordev.pay2spawn.cmd;
 
+import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.doubledoordev.pay2spawn.Pay2Spawn;
 import net.doubledoordev.pay2spawn.util.Constants;
 import net.minecraft.ChatFormatting;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
 
-import javax.swing.text.html.parser.Entity;
 import java.util.Arrays;
 import java.util.List;
 
@@ -54,67 +60,60 @@ public class CommandP2SServer {
         return "pay2spawnserver";
     }
 
-    public String getCommandUsage(ICommandSender icommandsender) {
+    public String getCommandUsage(CommandSourceStack icommandsender) {
         return HELP;
     }
 
-    public static void processCommand(final ICommandSender sender, String[] args) {
-        // todo: DEBUG
-        // CustomAI.INSTANCE.test(getCommandSenderAsPlayer(sender));
-
-        if (args.length == 0) {
-            sendChatToPlayer(sender, HELP, ChatFormatting.AQUA);
-            sendChatToPlayer(sender, "Protip: Use tab completion!", ChatFormatting.AQUA);
-            return;
-        }
-        switch (args[0]) {
-            case "butcher": {
-                sendChatToPlayer(sender, "Removing all spawned entities...", ChatFormatting.YELLOW);
-                int count = 0;
-                for (ServerLevel world : DimensionManager.getWorlds()) {
-                    for (Entity entity : (List<Entity>) world.loadedEntityList) {
-                        if (entity.getEntityData().contains(Constants.NAME)) {
-                            count++;
-                            entity.setDead();
-                        }
-                    }
+    public static void processCommand(CommandDispatcher<CommandSourceStack> sender) {
+        LiteralArgumentBuilder<CommandSourceStack> builder = Commands.literal("pay2spawn").requires(cs -> cs.hasPermission(2)).executes(
+                context -> {
+                    sendChatToPlayer(context.getSource(), HELP, ChatFormatting.AQUA);
+                    sendChatToPlayer(context.getSource(), "Protip: Use tab completion!", ChatFormatting.AQUA);
+                    return 1;
                 }
-                sendChatToPlayer(sender, "Removed " + count + " entities.", ChatFormatting.GREEN);
-                break;
+        );
+
+        builder.then(Commands.literal("reload").executes(context -> {
+            if (context.getSource().getServer().isDedicatedServer()) {
+                try {
+                    Pay2Spawn.reloadDB_Server();
+                } catch (Exception e) {
+                    sendChatToPlayer(context.getSource(), "RELOAD FAILED.", ChatFormatting.RED);
+                    e.printStackTrace();
+                }
             }
-            case "reload":
-                if (MinecraftServer.getServer().isDedicatedServer()) {
-                    try {
-                        Pay2Spawn.reloadDB_Server();
-                    } catch (Exception e) {
-                        sendChatToPlayer(sender, "RELOAD FAILED.", ChatFormatting.RED);
-                        e.printStackTrace();
-                    }
+            return 0;
+        }));
+
+        builder.then(Commands.literal("butcher").executes(context -> {
+            sendChatToPlayer(context.getSource(), "Removing all spawned entities...", ChatFormatting.YELLOW);
+            int count = 0;
+            for (ServerLevel world : context.getSource().getServer().getAllLevels()) {
+                for (Entity entity : world.getAllEntities()) {
+                  /*todo  if (entity.getEntityData().contains(Constants.NAME)) {
+                        count++;
+                        entity.kill();
+                    }*/
                 }
-                break;
-            case "hasmod":
-                if (args.length == 1) sendChatToPlayer(sender, "Use '/p2sserver hasmod <player>'.", ChatFormatting.RED);
-                else
-                    sendChatToPlayer(sender, args[1] + (Pay2Spawn.doesPlayerHaveValidConfig(args[1]) ? " does " : " doesn't ") + "have P2S.", ChatFormatting.AQUA);
-                break;
-            default:
-                sendChatToPlayer(sender, "Unknown command. Protip: Use tab completion!", ChatFormatting.RED);
-                break;
-        }
-    }
+            }
+            sendChatToPlayer(context.getSource(), "Removed " + count + " entities.", ChatFormatting.GREEN);
+            return 1;
+        }));
 
-    @Override
-    public List getCommandAliases() {
-        return Arrays.asList("p2sserver");
-    }
+        builder.then(Commands.literal("hasmod").executes(context -> {
+            sendChatToPlayer(context.getSource(), "Use '/p2sserver hasmod <player>'.", ChatFormatting.RED);
+            return 1;
+        })).then(Commands.argument("player", EntityArgument.player()).executes(context -> {
+            ServerPlayer player = EntityArgument.getPlayer(context, "player");
+            sendChatToPlayer(context.getSource(), player.getName().getString() + (Pay2Spawn.doesPlayerHaveValidConfig(player.getName().getString()) ? " does " : " doesn't"), ChatFormatting.AQUA);
+            return 1;
+        }));
 
-    @Override
-    public boolean canCommandSenderUseCommand(ICommandSender sender) {
-        return !(sender instanceof ServerPlayer) || MinecraftServer.getServer().getConfigurationManager().func_152596_g(((ServerPlayer) sender).getGameProfile());
-    }
+//        sendChatToPlayer(context.getSource(), "Unknown command. Protip: Use tab completion!", ChatFormatting.RED);
 
-    @Override
-    public List addTabCompletionOptions(ICommandSender sender, String[] args) {
+    }
+    
+/*    public List addTabCompletionOptions(CommandSourceStack sender, String[] args) {
         switch (args.length) {
             case 1:
                 return getListOfStringsMatchingLastWord(args, "reload", "hasmod", "butcher");
@@ -125,9 +124,9 @@ public class CommandP2SServer {
                 }
         }
         return null;
-    }
+    }*/
 
-    public static void sendChatToPlayer(ICommandSender sender, String message, ChatFormatting chatFormatting) {
-        sender.addChatMessage(new TextComponent(message).setChatStyle(new ChatStyle().setColor(chatFormatting)));
+    public static void sendChatToPlayer(CommandSourceStack sender, String message, ChatFormatting chatFormatting) throws CommandSyntaxException {
+        sender.getPlayerOrException().displayClientMessage(new TextComponent(message).withStyle(chatFormatting), false);
     }
 }

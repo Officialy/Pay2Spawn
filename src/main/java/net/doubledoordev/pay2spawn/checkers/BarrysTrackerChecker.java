@@ -33,11 +33,11 @@ package net.doubledoordev.pay2spawn.checkers;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import net.doubledoordev.oldforge.Configuration;
 import net.doubledoordev.pay2spawn.hud.DonationsBasedHudEntry;
 import net.doubledoordev.pay2spawn.hud.Hud;
 import net.doubledoordev.pay2spawn.util.Donation;
 import net.doubledoordev.pay2spawn.util.Helper;
-import net.minecraftforge.common.config.Configuration;
 
 import java.io.IOException;
 import java.net.URL;
@@ -50,30 +50,26 @@ import static net.doubledoordev.pay2spawn.util.Constants.JSON_PARSER;
  *
  * @author BarryCarlyon
  */
-public class BarrysTrackerChecker extends AbstractChecker implements Runnable
-{
+public class BarrysTrackerChecker extends AbstractChecker implements Runnable {
     public final static BarrysTrackerChecker INSTANCE = new BarrysTrackerChecker();
-    public final static String               NAME     = "barrys-tracker";
-    public final static String               CAT      = BASECAT_TRACKERS + '.' + NAME;
-    public              String               URL      = "http://localhost:8082/donations/";
+    public final static String NAME = "barrys-tracker";
+    public final static String CAT = BASECAT_TRACKERS + '.' + NAME;
+    public String URL = "http://localhost:8082/donations/";
     DonationsBasedHudEntry topDonationsBasedHudEntry, recentDonationsBasedHudEntry;
-    boolean enabled  = false;
-    int     interval = 5;
+    boolean enabled = false;
+    int interval = 5;
 
-    private BarrysTrackerChecker()
-    {
+    private BarrysTrackerChecker() {
         super();
     }
 
     @Override
-    public String getName()
-    {
+    public String getName() {
         return NAME;
     }
 
     @Override
-    public void init()
-    {
+    public void init() {
         Hud.INSTANCE.set.add(topDonationsBasedHudEntry);
         Hud.INSTANCE.set.add(recentDonationsBasedHudEntry);
 
@@ -81,14 +77,12 @@ public class BarrysTrackerChecker extends AbstractChecker implements Runnable
     }
 
     @Override
-    public boolean enabled()
-    {
+    public boolean enabled() {
         return enabled;
     }
 
     @Override
-    public void doConfig(Configuration configuration)
-    {
+    public void doConfig(Configuration configuration) {
         configuration.addCustomCategoryComment(CAT, "This is the checker for Barrys Donation Tracker. http://don.barrycarlyon.co.uk/");
 
         enabled = configuration.get(CAT, "enabled", enabled).getBoolean(enabled);
@@ -101,8 +95,7 @@ public class BarrysTrackerChecker extends AbstractChecker implements Runnable
 
         // Donation tracker doesn't allow a poll interval faster than 5 seconds
         // They will IP ban anyone using a time below 5 so force the value to be safe
-        if (interval < 5)
-        {
+        if (interval < 5) {
             interval = 5;
             // Now force the config setting to 5
             configuration.get(CAT, "interval", "The time in between polls minimum 5 (in seconds).").set(interval);
@@ -110,20 +103,17 @@ public class BarrysTrackerChecker extends AbstractChecker implements Runnable
     }
 
     @Override
-    public DonationsBasedHudEntry[] getDonationsBasedHudEntries()
-    {
+    public DonationsBasedHudEntry[] getDonationsBasedHudEntries() {
         return new DonationsBasedHudEntry[]{topDonationsBasedHudEntry, recentDonationsBasedHudEntry};
     }
 
     @Override
-    public void run()
-    {
+    public void run() {
         // Process any current donations from the API
         processDonationAPI(true);
 
         // Start the processing loop
-        while (true)
-        {
+        while (true) {
             // Pause the configured wait period
             doWait(interval);
 
@@ -137,43 +127,32 @@ public class BarrysTrackerChecker extends AbstractChecker implements Runnable
      *
      * @param firstRun <code>boolean</code> used to identify previous donations that should not be processed.
      */
-    private void processDonationAPI(boolean firstRun)
-    {
-        try
-        {
+    private void processDonationAPI(boolean firstRun) {
+        try {
             JsonObject root = JSON_PARSER.parse(Helper.readUrl(new URL(String.format(URL)))).getAsJsonObject();
-            if (root.getAsJsonPrimitive("status").getAsInt() == 200)
-            {
+            if (root.getAsJsonPrimitive("status").getAsInt() == 200) {
                 JsonArray donations = root.getAsJsonArray("donations");
-                for (JsonElement jsonElement : donations)
-                {
+                for (JsonElement jsonElement : donations) {
                     Donation donation = getDonation(jsonElement.getAsJsonObject());
 
                     // Make sure we have a donation to work with and see if this is a first run
-                    if (donation != null && firstRun == true)
-                    {
+                    if (donation != null && firstRun == true) {
                         // This is a first run so add to current list/done ids
                         topDonationsBasedHudEntry.add(donation);
                         doneIDs.add(donation.id);
-                    }
-                    else if (donation != null)
-                    {
+                    } else if (donation != null) {
                         // We have a donation and this is a loop check so process the donation
                         process(donation, true, this);
                     }
                 }
             }
-        }
-        catch (IOException e)
-        {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private Donation getDonation(JsonObject jsonObject)
-    {
-        try
-        {
+    private Donation getDonation(JsonObject jsonObject) {
+        try {
             // Attempt to parse the data we need for the donation
             String username = jsonObject.get("username").getAsString();
             String note = jsonObject.get("note").getAsString();
@@ -183,9 +162,7 @@ public class BarrysTrackerChecker extends AbstractChecker implements Runnable
 
             // We have all the data we need to return the Donation object
             return new Donation(id, amount, timestamp, username, note);
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             // We threw an error so just log it and move on
             e.printStackTrace();
         }

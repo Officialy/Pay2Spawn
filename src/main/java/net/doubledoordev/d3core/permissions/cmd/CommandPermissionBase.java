@@ -43,7 +43,7 @@ import net.minecraft.world.entity.player.Player;
 public abstract class CommandPermissionBase extends CommandBase
 {
     @Override
-    public boolean canCommandSenderUseCommand(ICommandSender sender)
+    public boolean canCommandSenderUseCommand(CommandSourceStack sender)
     {
         if (sender instanceof Player) return PermissionsDB.INSTANCE.checkPermissions(sender, getBasePermission());
         else return super.canCommandSenderUseCommand(sender);
@@ -54,7 +54,7 @@ public abstract class CommandPermissionBase extends CommandBase
         return new Node(PermConstants.COMMAND_PREFIX + "." + getCommandName());
     }
 
-    public boolean checkExtraPermission(ICommandSender sender, String... extras)
+    public boolean checkExtraPermission(CommandSourceStack sender, String... extras)
     {
         return PermissionsDB.INSTANCE.checkPermissions(sender, getBasePermission().append(extras));
     }

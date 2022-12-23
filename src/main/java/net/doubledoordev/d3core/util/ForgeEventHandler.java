@@ -105,7 +105,7 @@ public class ForgeEventHandler
             TextComponent posText = new TextComponent("X: " + Mth.floor(event.getEntityLiving().getX()) + " Y: " + Mth.floor(event.getEntityLiving().getY() + 0.5d) + " Z: " + Mth.floor(event.getEntityLiving().getZ()));
             try
             {
-                if (!MinecraftServer.getServer().getCommandManager().getPossibleCommands((ICommandSender) event.getEntityLiving(), "tp").isEmpty())
+                if (!MinecraftServer.getServer().getCommandManager().getPossibleCommands((CommandSourceStack) event.getEntityLiving(), "tp").isEmpty())
                 {
                     posText.withStyle(new Style().setItalic(true)
                             .setChatHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent("Click to teleport!")))

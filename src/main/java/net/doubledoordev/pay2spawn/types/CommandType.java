@@ -39,7 +39,7 @@ import net.minecraft.entity.player.ServerPlayer;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.IChatComponent;
-import net.minecraftforge.common.config.Configuration;
+import net.doubledoordev.oldforge.Configuration;
 
 import java.util.Collection;
 import java.util.HashMap;

@@ -32,13 +32,16 @@ package net.doubledoordev.pay2spawn.network;
 
 import com.google.common.base.Strings;
 
+import com.google.common.base.Supplier;
 import io.netty.buffer.ByteBuf;
 import net.doubledoordev.pay2spawn.Pay2Spawn;
 import net.doubledoordev.pay2spawn.util.Donation;
 import net.doubledoordev.pay2spawn.util.Helper;
 import net.doubledoordev.pay2spawn.util.Reward;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.TextComponent;
+import net.minecraftforge.network.NetworkEvent;
 
 import static net.doubledoordev.pay2spawn.util.Constants.GSON;
 import static net.doubledoordev.pay2spawn.util.Constants.GSON_NOPP;
@@ -48,39 +51,33 @@ import static net.doubledoordev.pay2spawn.util.Constants.GSON_NOPP;
  *
  * @author Dries007
  */
-public class MessageMessage implements IMessage
-{
-    private Reward   reward;
+public class MessageMessage {
+    private Reward reward;
     private Donation donation;
-    private String   message, name;
+    private String message, name;
     private double amount;
-    private int    countdown;
+    private int countdown;
 
-    public MessageMessage(Reward reward, Donation donation)
-    {
+    public MessageMessage(Reward reward, Donation donation) {
         this.reward = reward;
         this.donation = donation;
     }
 
-    public MessageMessage()
-    {
+    public MessageMessage() {
 
     }
 
-    @Override
-    public void fromBytes(ByteBuf buf)
-    {
+    public static MessageMessage fromBytes(FriendlyByteBuf buf) {
         message = ByteBufUtils.readUTF8String(buf);
         name = ByteBufUtils.readUTF8String(buf);
         amount = buf.readDouble();
         countdown = buf.readInt();
 
         donation = GSON.fromJson(Helper.readLongStringToByteBuf(buf), Donation.class);
+
     }
 
-    @Override
-    public void toBytes(ByteBuf buf)
-    {
+    public void toBytes(FriendlyByteBuf buf) {
         ByteBufUtils.writeUTF8String(buf, reward.getMessage());
         ByteBufUtils.writeUTF8String(buf, reward.getName());
         buf.writeDouble(reward.getAmount());
@@ -89,29 +86,26 @@ public class MessageMessage implements IMessage
         Helper.writeLongStringToByteBuf(buf, GSON_NOPP.toJson(donation));
     }
 
-    public static class Handler implements IMessageHandler<MessageMessage, IMessage>
-    {
-        @Override
-        public IMessage onMessage(MessageMessage message, MessageContext ctx)
-        {
-            if (ctx.side.isServer())
-            {
-                String format = Helper.formatColors(Pay2Spawn.getConfig().serverMessage);
-                if (Strings.isNullOrEmpty(format)) return null;
-
-                format = format.replace("$name", message.donation.username);
-                format = format.replace("$amount", message.donation.amount + "");
-                format = format.replace("$note", message.donation.note);
-                format = format.replace("$streamer", ctx.getServerHandler().playerEntity.getDisplayName());
-                format = format.replace("$reward_message", message.message);
-                format = format.replace("$reward_name", message.name);
-                format = format.replace("$reward_amount", message.amount + "");
-                format = format.replace("$reward_countdown", message.countdown + "");
-
-                MinecraftServer.getServer().getConfigurationManager().sendChatMsg(new TextComponent(format));
+    public static void handle(MessageMessage message, Supplier<NetworkEvent.Context> ctx) {
+        ctx.get().enqueueWork(() -> {
+            String format = Helper.formatColors(Pay2Spawn.getConfig().serverMessage);
+            if (Strings.isNullOrEmpty(format)) {
+                return;
             }
 
-            return null;
-        }
+            format = format.replace("$name", message.donation.username);
+            format = format.replace("$amount", message.donation.amount + "");
+            format = format.replace("$note", message.donation.note);
+            format = format.replace("$streamer", ctx.get().getSender().getDisplayName().toString());
+            format = format.replace("$reward_message", message.message);
+            format = format.replace("$reward_name", message.name);
+            format = format.replace("$reward_amount", message.amount + "");
+            format = format.replace("$reward_countdown", message.countdown + "");
+
+            ctx.get().getSender().displayClientMessage(new TextComponent(format), false);
+            ctx.get().setPacketHandled(true);
+        });
+        ctx.get().setPacketHandled(true);
     }
+
 }

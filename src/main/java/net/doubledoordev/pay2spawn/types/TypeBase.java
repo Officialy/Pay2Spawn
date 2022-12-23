@@ -31,14 +31,14 @@
 package net.doubledoordev.pay2spawn.types;
 
 import com.google.gson.JsonObject;
+import net.doubledoordev.oldforge.Configuration;
 import net.doubledoordev.pay2spawn.configurator.HTMLGenerator;
 import net.doubledoordev.pay2spawn.permissions.Node;
 import net.doubledoordev.pay2spawn.util.Donation;
 import net.doubledoordev.pay2spawn.util.Reward;
-import net.minecraft.entity.player.Player;
-import net.minecraft.entity.player.ServerPlayer;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraftforge.common.config.Configuration;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
 
 import java.io.File;
 import java.io.IOException;

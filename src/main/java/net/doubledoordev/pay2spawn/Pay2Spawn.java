@@ -32,7 +32,6 @@ package net.doubledoordev.pay2spawn;
 
 import com.mojang.brigadier.CommandDispatcher;
 import net.doubledoordev.d3core.util.ID3Mod;
-import net.doubledoordev.pay2spawn.ai.CustomAI;
 import net.doubledoordev.pay2spawn.checkers.CheckerHandler;
 import net.doubledoordev.pay2spawn.client.Rendering;
 import net.doubledoordev.pay2spawn.cmd.CommandP2S;
@@ -46,6 +45,7 @@ import net.doubledoordev.pay2spawn.types.TypeBase;
 import net.doubledoordev.pay2spawn.types.TypeRegistry;
 import net.doubledoordev.pay2spawn.util.*;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.ClientCommandHandler;
 import net.minecraftforge.event.RegisterCommandsEvent;
@@ -53,7 +53,9 @@ import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.simple.SimpleChannel;
+import net.minecraftforge.server.ServerLifecycleHooks;
 import org.apache.logging.log4j.Logger;
 
 import javax.swing.*;
@@ -62,9 +64,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 
 import static net.doubledoordev.pay2spawn.util.Constants.*;
@@ -75,108 +75,90 @@ import static net.doubledoordev.pay2spawn.util.Constants.*;
  * @author Dries007
  */
 @Mod(MODID)
-public class Pay2Spawn implements ID3Mod
-{
+public class Pay2Spawn implements ID3Mod {
     public static final HashSet<String> playersWithValidConfig = new HashSet<>();
 
     public static Pay2Spawn instance;
-    public static  boolean enable       = true;
-    public static  boolean forceOn      = false;
+    public static boolean enable = true;
+    public static boolean forceOn = false;
     private static boolean serverHasMod = false;
 
-    private RewardsDB            rewardsDB;
-    private P2SConfig            config;
-    private File                 configFolder;
-    private Logger               logger;
+    private RewardsDB rewardsDB;
+    private P2SConfig config;
+    private File configFolder;
+    private Logger logger;
     private SimpleChannel snw;
-    private boolean              newConfig;
+    private boolean newConfig;
+    private static final String PROTOCOL_VERSION = "1.0";
 
-    public static String getVersion()
-    {
+    public static String getVersion() {
         return instance.metadata.version;
     }
 
-    public static RewardsDB getRewardsDB()
-    {
+    public static RewardsDB getRewardsDB() {
         return instance.rewardsDB;
     }
 
-    public static Logger getLogger()
-    {
+    public static Logger getLogger() {
         return instance.logger;
     }
 
-    public static P2SConfig getConfig()
-    {
+    public static P2SConfig getConfig() {
         return instance.config;
     }
 
-    public static File getFolder()
-    {
+    public static File getFolder() {
         return instance.configFolder;
     }
 
-    public static SimpleChannel getSnw()
-    {
+    public static SimpleChannel getSnw() {
         return instance.snw;
     }
 
-    public static File getRewardDBFile()
-    {
+    public static File getRewardDBFile() {
         return new File(instance.configFolder, NAME + ".json");
     }
 
-    public static void reloadDB()
-    {
+    public static void reloadDB() {
         instance.rewardsDB = new RewardsDB(getRewardDBFile());
         ConfiguratorManager.reload();
-        try
-        {
+        try {
             PermissionsHandler.init();
-        }
-        catch (IOException e)
-        {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public static void reloadDB_Server() throws Exception
-    {
+    public static void reloadDB_Server() throws Exception {
         StatusMessage.serverConfig = GSON_NOPP.toJson(JSON_PARSER.parse(new FileReader(getRewardDBFile())));
         StatusMessage.sendConfigToAllPlayers();
     }
 
-    public static void reloadDBFromServer(String input)
-    {
+    public static void reloadDBFromServer(String input) {
         instance.rewardsDB = new RewardsDB(input);
         ConfiguratorManager.reload();
     }
 
-    public static boolean doesServerHaveMod()
-    {
+    public static boolean doesServerHaveMod() {
         return serverHasMod;
     }
 
-    public static boolean doesPlayerHaveValidConfig(String username)
-    {
+    public static boolean doesPlayerHaveValidConfig(String username) {
         return playersWithValidConfig.contains(username);
     }
 
-    public static void resetServerStatus()
-    {
+    public static void resetServerStatus() {
         enable = true;
         forceOn = false;
     }
 
     @NetworkCheckHandler
-    public boolean networkCheckHandler(Map<String, String> data, Dist side)
-    {
+    public boolean networkCheckHandler(Map<String, String> data, Dist side) {
         if (side.isClient()) serverHasMod = data.containsKey(MODID);
         return !data.containsKey(MODID) || data.get(MODID).equals(metadata.version);
     }
 
-    public Pay2Spawn() throws IOException
-    {
+    public Pay2Spawn() throws IOException {
         instance = this;
         logger = event.getModLog();
 
@@ -190,19 +172,19 @@ public class Pay2Spawn implements ID3Mod
         MetricsHelper.init();
 
         int id = 0;
-        snw = NetworkRegistry.INSTANCE.newSimpleChannel(MODID);
-        snw.registerMessage(MessageMessage.Handler.class, MessageMessage.class, id++, Dist.SERVER);
-        snw.registerMessage(MusicMessage.Handler.class, MusicMessage.class, id++, Dist.CLIENT);
-        snw.registerMessage(NbtRequestMessage.Handler.class, NbtRequestMessage.class, id++, Dist.CLIENT);
-        snw.registerMessage(NbtRequestMessage.Handler.class, NbtRequestMessage.class, id++, Dist.SERVER);
-        snw.registerMessage(RewardMessage.Handler.class, RewardMessage.class, id++, Dist.SERVER);
-        snw.registerMessage(StatusMessage.Handler.class, StatusMessage.class, id++, Dist.SERVER);
-        snw.registerMessage(StatusMessage.Handler.class, StatusMessage.class, id++, Dist.CLIENT);
-        snw.registerMessage(TestMessage.Handler.class, TestMessage.class, id++, Dist.SERVER);
-        snw.registerMessage(StructureImportMessage.Handler.class, StructureImportMessage.class, id++, Dist.SERVER);
-        snw.registerMessage(StructureImportMessage.Handler.class, StructureImportMessage.class, id++, Dist.CLIENT);
-        snw.registerMessage(HTMLuploadMessage.Handler.class, HTMLuploadMessage.class, id++, Dist.SERVER);
-        snw.registerMessage(CrashMessage.Handler.class, CrashMessage.class, id++, Dist.CLIENT);
+        snw = NetworkRegistry.newSimpleChannel(new ResourceLocation(MODID, "main"), () -> PROTOCOL_VERSION, PROTOCOL_VERSION::equals, PROTOCOL_VERSION::equals);
+        snw.registerMessage(id++, MessageMessage::toBytes, MessageMessage::fromBytes, MessageMessage::handle);
+        snw.registerMessage(id++, MusicMessage.Handler.class, MusicMessage.class,  Dist.CLIENT);
+        snw.registerMessage(id++, NbtRequestMessage.Handler.class, NbtRequestMessage.class, Dist.CLIENT);
+        snw.registerMessage(id++, NbtRequestMessage.Handler.class, NbtRequestMessage.class, Dist.DEDICATED_SERVER);
+        snw.registerMessage(id++, RewardMessage.Handler.class, RewardMessage.class,  Dist.DEDICATED_SERVER);
+        snw.registerMessage(id++, StatusMessage.Handler.class, StatusMessage.class,  Dist.DEDICATED_SERVER);
+        snw.registerMessage(id++, StatusMessage.Handler.class, StatusMessage.class,  Dist.CLIENT);
+        snw.registerMessage(id++, TestMessage.Handler.class, TestMessage.class, Dist.DEDICATED_SERVER);
+        snw.registerMessage(id++, StructureImportMessage.Handler.class, StructureImportMessage.class, Dist.DEDICATED_SERVER);
+        snw.registerMessage(id++, StructureImportMessage.Handler.class, StructureImportMessage.class, Dist.CLIENT);
+        snw.registerMessage(id++, HTMLuploadMessage.Handler.class, HTMLuploadMessage.class,  Dist.DEDICATED_SERVER);
+        snw.registerMessage(id++, CrashMessage.Handler.class, CrashMessage.class,  Dist.CLIENT);
 
         TypeRegistry.preInit();
         Statistics.preInit();
@@ -210,14 +192,12 @@ public class Pay2Spawn implements ID3Mod
         config.syncConfig();
     }
 
-    public void init(FMLCommonSetupEvent event) throws MalformedURLException
-    {
+    public void init(FMLCommonSetupEvent event) throws MalformedURLException {
         ServerTickHandler.INSTANCE.init();
 
         rewardsDB = new RewardsDB(getRewardDBFile());
 
-        if (event.getSide().isClient())
-        {
+        if (event.getSide().isClient()) {
             CheckerHandler.init();
             new EventHandler();
             ClientCommandHandler.instance.registerCommand(new CommandP2S());
@@ -233,18 +213,14 @@ public class Pay2Spawn implements ID3Mod
         for (TypeBase base : TypeRegistry.getAllTypes()) base.printHelpList(configFolder);
 
         TypeRegistry.registerPermissions();
-        try
-        {
+        try {
             HTMLGenerator.init();
-        }
-        catch (IOException e)
-        {
+        } catch (IOException e) {
             logger.warn("Error initializing the HTMLGenerator.");
             e.printStackTrace();
         }
 
-        if (newConfig && event.getSide().isClient())
-        {
+        if (newConfig && event.getSide().isClient()) {
             JOptionPane pane = new JOptionPane();
             pane.setMessageType(JOptionPane.WARNING_MESSAGE);
             pane.setMessage("Please configure Pay2Spawn properly BEFORE you try launching this instance again.\n" +
@@ -253,22 +229,17 @@ public class Pay2Spawn implements ID3Mod
             JDialog dialog = pane.createDialog("Please configure Pay2Spawn!");
             dialog.setAlwaysOnTop(true);
             dialog.setVisible(true);
-            FMLCommonHandler.instance().handleExit(1);
+            ServerLifecycleHooks.handleExit(1);
         }
 
-        if (Pay2Spawn.getConfig().majorConfigVersionChange)
-        {
-            try
-            {
+        if (Pay2Spawn.getConfig().majorConfigVersionChange) {
+            try {
                 MetricsHelper.metrics.enable();
-            }
-            catch (IOException ignored)
-            {
+            } catch (IOException ignored) {
 
             }
 
-            if (event.getSide().isClient())
-            {
+            if (event.getSide().isClient()) {
                 JOptionPane pane = new JOptionPane();
                 pane.setMessageType(JOptionPane.INFORMATION_MESSAGE);
                 pane.setMessage("You can now (and should) use string id's (minecraft:stone) instead of actual id's.\n" +
@@ -286,21 +257,16 @@ public class Pay2Spawn implements ID3Mod
 
         config.syncConfig();
 
-        if (event.getSide().isClient())
-        {
+        if (event.getSide().isClient()) {
             Rendering.init();
         }
     }
 
-    public void serverStarting(ServerStartingEvent event) throws IOException
-    {
+    public void serverStarting(ServerStartingEvent event) throws IOException {
         PermissionsHandler.init();
-        try
-        {
+        try {
             StatusMessage.serverConfig = GSON_NOPP.toJson(JSON_PARSER.parse(new FileReader(new File(instance.configFolder, NAME + ".json"))));
-        }
-        catch (FileNotFoundException e)
-        {
+        } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
     }
@@ -313,21 +279,20 @@ public class Pay2Spawn implements ID3Mod
     }
 
     @Override
-    public void syncConfig()
-    {
+    public void syncConfig() {
         config.syncConfig();
     }
 
-    @Override
-    public void addConfigElements(List<IConfigElement> configElements)
-    {
-        List<IConfigElement> listsList = new ArrayList<IConfigElement>();
-
-        listsList.add(new ConfigElement(config.configuration.getCategory(Constants.MODID.toLowerCase())));
-        listsList.add(new ConfigElement(config.configuration.getCategory(Constants.FILTER_CAT.toLowerCase())));
-        listsList.add(new ConfigElement(config.configuration.getCategory(Constants.SERVER_CAT.toLowerCase())));
-        listsList.add(new ConfigElement(config.configuration.getCategory(Constants.BASECAT_TRACKERS.toLowerCase())));
-
-        configElements.add(new DummyConfigElement.DummyCategoryElement(MODID, "d3.pay2spawn.config.pay2spawn", listsList));
-    }
+//    @Override
+//    public void addConfigElements(List<IConfigElement> configElements)
+//    {
+//        List<IConfigElement> listsList = new ArrayList<IConfigElement>();
+//
+//        listsList.add(new ConfigElement(config.configuration.getCategory(Constants.MODID.toLowerCase())));
+//        listsList.add(new ConfigElement(config.configuration.getCategory(Constants.FILTER_CAT.toLowerCase())));
+//        listsList.add(new ConfigElement(config.configuration.getCategory(Constants.SERVER_CAT.toLowerCase())));
+//        listsList.add(new ConfigElement(config.configuration.getCategory(Constants.BASECAT_TRACKERS.toLowerCase())));
+//
+//        configElements.add(new DummyConfigElement.DummyCategoryElement(MODID, "d3.pay2spawn.config.pay2spawn", listsList));
+//    }
 }

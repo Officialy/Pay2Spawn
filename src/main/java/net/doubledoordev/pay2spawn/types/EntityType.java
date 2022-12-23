@@ -47,7 +47,7 @@ import net.minecraft.entity.player.Player;
 import net.minecraft.entity.player.ServerPlayer;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.ChatFormatting;
-import net.minecraftforge.common.config.Configuration;
+import net.doubledoordev.oldforge.Configuration;
 
 import java.io.File;
 import java.io.IOException;

@@ -62,7 +62,7 @@ public class CommandPermissionWrapper extends CommandPermissionBase
     }
 
     @Override
-    public String getCommandUsage(ICommandSender p_71518_1_)
+    public String getCommandUsage(CommandSourceStack p_71518_1_)
     {
         return commandBase.getCommandUsage(p_71518_1_);
     }
@@ -74,20 +74,20 @@ public class CommandPermissionWrapper extends CommandPermissionBase
     }
 
     @Override
-    public void processCommand(ICommandSender p_71515_1_, String[] p_71515_2_)
+    public void processCommand(CommandSourceStack p_71515_1_, String[] p_71515_2_)
     {
         commandBase.processCommand(p_71515_1_, p_71515_2_);
     }
 
     @Override
-    public boolean canCommandSenderUseCommand(ICommandSender sender)
+    public boolean canCommandSenderUseCommand(CommandSourceStack sender)
     {
         if (sender instanceof Player) return PermissionsDB.INSTANCE.checkPermissions(sender, getBasePermission());
         else return commandBase.canCommandSenderUseCommand(sender);
     }
 
     @Override
-    public List addTabCompletionOptions(ICommandSender p_71516_1_, String[] p_71516_2_)
+    public List addTabCompletionOptions(CommandSourceStack p_71516_1_, String[] p_71516_2_)
     {
         return commandBase.addTabCompletionOptions(p_71516_1_, p_71516_2_);
     }

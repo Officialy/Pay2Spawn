@@ -37,21 +37,20 @@ import java.util.ArrayList;
  *
  * @author Dries007
  */
-public interface IHudEntry
-{
-    public int getPosition();
+public interface IHudEntry {
+    int getPosition();
 
-    public int getAmount();
+    int getAmount();
 
-    public String getHeader();
+    String getHeader();
 
-    public String getFormat();
+    String getFormat();
 
-    public void addToList(ArrayList<String> list);
+    void addToList(ArrayList<String> list);
 
-    public void updateConfig();
+    void updateConfig();
 
-    public String getFilename();
+    String getFilename();
 
-    public boolean writeToFile();
+    boolean writeToFile();
 }

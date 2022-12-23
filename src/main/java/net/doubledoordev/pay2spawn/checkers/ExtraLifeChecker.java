@@ -39,7 +39,7 @@ import net.doubledoordev.pay2spawn.hud.Hud;
 import net.doubledoordev.pay2spawn.util.Donation;
 import net.doubledoordev.pay2spawn.util.Helper;
 import net.doubledoordev.pay2spawn.util.JsonNBTHelper;
-import net.minecraftforge.common.config.Configuration;
+import net.doubledoordev.oldforge.Configuration;
 
 import java.net.URL;
 import java.text.ParseException;

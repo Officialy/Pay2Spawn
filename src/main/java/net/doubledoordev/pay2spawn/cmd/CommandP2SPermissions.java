@@ -31,6 +31,7 @@
 package net.doubledoordev.pay2spawn.cmd;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.doubledoordev.pay2spawn.permissions.Group;
 import net.doubledoordev.pay2spawn.permissions.Node;
 import net.doubledoordev.pay2spawn.permissions.PermissionsHandler;
@@ -38,6 +39,7 @@ import net.doubledoordev.pay2spawn.permissions.Player;
 import net.doubledoordev.pay2spawn.util.Helper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 
@@ -56,41 +58,41 @@ public class CommandP2SPermissions {
         return "p2spermissions";
     }
 
-    public String getCommandUsage(ICommandSender icommandsender) {
+    public String getCommandUsage(CommandSourceStack icommandsender) {
         return HELP;
     }
 
-    public static void processCommand(CommandDispatcher<CommandSourceStack> sender, String[] args) {
-        if (args.length == 0) {
-            Helper.sendChatToPlayer(sender, "Use '/p2sperm group|groups|player' for more info.", ChatFormatting.RED);
-            return;
-        }
-        switch (args[0]) {
+    public static void processCommand(CommandDispatcher<CommandSourceStack> sender) {
+        LiteralArgumentBuilder<CommandSourceStack> builder = Commands.literal("p2spermissions").executes(context -> {
+            Helper.sendChatToPlayer(context.getSource(), "Use '/p2sperm group|groups|player' for more info.", ChatFormatting.RED);
+            return 0;
+        });
+
             case "groups" -> {
                 if (args.length < 3) {
-                    Helper.sendChatToPlayer(sender, "Use '/p2s perm groups add|remove <name> [parent group]' to add or remove a group.", ChatFormatting.RED);
+                    Helper.sendChatToPlayer(context.getSource(), "Use '/p2s perm groups add|remove <name> [parent group]' to add or remove a group.", ChatFormatting.RED);
                 } else {
                     String name = args[2];
                     switch (args[1]) {
                         case "add" -> {
                             String parent = args.length == 4 ? args[3] : null;
                             PermissionsHandler.getDB().newGroup(name, parent);
-                            Helper.sendChatToPlayer(sender, "Added new group named '" + name + (parent != null ? "' with parent group '" + parent : "") + "'.", ChatFormatting.GOLD);
+                            Helper.sendChatToPlayer(context.getSource(), "Added new group named '" + name + (parent != null ? "' with parent group '" + parent : "") + "'.", ChatFormatting.GOLD);
                         }
                         case "remove" -> {
                             PermissionsHandler.getDB().remove(name);
-                            Helper.sendChatToPlayer(sender, "Removed group named '" + name + "'", ChatFormatting.GOLD);
+                            Helper.sendChatToPlayer(context.getSource(), "Removed group named '" + name + "'", ChatFormatting.GOLD);
                         }
                     }
                 }
             }
             case "group" -> {
                 if (args.length < 4) {
-                    Helper.sendChatToPlayer(sender, "Use '/p2s perm group <name> add|remove <node>' OR '<name> parent set|clear [name]'", ChatFormatting.RED);
+                    Helper.sendChatToPlayer(context.getSource(), "Use '/p2s perm group <name> add|remove <node>' OR '<name> parent set|clear [name]'", ChatFormatting.RED);
                 } else {
                     Group group = PermissionsHandler.getDB().getGroup(args[1]);
                     if (group == null) {
-                        Helper.sendChatToPlayer(sender, "The group doesn't exist.", ChatFormatting.RED);
+                        Helper.sendChatToPlayer(context.getSource(), "The group doesn't exist.", ChatFormatting.RED);
                         break;
                     }
                     switch (args[2]) {
@@ -98,38 +100,38 @@ public class CommandP2SPermissions {
                             switch (args[3]) {
                                 case "set" -> {
                                     if (args.length != 5) {
-                                        Helper.sendChatToPlayer(sender, "Use 'parent set <name>.", ChatFormatting.RED);
+                                        Helper.sendChatToPlayer(context.getSource(), "Use 'parent set <name>.", ChatFormatting.RED);
                                         return;
                                     }
                                     group.setParent(args[4]);
-                                    Helper.sendChatToPlayer(sender, "Set parent to: " + args[4], ChatFormatting.GOLD);
+                                    Helper.sendChatToPlayer(context.getSource(), "Set parent to: " + args[4], ChatFormatting.GOLD);
                                 }
                                 case "clear" -> {
                                     group.setParent(null);
-                                    Helper.sendChatToPlayer(sender, "Cleared parent group.", ChatFormatting.GOLD);
+                                    Helper.sendChatToPlayer(context.getSource(), "Cleared parent group.", ChatFormatting.GOLD);
                                 }
                             }
                         }
                         case "add" -> {
                             group.addNode(args[3]);
-                            Helper.sendChatToPlayer(sender, "Added node: " + args[3], ChatFormatting.GOLD);
+                            Helper.sendChatToPlayer(context.getSource(), "Added node: " + args[3], ChatFormatting.GOLD);
                         }
                         case "remove" -> {
                             if (group.removeNode(args[3]))
-                                Helper.sendChatToPlayer(sender, "Removed node: " + args[3], ChatFormatting.GOLD);
+                                Helper.sendChatToPlayer(context.getSource(), "Removed node: " + args[3], ChatFormatting.GOLD);
                             else
-                                Helper.sendChatToPlayer(sender, "Node not removed, it wasn't there in the first place...", ChatFormatting.RED);
+                                Helper.sendChatToPlayer(context.getSource(), "Node not removed, it wasn't there in the first place...", ChatFormatting.RED);
                         }
                     }
                 }
             }
             case "player" -> {
                 if (args.length < 5) {
-                    Helper.sendChatToPlayer(sender, "Use '/p2s perm player <name> group add|remove <group>' OR '<name> perm add|remove <node>'", ChatFormatting.RED);
+                    Helper.sendChatToPlayer(context.getSource(), "Use '/p2s perm player <name> group add|remove <group>' OR '<name> perm add|remove <node>'", ChatFormatting.RED);
                 } else {
                     Player playero = PermissionsHandler.getDB().getPlayer(args[1]);
                     if (playero == null) {
-                        Helper.sendChatToPlayer(sender, "That player doesn't exist.", ChatFormatting.RED);
+                        Helper.sendChatToPlayer(context.getSource(), "That player doesn't exist.", ChatFormatting.RED);
                         break;
                     }
                     switch (args[2]) {
@@ -137,13 +139,13 @@ public class CommandP2SPermissions {
                             switch (args[3]) {
                                 case "add" -> {
                                     playero.addGroup(args[4]);
-                                    Helper.sendChatToPlayer(sender, "Added " + args[1] + " to " + args[4], ChatFormatting.GOLD);
+                                    Helper.sendChatToPlayer(context.getSource(), "Added " + args[1] + " to " + args[4], ChatFormatting.GOLD);
                                 }
                                 case "remove" -> {
                                     if (playero.removeGroup(args[4]))
-                                        Helper.sendChatToPlayer(sender, "Removed group: " + args[4], ChatFormatting.GOLD);
+                                        Helper.sendChatToPlayer(context.getSource(), "Removed group: " + args[4], ChatFormatting.GOLD);
                                     else
-                                        Helper.sendChatToPlayer(sender, "Group not removed, it wasn't there in the first place...", ChatFormatting.RED);
+                                        Helper.sendChatToPlayer(context.getSource(), "Group not removed, it wasn't there in the first place...", ChatFormatting.RED);
                                 }
                             }
                         }
@@ -152,28 +154,21 @@ public class CommandP2SPermissions {
                                 case "add" -> playero.addNode(new Node(args[4]));
                                 case "remove" -> {
                                     if (playero.removeNode(new Node(args[4])))
-                                        Helper.sendChatToPlayer(sender, "Added per node: " + args[4], ChatFormatting.GOLD);
+                                        Helper.sendChatToPlayer(context.getSource(), "Added per node: " + args[4], ChatFormatting.GOLD);
                                     else
-                                        Helper.sendChatToPlayer(sender, "Perm node not removed, it wasn't there in the first place...", ChatFormatting.RED);
+                                        Helper.sendChatToPlayer(context.getSource(), "Perm node not removed, it wasn't there in the first place...", ChatFormatting.RED);
                                 }
                             }
                         }
                     }
                 }
             }
-        }
-        PermissionsHandler.getDB().save();
+
+//        PermissionsHandler.getDB().save();
     }
 
-    public List getCommandAliases() {
-        return Arrays.asList("p2sperm");
-    }
-
-    public boolean canCommandSenderUseCommand(ICommandSender sender) {
-        return !(sender instanceof ServerPlayer) || MinecraftServer.getServer().getConfigurationManager().func_152596_g(((ServerPlayer) sender).getGameProfile());
-    }
-
-    public List addTabCompletionOptions(ICommandSender sender, String[] args) {
+/*
+    public List addTabCompletionOptions(CommandSourceStack sender, String[] args) {
         switch (args.length) {
             case 1:
                 return getListOfStringsMatchingLastWord(args, "groups", "group", "player");
@@ -266,4 +261,5 @@ public class CommandP2SPermissions {
         }
         return null;
     }
+*/
 }

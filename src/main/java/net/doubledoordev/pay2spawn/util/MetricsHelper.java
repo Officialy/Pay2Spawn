@@ -31,7 +31,6 @@
 package net.doubledoordev.pay2spawn.util;
 
 import com.google.common.base.Strings;
-import cpw.mods.fml.common.FMLCommonHandler;
 import net.doubledoordev.d3core.util.libs.org.mcstats.Metrics;
 import net.doubledoordev.pay2spawn.Pay2Spawn;
 import net.doubledoordev.pay2spawn.checkers.AbstractChecker;

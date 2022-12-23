@@ -30,12 +30,9 @@
 
 package net.doubledoordev.pay2spawn.network;
 
-import com.google.common.base.Throwables;
-
 import io.netty.buffer.ByteBuf;
 import net.doubledoordev.pay2spawn.types.CrashType;
 import net.doubledoordev.pay2spawn.util.DramaException;
-import net.doubledoordev.pay2spawn.util.Helper;
 
 /**
  * @author Dries007

@@ -30,10 +30,10 @@
 
 package net.doubledoordev.pay2spawn.configurator;
 
-import cpw.mods.fml.common.FMLCommonHandler;
 import net.doubledoordev.pay2spawn.Pay2Spawn;
 import net.doubledoordev.pay2spawn.util.Helper;
-import net.minecraft.util.ChatFormatting;
+import net.minecraft.ChatFormatting;
+import net.minecraftforge.fml.loading.FMLLoader;
 
 /**
  * Manages instances of the NBTgrabber and the configurator

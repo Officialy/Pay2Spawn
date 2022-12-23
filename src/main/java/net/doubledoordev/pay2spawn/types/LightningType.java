@@ -34,14 +34,12 @@ import com.google.gson.JsonObject;
 import net.doubledoordev.pay2spawn.permissions.Node;
 import net.doubledoordev.pay2spawn.types.guis.LightningTypeGui;
 import net.doubledoordev.pay2spawn.util.Helper;
-import net.minecraft.command.IEntitySelector;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.effect.EntityLightningBolt;
-import net.minecraft.entity.player.Player;
-import net.minecraft.entity.player.ServerPlayer;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LightningBolt;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.phys.AABB;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -104,15 +102,15 @@ public class LightningType extends TypeBase
         {
             case PLAYER_ENTITY:
             {
-                player.getEntityWorld().addWeatherEffect(new EntityLightningBolt(player.getEntityWorld(), X, Y, Z));
+                player.getEntityWorld().addWeatherEffect(new LightningBolt(player.getEntityWorld(), X, Y, Z));
                 break;
             }
             case NEAREST_ENTITY:
             {
-                AxisAlignedBB AABB = AxisAlignedBB.getBoundingBox(X - spread, Y - spread, Z - spread, X + spread, Y + spread, Z + spread);
+                AABB AABB = AABB.getBoundingBox(X - spread, Y - spread, Z - spread, X + spread, Y + spread, Z + spread);
                 Entity entity = player.getEntityWorld().findNearestEntityWithinAABB(LivingEntity.class, AABB, player);
-                if (entity != null) player.getEntityWorld().addWeatherEffect(new EntityLightningBolt(player.getEntityWorld(), entity.getX(), entity.getY(), entity.getZ()));
-                else player.getEntityWorld().addWeatherEffect(new EntityLightningBolt(player.getEntityWorld(), X, Y, Z));
+                if (entity != null) player.getEntityWorld().addWeatherEffect(new LightningBolt(player.getEntityWorld(), entity.getX(), entity.getY(), entity.getZ()));
+                else player.getEntityWorld().addWeatherEffect(new LightningBolt(player.getEntityWorld(), X, Y, Z));
                 break;
             }
             case RND_SPOT:
@@ -120,7 +118,7 @@ public class LightningType extends TypeBase
                 X += (spread - (RANDOM.nextDouble() * spread * 2));
                 Z += (spread - (RANDOM.nextDouble() * spread * 2));
                 Y += (3 - RANDOM.nextDouble() * 6);
-                player.getEntityWorld().addWeatherEffect(new EntityLightningBolt(player.getEntityWorld(), X, Y, Z));
+                player.getEntityWorld().addWeatherEffect(new LightningBolt(player.getEntityWorld(), X, Y, Z));
                 break;
             }
             case RND_ENTITY:
@@ -133,12 +131,12 @@ public class LightningType extends TypeBase
                         return entity instanceof LivingEntity;
                     }
                 };
-                AxisAlignedBB AABB = AxisAlignedBB.getBoundingBox(X - spread, Y - spread, Z - spread, X + spread, Y + spread, Z + spread);
+                AABB aabb = new AABB(X - spread, Y - spread, Z - spread, X + spread, Y + spread, Z + spread);
                 //noinspection unchecked
-                List<LivingEntity> entity = player.getEntityWorld().getEntitiesWithinAABBExcludingEntity(player, AABB, iEntitySelector);
-                LivingEntity getEntityLiving() = Helper.getRandomFromSet(entity);
-                if (getEntityLiving() != null) player.getEntityWorld().addWeatherEffect(new EntityLightningBolt(player.getEntityWorld(), getEntityLiving().getX(), getEntityLiving().getY(), getEntityLiving().getZ()));
-                else player.getEntityWorld().addWeatherEffect(new EntityLightningBolt(player.getEntityWorld(), X, Y, Z));
+                List<LivingEntity> entity = player.getEntityWorld().getEntitiesWithinAABBExcludingEntity(player, aabb, iEntitySelector);
+                LivingEntity entityLiving = Helper.getRandomFromSet(entity);
+                if (getEntityLiving() != null) player.getEntityWorld().addWeatherEffect(new LightningBolt(player.getEntityWorld(), entityLiving.getX(), entityLiving.getY(), entityLiving.getZ()));
+                else player.getEntityWorld().addWeatherEffect(new LightningBolt(player.getEntityWorld(), X, Y, Z));
             }
         }
     }

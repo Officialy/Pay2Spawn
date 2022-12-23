@@ -30,6 +30,7 @@
 
 package net.doubledoordev.pay2spawn;
 
+import net.doubledoordev.oldforge.Configuration;
 import net.doubledoordev.pay2spawn.checkers.CheckerHandler;
 import net.doubledoordev.pay2spawn.hud.Hud;
 import net.doubledoordev.pay2spawn.types.TypeRegistry;
@@ -51,7 +52,7 @@ public class P2SConfig
     public final static String HUD           = MODID + ".Hud";
     public static final String CONFIGVERSION = "4";
     public final boolean       majorConfigVersionChange;
-    public       Configuration configuration;
+    public Configuration configuration;
     public boolean forceServerconfig = false;
     public boolean forceP2S          = false;
     public String  channel           = "";

@@ -35,7 +35,7 @@ import net.doubledoordev.pay2spawn.P2SConfig;
 import net.doubledoordev.pay2spawn.Pay2Spawn;
 import net.doubledoordev.pay2spawn.util.Helper;
 import net.doubledoordev.pay2spawn.util.RewardsDB;
-import net.minecraftforge.common.config.Configuration;
+import net.doubledoordev.oldforge.Configuration;
 
 import java.util.ArrayList;
 

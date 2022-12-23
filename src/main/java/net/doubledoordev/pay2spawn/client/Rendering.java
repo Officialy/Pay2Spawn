@@ -30,34 +30,30 @@
 
 package net.doubledoordev.pay2spawn.client;
 
-import com.mojang.authlib.minecraft.MinecraftProfileTexture;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import net.doubledoordev.pay2spawn.Pay2Spawn;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.AbstractClientPlayer;
-import net.minecraft.client.model.ModelBiped;
-import net.minecraft.client.renderer.ThreadDownloadImageData;
-import net.minecraft.client.renderer.entity.*;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.monster.EntityZombie;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.client.model.ZombieModel;
+import net.minecraft.client.model.geom.ModelLayerLocation;
+import net.minecraft.client.model.geom.ModelLayers;
+import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.client.renderer.entity.AbstractZombieRenderer;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.client.renderer.entity.LivingEntityRenderer;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.monster.Zombie;
 import net.minecraftforge.client.event.RenderLivingEvent;
 import net.minecraftforge.common.MinecraftForge;
-import org.lwjgl.Sys;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 /**
  * @author Dries007
  */
-public class Rendering
-{
-    private CustomRender customRender = new CustomRender();
+public class Rendering {
+    private CustomRender customRender; //todo THIS IS NULL
 
-    private Rendering()
-    {
+    private Rendering() {
     }
 
-    public static void init()
-    {
+    public static void init() {
         MinecraftForge.EVENT_BUS.register(new Rendering());
 //        Render render = RenderManager.instance.getEntityClassRenderObject(EntityZombie.class);
 //        if (render instanceof RenderBiped)
@@ -71,29 +67,28 @@ public class Rendering
     }
 
     @SubscribeEvent
-    public void renderLivingEvent(RenderLivingEvent.Pre event)
-    {
-        if (event.entity instanceof EntityZombie && ((LivingEntity) event.entity).hasCustomNameTag() && !(event.renderer instanceof CustomRender))
-        {
+    public void renderLivingEvent(RenderLivingEvent.Pre<Zombie, ZombieModel<Zombie>> event) {
+        if (event.getEntity() instanceof Zombie zombie && event.getEntity().hasCustomName() && !(event.getRenderer() instanceof CustomRender)) {
             event.setCanceled(true);
-            customRender.doRender(event.entity, event.x, event.y, event.z, 0, 0);
+            customRender.render(zombie, 0, 0, event.getPoseStack(), event.getMultiBufferSource(), event.getPackedLight());
         }
     }
 
-    private class CustomRender extends RenderBiped
-    {
-        public CustomRender()
-        {
-            super(new ModelBiped(0.0F), 1.0F);
-            setRenderManager(RenderManager.instance);
+    private static class CustomRender extends AbstractZombieRenderer<Zombie, ZombieModel<Zombie>> {
+
+        public CustomRender(EntityRendererProvider.Context context) {
+            this(context, ModelLayers.ZOMBIE, ModelLayers.ZOMBIE_INNER_ARMOR, ModelLayers.ZOMBIE_OUTER_ARMOR);
+        }
+
+        public CustomRender(EntityRendererProvider.Context context, ModelLayerLocation model, ModelLayerLocation inner, ModelLayerLocation outer) {
+            super(context, new ZombieModel<>(context.bakeLayer(model)), new ZombieModel<>(context.bakeLayer(inner)), new ZombieModel<>(context.bakeLayer(outer)));
         }
 
         @Override
-        public ResourceLocation getEntityTexture(LivingEntity p_110775_1_)
-        {
-            String name = p_110775_1_.getCustomNameTag();
-            ResourceLocation location = AbstractClientPlayer.getLocationSkin(name);
-            AbstractClientPlayer.getDownloadImageSkin(location, name);
+        public ResourceLocation getTextureLocation(Zombie zombie) {
+            String name = zombie.getCustomName().getString();
+            ResourceLocation location = AbstractClientPlayer.getSkinLocation(name);
+            AbstractClientPlayer.registerSkinTexture(location, name);
             return location;
         }
     }

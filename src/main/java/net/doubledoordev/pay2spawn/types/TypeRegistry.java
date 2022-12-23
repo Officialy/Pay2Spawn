@@ -32,7 +32,7 @@ package net.doubledoordev.pay2spawn.types;
 
 import net.doubledoordev.pay2spawn.configurator.HTMLGenerator;
 import net.doubledoordev.pay2spawn.permissions.PermissionsHandler;
-import net.minecraftforge.common.config.Configuration;
+import net.doubledoordev.oldforge.Configuration;
 
 import java.io.IOException;
 import java.util.ArrayList;
