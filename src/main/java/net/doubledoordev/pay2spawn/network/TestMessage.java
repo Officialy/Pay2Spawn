@@ -41,81 +41,73 @@ import net.doubledoordev.pay2spawn.types.TypeBase;
 import net.doubledoordev.pay2spawn.types.TypeRegistry;
 import net.doubledoordev.pay2spawn.util.Helper;
 import net.doubledoordev.pay2spawn.util.JsonNBTHelper;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraftforge.network.NetworkEvent;
+
+import java.util.function.Supplier;
 
 /**
  * Allows testing of rewards
  *
  * @author Dries007
  */
-public class TestMessage implements IMessage
-{
-    private String         name;
+public class TestMessage {
+    private String name;
     private CompoundTag data;
 
-    public TestMessage()
-    {
+    public TestMessage() {
 
     }
 
-    public TestMessage(String name, CompoundTag data)
-    {
+    public TestMessage(String name, CompoundTag data) {
         this.name = name;
         this.data = data;
     }
 
-    public static void sendToServer(String name, JsonObject jsondata)
-    {
-        if (Minecraft.getInstance().isGamePaused()) Helper.msg(ChatFormatting.RED + "Some tests don't work while paused! Use your chat key to lose focus.");
+    public static void sendToServer(String name, JsonObject jsondata) {
+        if (Minecraft.getInstance().isPaused())
+            Helper.msg(ChatFormatting.RED + "Some tests don't work while paused! Use your chat key to lose focus.");
         CompoundTag data = JsonNBTHelper.parseJSON(jsondata);
         if (Helper.checkTooBigForNetwork(data)) return;
         Pay2Spawn.getSnw().sendToServer(new TestMessage(name, data));
     }
 
-    @Override
-    public void fromBytes(ByteBuf buf)
-    {
+
+    public static TestMessage fromBytes(FriendlyByteBuf buf) {
         name = ByteBufUtils.readUTF8String(buf);
         data = ByteBufUtils.readTag(buf);
     }
 
-    @Override
-    public void toBytes(ByteBuf buf)
-    {
-        ByteBufUtils.writeUTF8String(buf, name);
-        ByteBufUtils.writeTag(buf, data);
+
+    public void toBytes(FriendlyByteBuf buf) {
+        buf.writeUTF8String(buf, name);
+        buf.writeTag(buf, data);
     }
 
-    public static class Handler implements IMessageHandler<TestMessage, IMessage>
-    {
-        @Override
-        public IMessage onMessage(TestMessage message, MessageContext ctx)
-        {
-            if (ctx.side.isServer())
-            {
-                RndVariable.reset();
+    public static void handle(TestMessage message, Supplier<NetworkEvent.Context> ctx) {
+        ctx.get().enqueueWork(() -> {
+            RndVariable.reset();
 
-                CompoundTag rewardData = new CompoundTag();
-                Helper.sendChatToPlayer(ctx.getServerHandler().playerEntity, "Testing reward " + message.name + ".");
-                Pay2Spawn.getLogger().info("Test by " + ctx.getServerHandler().playerEntity.getCommandSenderName() + " Type: " + message.name + " Data: " + message.data);
-                TypeBase type = TypeRegistry.getByName(message.name);
+            CompoundTag rewardData = new CompoundTag();
+            Helper.sendChatToPlayer(ctx.get().getSender(), "Testing reward " + message.name + ".");
+            Pay2Spawn.getLogger().info("Test by " + ctx.get().getSender().getName() + " Type: " + message.name + " Data: " + message.data);
+            TypeBase type = TypeRegistry.getByName(message.name);
 
-                Node node = type.getPermissionNode(ctx.getServerHandler().playerEntity, message.data);
-                if (BanHelper.isBanned(node))
-                {
-                    Helper.sendChatToPlayer(ctx.getServerHandler().playerEntity, "This node (" + node + ") is banned.", ChatFormatting.RED);
-                    Pay2Spawn.getLogger().warn(ctx.getServerHandler().playerEntity.getCommandSenderName() + " tried using globally banned node " + node + ".");
-                    return null;
-                }
-                if (PermissionsHandler.needPermCheck(ctx.getServerHandler().playerEntity) && !PermissionsHandler.hasPermissionNode(ctx.getServerHandler().playerEntity, node))
-                {
-                    Pay2Spawn.getLogger().warn(ctx.getServerHandler().playerEntity.getDisplayName() + " doesn't have perm node " + node.toString());
-                    return null;
-                }
-                type.spawnServerSide(ctx.getServerHandler().playerEntity, message.data, rewardData);
+            Node node = type.getPermissionNode(ctx.get().getSender(), message.data);
+            if (BanHelper.isBanned(node)) {
+                Helper.sendChatToPlayer(ctx.get().getSender(), "This node (" + node + ") is banned.", ChatFormatting.RED);
+                Pay2Spawn.getLogger().warn(ctx.get().getSender().getName() + " tried using globally banned node " + node + ".");
+                return;
             }
-            return null;
-        }
+            if (PermissionsHandler.needPermCheck(ctx.get().getSender()) && !PermissionsHandler.hasPermissionNode(ctx.get().getSender(), node)) {
+                Pay2Spawn.getLogger().warn(ctx.get().getSender().getDisplayName() + " doesn't have perm node " + node.toString());
+                return;
+            }
+            type.spawnServerSide(ctx.get().getSender(), message.data, rewardData);
+        });
     }
+
 }

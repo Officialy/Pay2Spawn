@@ -36,10 +36,15 @@ import net.doubledoordev.d3core.permissions.PermissionsDB;
 import net.doubledoordev.d3core.util.*;
 import net.doubledoordev.d3core.util.libs.org.mcstats.Metrics;
 import net.doubledoordev.oldforge.Configuration;
+import net.minecraft.client.gui.components.ChatComponent;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLModContainer;
+import net.minecraftforge.fml.loading.FMLLoader;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.impl.Log4JLogger;
 import org.apache.logging.log4j.LogManager;
@@ -67,26 +72,23 @@ import static net.doubledoordev.d3core.util.VoidRefunds.VOID_REFUNDS;
  * @author Dries007
  */
 @Mod(MODID)
-public class D3Core implements ID3Mod
-{
+public class D3Core implements ID3Mod {
     public static D3Core instance;
     public static boolean aprilFools = true;
     private File folder;
 
     private static final Logger logger = LogManager.getLogger();
-    private DevPerks      devPerks;
     private Configuration configuration;
 
-    private boolean debug         = false;
-    private boolean sillyness     = true;
+    private boolean debug = false;
+    private boolean sillyness = true;
     private boolean updateWarning = true;
 
-    private List<ModContainer>             d3Mods         = new ArrayList<>();
+    private List<ModContainer> d3Mods = new ArrayList<>();
     private List<CoreHelper.ModUpdateDate> updateDateList = new ArrayList<>();
     private boolean pastPost;
 
-    public D3Core()
-    {
+    public D3Core() {
         instance = this;
 
         MinecraftForge.EVENT_BUS.register(this);
@@ -95,155 +97,46 @@ public class D3Core implements ID3Mod
         MinecraftForge.EVENT_BUS.register(FORGE_EVENT_HANDLER);
         MinecraftForge.EVENT_BUS.register(VOID_REFUNDS);
 
-        folder = new File(event.getModConfigurationDirectory(), MODID);
+        folder = new File(FMLLoader.getGamePath() + "/" + "config" + "/", MODID);
         folder.mkdir();
-
-        File configFile = new File(folder, event.getSuggestedConfigurationFile().getName());
-        if (event.getSuggestedConfigurationFile().exists())
-        {
-            try
-            {
-                FileUtils.copyFile(event.getSuggestedConfigurationFile(), configFile);
-                event.getSuggestedConfigurationFile().delete();
-            }
-            catch (IOException e)
-            {
-                e.printStackTrace();
-            }
-        }
-        configuration = new Configuration(configFile);
-        syncConfig();
+        configuration = new Configuration(new File(folder, "config.cfg"));
+//        syncConfig();
 
         PermissionsDB.load();
     }
 
-    @Mod.EventHandler
-    public void init(FMLInitializationEvent event) throws IOException
-    {
+    public void init(FMLCommonSetupEvent event) throws IOException {
         Materials.load();
 
-        final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-        for (final ModContainer modContainer : Loader.instance().getActiveModList())
-        {
-            if (modContainer instanceof FMLModContainer && modContainer.getMod() instanceof ID3Mod)
-            {
-                if (debug()) logger.info(String.format("[%s] Found a D3 Mod!", modContainer.getModId()));
-                d3Mods.add(modContainer);
-                if (!updateWarning) continue;
-
-                new Thread(new Runnable()
-                {
-                    @Override
-                    public void run()
-                    {
-                        try
-                        {
-                            TreeSet<ArtifactVersion> availableVersions = new TreeSet<>();
-
-                            String group = modContainer.getMod().getClass().getPackage().getName();
-                            String artifactId = modContainer.getName();
-                            if (debug()) logger.info(String.format("[%s] Group: %s ArtifactId: %s", modContainer.getModId(), group, artifactId));
-
-                            URL url = new URL(MAVENURL + group.replace('.', '/') + '/' + artifactId + "/maven-metadata.xml");
-                            if (debug()) logger.info(String.format("[%s] Maven URL: %s", modContainer.getModId(), url));
-
-                            DocumentBuilder builder = dbf.newDocumentBuilder();
-                            Document document = builder.parse(url.toURI().toString());
-                            NodeList list = document.getDocumentElement().getElementsByTagName("version");
-                            for (int i = 0; i < list.getLength(); i++)
-                            {
-                                String version = list.item(i).getFirstChild().getNodeValue();
-                                if (version.startsWith(Loader.MC_VERSION + "-"))
-                                {
-                                    availableVersions.add(new DefaultArtifactVersion(version.replace(Loader.MC_VERSION + "-", "")));
-                                }
-                            }
-                            DefaultArtifactVersion current = new DefaultArtifactVersion(modContainer.getVersion().replace(Loader.MC_VERSION + "-", ""));
-
-                            if (debug()) logger.info(String.format("[%s] Current: %s Latest: %s All versions for MC %s: %s", modContainer.getModId(), current, availableVersions.last(), Loader.MC_VERSION, availableVersions));
-
-                            if (current.compareTo(availableVersions.last()) < 0)
-                            {
-                                updateDateList.add(new CoreHelper.ModUpdateDate(modContainer.getName(), modContainer.getModId(), current.toString(), availableVersions.last().toString()));
-                            }
-                        }
-                        catch (Exception e)
-                        {
-                            logger.info("D3 Mod " + modContainer.getModId() + " Version check FAILED. Error: " + e.toString());
-                        }
-                    }
-                }).start();
-            }
-        }
-
-        try
-        {
-            Metrics metrics = new Metrics(MODID, metadata.version);
+        try {
+            Metrics metrics = new Metrics(MODID, "1.18.2"); //todo mod version
 
             Metrics.Graph submods = metrics.createGraph("Submods");
-            for (ModContainer modContainer : d3Mods)
-            {
+            for (ModContainer modContainer : d3Mods) {
                 submods.addPlotter(new Metrics.Plotter(modContainer.getModId()) {
                     @Override
-                    public int getValue()
-                    {
+                    public int getValue() {
                         return 1;
                     }
                 });
             }
 
-            for (ModContainer modContainer : d3Mods)
-            {
-                metrics.createGraph(modContainer.getModId()).addPlotter(new Metrics.Plotter(modContainer.getDisplayVersion()) {
+            for (ModContainer modContainer : d3Mods) {
+                metrics.createGraph(modContainer.getModId()).addPlotter(new Metrics.Plotter("Version") { //todo idk what to put here lmao
                     @Override
-                    public int getValue()
-                    {
+                    public int getValue() {
                         return 1;
                     }
                 });
             }
 
             metrics.start();
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    @Mod.EventHandler
-    public void postInit(FMLPostInitializationEvent event)
-    {
-        for (CoreHelper.ModUpdateDate updateDate : updateDateList)
-        {
-            logger.warn(String.format("Update available for %s (%s)! Current version: %s New version: %s. Please update ASAP!", updateDate.getName(), updateDate.getModId(), updateDate.getCurrentVersion(), updateDate.getLatestVersion()));
-        }
-
-        EndermanGriefing.init();
-        pastPost = true;
-
         PermissionsDB.save();
     }
 
-    @Mod.EventHandler
-    public void serverStarting(FMLServerStartingEvent event)
-    {
-        //event.registerServerCommand(new CommandGroup());
-        event.registerServerCommand(new CommandSetLoginMessage());
-    }
-
-    @SubscribeEvent
-    public void nameFormatEvent(PlayerEvent.PlayerLoggedInEvent event)
-    {
-        if (!updateWarning || updateDateList.isEmpty()) return;
-
-        event.player.addChatComponentMessage(IChatComponent.Serializer.func_150699_a("{\"text\":\"\",\"extra\":[{\"text\":\"Updates available for these mods:\",\"color\":\"gold\"}]}"));
-        for (CoreHelper.ModUpdateDate updateDate : updateDateList)
-        {
-            event.player.addChatComponentMessage(IChatComponent.Serializer.func_150699_a(String.format("{\"text\":\"\",\"extra\":[{\"text\":\"%s: %s -> %s\"}]}", updateDate.getName(), updateDate.getCurrentVersion(), updateDate.getLatestVersion())));
-        }
-        event.player.addChatComponentMessage(IChatComponent.Serializer.func_150699_a("{\"text\":\"\",\"extra\":[{\"text\":\"Download here!\",\"color\":\"gold\",\"clickEvent\":{\"action\":\"open_url\",\"value\":\"http://doubledoordev.net\"}},{\"text\":\" <- That is a link btw :p\"}]}"));
-    }
     
  /*   @Override
     public void syncConfig()
@@ -296,29 +189,19 @@ public class D3Core implements ID3Mod
     }*/
 
 
-    public static Logger getLogger()
-    {
+    public static Logger getLogger() {
         return instance.logger;
     }
 
-    public static boolean debug()
-    {
+    public static boolean debug() {
         return instance.debug;
     }
 
-    public static Configuration getConfiguration()
-    {
+    public static Configuration getConfiguration() {
         return instance.configuration;
     }
 
-    public static DevPerks getDevPerks()
-    {
-        if (instance.devPerks == null) instance.devPerks = new DevPerks();
-        return instance.devPerks;
-    }
-
-    public static File getFolder()
-    {
+    public static File getFolder() {
         return instance.folder;
     }
 }

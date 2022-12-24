@@ -35,7 +35,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.doubledoordev.pay2spawn.Pay2Spawn;
-import net.doubledoordev.pay2spawn.network.MessageMessage;
 import net.doubledoordev.pay2spawn.types.TypeBase;
 import net.doubledoordev.pay2spawn.types.TypeRegistry;
 
@@ -165,7 +164,7 @@ public class RewardsDB
             Helper.getRandomFromSet(map.get(-1D)).addToCountdown(donation, false, reward);
         }
 
-        if (reward != null) Pay2Spawn.getSnw().sendToServer(new MessageMessage(reward, donation));
+//     todo   if (reward != null) Pay2Spawn.getSnw().sendToServer(new MessageMessage(reward, donation));
     }
 
     public Set<Double> getAmounts()

@@ -32,18 +32,16 @@ package net.doubledoordev.pay2spawn.types;
 
 import com.google.gson.JsonObject;
 import net.doubledoordev.pay2spawn.Pay2Spawn;
-import net.doubledoordev.pay2spawn.network.StatusMessage;
 import net.doubledoordev.pay2spawn.permissions.Node;
 import net.doubledoordev.pay2spawn.types.guis.SaleTypeGui;
-import net.minecraft.entity.player.Player;
-import net.minecraft.entity.player.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.nbt.CompoundTag;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 
-import static net.doubledoordev.pay2spawn.network.StatusMessage.Type.SALE;
 import static net.doubledoordev.pay2spawn.util.Constants.INT;
 import static net.doubledoordev.pay2spawn.util.Constants.NBTTypes;
 
@@ -81,7 +79,7 @@ public class SaleType extends TypeBase
     @Override
     public void spawnServerSide(ServerPlayer player, CompoundTag dataFromClient, CompoundTag rewardData)
     {
-        Pay2Spawn.getSnw().sendTo(new StatusMessage(SALE, Integer.toString(dataFromClient.getInt(TIME_KEY)), Integer.toString(dataFromClient.getInt(AMOUNT_KEY))), player);
+//        Pay2Spawn.getSnw().sendTo(new StatusMessage(SALE, Integer.toString(dataFromClient.getInt(TIME_KEY)), Integer.toString(dataFromClient.getInt(AMOUNT_KEY))), player);
     }
 
     @Override

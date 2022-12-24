@@ -33,8 +33,10 @@
 package net.doubledoordev.d3core.util;
 
 import net.doubledoordev.d3core.D3Core;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Tiers;
+import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
@@ -70,12 +72,12 @@ public class Materials
                 {
                     String modid = itemName.substring(0, itemName.indexOf(':'));
                     String name = itemName.substring(itemName.indexOf(':' + 1));
-                    Item item = GameRegistry.findItem(modid, name);
-                    if (item != null) material.customCraftingMaterial = item;
-                    else
-                    {
-                        D3Core.getLogger().warn("Tried to assign item {} to material {}. That item doesn't exist.", itemName, material.name());
-                    }
+                    Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(modid, name));
+//                    if (item != null) material.customCraftingMaterial = item;
+//                    else
+//                    {
+//                        D3Core.getLogger().warn("Tried to assign item {} to material {}. That item doesn't exist.", itemName, material.name());
+//                    }
                     map.remove(material.name());
                 }
             }

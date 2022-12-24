@@ -37,6 +37,6 @@ package net.doubledoordev.d3core.util;
  */
 public interface ID3Mod
 {
-    void syncConfig();
+//    void syncConfig();
 
 }

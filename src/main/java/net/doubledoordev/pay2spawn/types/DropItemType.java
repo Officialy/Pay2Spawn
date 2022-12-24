@@ -33,8 +33,8 @@ package net.doubledoordev.pay2spawn.types;
 import com.google.gson.JsonObject;
 import net.doubledoordev.pay2spawn.permissions.Node;
 import net.doubledoordev.pay2spawn.types.guis.DropItemTypeGui;
-import net.minecraft.entity.player.Player;
-import net.minecraft.entity.player.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.nbt.CompoundTag;
 
 import java.util.Collection;
@@ -84,21 +84,21 @@ public class DropItemType extends TypeBase
         switch (dataFromClient.getInt(TYPE_KEY))
         {
             case HOLDING_1:
-                player.dropOneItem(false);
+                player.drop(false);
                 break;
             case HOLDING_ALL:
-                player.dropOneItem(true);
+                player.drop(true);
                 break;
             case ALL:
-                player.inventory.dropAllItems();
+                player.getInventory().dropAll();
                 break;
             case ARMOR:
-                for (int i = 0; i < player.inventory.armorInventory.length; ++i)
+                for (int i = 0; i < player.getInventory().armor.size(); ++i)
                 {
-                    if (player.inventory.armorInventory[i] != null)
+                    if (player.getInventory().getArmor(i) != null)
                     {
-                        player.dropPlayerItemWithRandomChoice(player.inventory.armorInventory[i], true);
-                        player.inventory.armorInventory[i] = null;
+                        player.drop(player.getInventory().getArmor(i), true);
+                        player.getInventory().armor.set(i, null);
                     }
                 }
                 break;

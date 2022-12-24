@@ -34,6 +34,7 @@ import com.google.common.base.Strings;
 
 import com.google.common.base.Supplier;
 import io.netty.buffer.ByteBuf;
+import io.netty.handler.codec.mqtt.MqttEncoder;
 import net.doubledoordev.pay2spawn.Pay2Spawn;
 import net.doubledoordev.pay2spawn.util.Donation;
 import net.doubledoordev.pay2spawn.util.Helper;
@@ -53,10 +54,10 @@ import static net.doubledoordev.pay2spawn.util.Constants.GSON_NOPP;
  */
 public class MessageMessage {
     private Reward reward;
-    private Donation donation;
-    private String message, name;
-    private double amount;
-    private int countdown;
+    private static Donation donation;
+    private static String message, name;
+    private static double amount;
+    private static int countdown;
 
     public MessageMessage(Reward reward, Donation donation) {
         this.reward = reward;
@@ -74,11 +75,11 @@ public class MessageMessage {
         countdown = buf.readInt();
 
         donation = GSON.fromJson(Helper.readLongStringToByteBuf(buf), Donation.class);
-
+        return new MessageMessage();
     }
 
     public void toBytes(FriendlyByteBuf buf) {
-        ByteBufUtils.writeUTF8String(buf, reward.getMessage());
+        MqttEncoder.writeUTF8String(buf, reward.getMessage());
         ByteBufUtils.writeUTF8String(buf, reward.getName());
         buf.writeDouble(reward.getAmount());
         buf.writeInt(reward.getCountdown());

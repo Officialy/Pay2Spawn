@@ -32,6 +32,7 @@
 
 package net.doubledoordev.d3core.util;
 
+import net.doubledoordev.oldforge.Configuration;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.player.Inventory;
@@ -66,7 +67,7 @@ public class VoidRefunds
     {
         final String catVoidDeaths = MODID + ".VoidDeaths";
         configuration.addCustomCategoryComment(catVoidDeaths, "In these dimensions, when you die to void damage, you will keep your items.");
-        voidRefundDimensions = configuration.get(catVoidDeaths, "refundDimensions", new int[] {}).getIntList();
+//    todo    voidRefundDimensions = configuration.get(catVoidDeaths, "refundDimensions", new int[] {}).getIntList();
     }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
@@ -74,14 +75,16 @@ public class VoidRefunds
     {
         if (FMLLoader.getDist().isClient()) return;
         if (event.getSource() != DamageSource.OUT_OF_WORLD || !(event.getEntity() instanceof Player)) return;
-        if (event.getEntityLiving().lasthurt >= (Float.MAX_VALUE / 2)) return; // try to ignore /kill command
+        if (event.getEntityLiving().lastHurt >= (Float.MAX_VALUE / 2)) return; // try to ignore /kill command
         for (ResourceKey<Level> dim : voidRefundDimensions)
         {
             if (dim != event.getEntity().getLevel().dimension()) continue;
             event.setCanceled(true);
 
             Inventory tempCopy = new Inventory(null);
-            tempCopy.copyInventory(((Player) event.getEntity()).getInventory());
+//          todo  tempCopy.copyInventory(((Player) event.getEntity()).getInventory());
+//    todo        tempCopy.save();
+//            tempCopy.load();
             map.put(event.getEntity().getUUID(), tempCopy);
         }
     }

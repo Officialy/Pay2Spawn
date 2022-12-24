@@ -39,7 +39,8 @@ import net.doubledoordev.pay2spawn.cmd.CommandP2SPermissions;
 import net.doubledoordev.pay2spawn.cmd.CommandP2SServer;
 import net.doubledoordev.pay2spawn.configurator.ConfiguratorManager;
 import net.doubledoordev.pay2spawn.configurator.HTMLGenerator;
-import net.doubledoordev.pay2spawn.network.*;
+import net.doubledoordev.pay2spawn.network.MessageMessage;
+import net.doubledoordev.pay2spawn.network.TestMessage;
 import net.doubledoordev.pay2spawn.permissions.PermissionsHandler;
 import net.doubledoordev.pay2spawn.types.TypeBase;
 import net.doubledoordev.pay2spawn.types.TypeRegistry;
@@ -50,9 +51,11 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.ClientCommandHandler;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
+import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.simple.SimpleChannel;
@@ -76,6 +79,7 @@ import static net.doubledoordev.pay2spawn.util.Constants.*;
  *
  * @author Dries007
  */
+@Mod.EventBusSubscriber(modid = MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
 @Mod(MODID)
 public class Pay2Spawn implements ID3Mod {
     public static final HashSet<String> playersWithValidConfig = new HashSet<>();
@@ -128,8 +132,8 @@ public class Pay2Spawn implements ID3Mod {
     }
 
     public static void reloadDB_Server() throws Exception {
-        StatusMessage.serverConfig = GSON_NOPP.toJson(JSON_PARSER.parse(new FileReader(getRewardDBFile())));
-        StatusMessage.sendConfigToAllPlayers();
+//        StatusMessage.serverConfig = GSON_NOPP.toJson(JSON_PARSER.parse(new FileReader(getRewardDBFile())));
+//        StatusMessage.sendConfigToAllPlayers();
     }
 
     public static void reloadDBFromServer(String input) {
@@ -167,21 +171,27 @@ public class Pay2Spawn implements ID3Mod {
         newConfig = !configFile.exists();
         config = new P2SConfig(configFile);
         MetricsHelper.init();
+        IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
+
+        modEventBus.addListener(this::commonSetup);
 
         int id = 0;
         snw = NetworkRegistry.newSimpleChannel(new ResourceLocation(MODID, "main"), () -> PROTOCOL_VERSION, PROTOCOL_VERSION::equals, PROTOCOL_VERSION::equals);
-       /* snw.registerMessage(id++, MessageMessage::toBytes, MessageMessage::fromBytes, MessageMessage::handle);
+
+        snw.messageBuilder(TestMessage.class, id++).encoder(TestMessage::toBytes).decoder(TestMessage::fromBytes).consumer(TestMessage::handle).add();
+        snw.messageBuilder(MessageMessage.class, id++).encoder(MessageMessage::toBytes).decoder(MessageMessage::fromBytes).consumer(MessageMessage::handle).add();
+
+
         snw.registerMessage(id++, MusicMessage.Handler.class, MusicMessage.class,  Dist.CLIENT);
         snw.registerMessage(id++, NbtRequestMessage.Handler.class, NbtRequestMessage.class, Dist.CLIENT);
         snw.registerMessage(id++, NbtRequestMessage.Handler.class, NbtRequestMessage.class, Dist.DEDICATED_SERVER);
         snw.registerMessage(id++, RewardMessage.Handler.class, RewardMessage.class,  Dist.DEDICATED_SERVER);
         snw.registerMessage(id++, StatusMessage.Handler.class, StatusMessage.class,  Dist.DEDICATED_SERVER);
         snw.registerMessage(id++, StatusMessage.Handler.class, StatusMessage.class,  Dist.CLIENT);
-        snw.registerMessage(id++, TestMessage.Handler.class, TestMessage.class, Dist.DEDICATED_SERVER);
         snw.registerMessage(id++, StructureImportMessage.Handler.class, StructureImportMessage.class, Dist.DEDICATED_SERVER);
         snw.registerMessage(id++, StructureImportMessage.Handler.class, StructureImportMessage.class, Dist.CLIENT);
         snw.registerMessage(id++, HTMLuploadMessage.Handler.class, HTMLuploadMessage.class,  Dist.DEDICATED_SERVER);
-        snw.registerMessage(id++, CrashMessage.Handler.class, CrashMessage.class,  Dist.CLIENT);*/
+        snw.registerMessage(id++, CrashMessage.Handler.class, CrashMessage.class,  Dist.CLIENT);
 
         TypeRegistry.preInit();
         Statistics.preInit();
@@ -189,7 +199,7 @@ public class Pay2Spawn implements ID3Mod {
         config.syncConfig();
     }
 
-    public void init(FMLCommonSetupEvent event) throws MalformedURLException {
+    public void commonSetup(FMLCommonSetupEvent event) {
         ServerTickHandler.INSTANCE.init();
 
         rewardsDB = new RewardsDB(getRewardDBFile());
@@ -203,7 +213,7 @@ public class Pay2Spawn implements ID3Mod {
 //        CustomAI.INSTANCE.init();
 
         ClientTickHandler.INSTANCE.init();
-        ConnectionHandler.INSTANCE.init();
+//        ConnectionHandler.INSTANCE.init();
 
         config.syncConfig();
 
@@ -259,13 +269,14 @@ public class Pay2Spawn implements ID3Mod {
         }
     }
 
+    @SubscribeEvent
     public void serverStarting(ServerStartingEvent event) throws IOException {
         PermissionsHandler.init();
-        try {
-            StatusMessage.serverConfig = GSON_NOPP.toJson(JSON_PARSER.parse(new FileReader(new File(instance.configFolder, NAME + ".json"))));
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
+//        try {
+//            StatusMessage.serverConfig = GSON_NOPP.toJson(JSON_PARSER.parse(new FileReader(new File(instance.configFolder, NAME + ".json"))));
+//        } catch (FileNotFoundException e) {
+//            e.printStackTrace();
+//        }
     }
 
     @SubscribeEvent
@@ -275,10 +286,10 @@ public class Pay2Spawn implements ID3Mod {
         CommandP2SServer.processCommand(commandDispatcher);
     }
 
-    @Override
-    public void syncConfig() {
-        config.syncConfig();
-    }
+//    @Override
+//    public void syncConfig() {
+//        config.syncConfig();
+//    }
 
 //    @Override
 //    public void addConfigElements(List<IConfigElement> configElements)

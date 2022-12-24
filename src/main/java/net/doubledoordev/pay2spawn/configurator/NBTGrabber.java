@@ -30,7 +30,6 @@
 
 package net.doubledoordev.pay2spawn.configurator;
 
-import net.doubledoordev.pay2spawn.network.NbtRequestMessage;
 import net.doubledoordev.pay2spawn.util.IIHasCallback;
 
 import javax.swing.*;
@@ -46,16 +45,14 @@ import static net.doubledoordev.pay2spawn.util.Constants.JSON_PARSER;
  *
  * @author Dries007
  */
-public class NBTGrabber implements IIHasCallback
-{
-    public JButton   grabEntityButton;
+public class NBTGrabber implements IIHasCallback {
+    public JButton grabEntityButton;
     public JTextPane out;
-    public JPanel    panel1;
-    public JButton   grabItemButton;
+    public JPanel panel1;
+    public JButton grabItemButton;
     private NBTGrabber instance = this;
 
-    public NBTGrabber()
-    {
+    public NBTGrabber() {
         JFrame frame = new JFrame("NBTGrabber");
         frame.setContentPane(panel1);
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -68,28 +65,22 @@ public class NBTGrabber implements IIHasCallback
     }
 
     @Override
-    public void callback(Object... data)
-    {
+    public void callback(Object... data) {
         out.setText(GSON.toJson(JSON_PARSER.parse((String) data[0])));
     }
 
-    private void setupListeners()
-    {
-        grabEntityButton.addActionListener(new ActionListener()
-        {
+    private void setupListeners() {
+        grabEntityButton.addActionListener(new ActionListener() {
             @Override
-            public void actionPerformed(ActionEvent e)
-            {
-                NbtRequestMessage.requestEntity(instance);
+            public void actionPerformed(ActionEvent e) {
+//                NbtRequestMessage.requestEntity(instance);
             }
         });
 
-        grabItemButton.addActionListener(new ActionListener()
-        {
+        grabItemButton.addActionListener(new ActionListener() {
             @Override
-            public void actionPerformed(ActionEvent e)
-            {
-                NbtRequestMessage.requestItem(instance, -1);
+            public void actionPerformed(ActionEvent e) {
+//                NbtRequestMessage.requestItem(instance, -1);
             }
         });
     }
@@ -108,8 +99,7 @@ public class NBTGrabber implements IIHasCallback
      *
      * @noinspection ALL
      */
-    private void $$$setupUI$$$()
-    {
+    private void $$$setupUI$$$() {
         panel1 = new JPanel();
         panel1.setLayout(new GridBagLayout());
         final JPanel panel2 = new JPanel();
@@ -151,8 +141,7 @@ public class NBTGrabber implements IIHasCallback
     /**
      * @noinspection ALL
      */
-    public JComponent $$$getRootComponent$$$()
-    {
+    public JComponent $$$getRootComponent$$$() {
         return panel1;
     }
 }

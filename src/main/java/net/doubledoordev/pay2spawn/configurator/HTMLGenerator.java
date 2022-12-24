@@ -31,7 +31,6 @@
 package net.doubledoordev.pay2spawn.configurator;
 
 import net.doubledoordev.pay2spawn.Pay2Spawn;
-import net.doubledoordev.pay2spawn.network.HTMLuploadMessage;
 import net.doubledoordev.pay2spawn.types.TypeRegistry;
 import net.doubledoordev.pay2spawn.util.Reward;
 import org.apache.commons.io.FileUtils;
@@ -111,7 +110,7 @@ public class HTMLGenerator
         result.append(text.substring(end + LOOP_END.length(), text.length()));
 
         FileUtils.writeStringToFile(output, result.toString());
-        Pay2Spawn.getSnw().sendToServer(new HTMLuploadMessage(result.toString()));
+//        Pay2Spawn.getSnw().sendToServer(new HTMLuploadMessage(result.toString()));
     }
 
     private static String replace(String text) throws IOException

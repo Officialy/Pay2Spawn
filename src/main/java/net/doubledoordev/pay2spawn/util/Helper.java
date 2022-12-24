@@ -52,6 +52,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
@@ -314,9 +315,9 @@ public class Helper
         return max;
     }
 
-    public static void sendChatToPlayer(CommandSourceStack player, String message, ChatFormatting chatFormatting)
+    public static void sendChatToPlayer(ServerPlayer player, String message, ChatFormatting chatFormatting)
     {
-        player.addChatMessage(new TextComponent(message).setChatStyle(new ChatStyle().setColor(chatFormatting)));
+        player.displayClientMessage(new TextComponent(message).withStyle(chatFormatting), false);
     }
 
     public static void sendChatToPlayer(Player player, String message)
@@ -343,9 +344,9 @@ public class Helper
 
     public static void renderPoint(BufferBuilder tess, int x, int y, int z)
     {
-        GL11.glPushMatrix();
-        GL11.glTranslated(x, y, z);
-        GL11.glScalef(1.01f, 1.01f, 1.01f);
+//        todo GL11.glPushMatrix();
+//        GL11.glTranslated(x, y, z);
+//        GL11.glScalef(1.01f, 1.01f, 1.01f);
 
         // FRONT
         tess.begin(VertexFormat.Mode.LINES, DefaultVertexFormat.POSITION);
@@ -384,7 +385,7 @@ public class Helper
         tess.vertex(1, 1, 0);
         tess.vertex(1, 1, -1);
 
-        GL11.glPopMatrix();
+//        GL11.glPopMatrix();
     }
 
     public static String makeTable(TableData... datas)
@@ -418,13 +419,12 @@ public class Helper
      *
      * @param username <code>String</code> containing the username to check OP status
      * @return <code>boolean</code>
-     */
+     *
     public static boolean isPlayerOpped(String username)
     {
         MinecraftServer server = MinecraftServer.getServer();
-
         return server.getConfigurationManager().func_152596_g(server.func_152358_ax().func_152655_a(username));
-    }
+    }*/
 
     /**
      * Used to get the MD5 hash of a given string.
@@ -492,7 +492,7 @@ public class Helper
      */
     public static boolean checkTooBigForNetwork(CompoundTag root)
     {
-        try
+    /* todo   try
         {
             if (NbtIo.compress(root).length > 32000)
             {
@@ -503,7 +503,7 @@ public class Helper
         catch (IOException ex)
         {
             ex.printStackTrace();
-        }
+        }*/
         return false;
     }
 

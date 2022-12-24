@@ -56,12 +56,12 @@ public class CommandP2SPermissions {
 
     public static void processCommand(CommandDispatcher<CommandSourceStack> sender) {
         LiteralArgumentBuilder<CommandSourceStack> builder = Commands.literal("p2sperm").executes(context -> {
-            Helper.sendChatToPlayer(context.getSource(), "Use '/p2sperm group|groups|player' for more info.", ChatFormatting.RED);
+            Helper.sendChatToPlayer(context.getSource().getPlayerOrException(), "Use '/p2sperm group|groups|player' for more info.", ChatFormatting.RED);
             return 0;
         });
 
         builder.then(Commands.literal("groups").executes(context -> {
-                    Helper.sendChatToPlayer(context.getSource(), "Use 'p2sperm groups add|remove <name> [parent group]' to add or remove a group.", ChatFormatting.RED);
+                    Helper.sendChatToPlayer(context.getSource().getPlayerOrException(), "Use 'p2sperm groups add|remove <name> [parent group]' to add or remove a group.", ChatFormatting.RED);
                     return 1;
                 }).then(Commands.literal("add")
                         .then(Commands.argument("name", StringArgumentType.string())
@@ -70,7 +70,7 @@ public class CommandP2SPermissions {
                                             String name = context.getArgument("name", String.class);
                                             String parent = context.getArgument("parent", String.class);
                                             PermissionsHandler.getDB().newGroup(name, parent);
-                                            Helper.sendChatToPlayer(context.getSource(), "Added new group named '" + name + (parent != null ? "' with parent group '" + parent : "") + "'.", ChatFormatting.GOLD);
+                                            Helper.sendChatToPlayer(context.getSource().getPlayerOrException(), "Added new group named '" + name + (parent != null ? "' with parent group '" + parent : "") + "'.", ChatFormatting.GOLD);
                                             PermissionsHandler.getDB().save();
                                             return 1;
                                         }))))
@@ -78,13 +78,13 @@ public class CommandP2SPermissions {
                         .executes(context -> {
                             String name = context.getArgument("name", String.class);
                             PermissionsHandler.getDB().remove(name);
-                            Helper.sendChatToPlayer(context.getSource(), "Removed group named '" + name + "'", ChatFormatting.GOLD);
+                            Helper.sendChatToPlayer(context.getSource().getPlayerOrException(), "Removed group named '" + name + "'", ChatFormatting.GOLD);
                             PermissionsHandler.getDB().save();
                             return 1;
                         }))));
 
         builder.then(Commands.literal("group").executes(context -> {
-            Helper.sendChatToPlayer(context.getSource(), "Use 'p2sperm group <name> add|remove <node>' OR '<name> parent set|clear [name]'", ChatFormatting.RED);
+            Helper.sendChatToPlayer(context.getSource().getPlayerOrException(), "Use 'p2sperm group <name> add|remove <node>' OR '<name> parent set|clear [name]'", ChatFormatting.RED);
             return 1;
         }).then(Commands.argument("name", StringArgumentType.string())
                 .then(Commands.literal("add")
@@ -94,11 +94,11 @@ public class CommandP2SPermissions {
                                     String node = context.getArgument("node", String.class);
                                     Group group = PermissionsHandler.getDB().getGroup(name);
                                     if (group == null) {
-                                        Helper.sendChatToPlayer(context.getSource(), "Group '" + name + "' does not exist.", ChatFormatting.RED);
+                                        Helper.sendChatToPlayer(context.getSource().getPlayerOrException(), "Group '" + name + "' does not exist.", ChatFormatting.RED);
                                         return 1;
                                     }
                                     group.addNode(node);
-                                    Helper.sendChatToPlayer(context.getSource(), "Added node '" + node + "' to group '" + name + "'.", ChatFormatting.GOLD);
+                                    Helper.sendChatToPlayer(context.getSource().getPlayerOrException(), "Added node '" + node + "' to group '" + name + "'.", ChatFormatting.GOLD);
                                     PermissionsHandler.getDB().save();
                                     return 1;
                                 }))) //end of add
@@ -108,11 +108,11 @@ public class CommandP2SPermissions {
                             String node = context.getArgument("node", String.class);
                             Group group = PermissionsHandler.getDB().getGroup(name);
                             if (group == null) {
-                                Helper.sendChatToPlayer(context.getSource(), "Group '" + name + "' does not exist.", ChatFormatting.RED);
+                                Helper.sendChatToPlayer(context.getSource().getPlayerOrException(), "Group '" + name + "' does not exist.", ChatFormatting.RED);
                                 return 1;
                             }
                             group.removeNode(node);
-                            Helper.sendChatToPlayer(context.getSource(), "Removed node '" + node + "' from group '" + name + "'.", ChatFormatting.GOLD);
+                            Helper.sendChatToPlayer(context.getSource().getPlayerOrException(), "Removed node '" + node + "' from group '" + name + "'.", ChatFormatting.GOLD);
                             PermissionsHandler.getDB().save();
                             return 1;
                         }))) //end of remove
@@ -121,18 +121,18 @@ public class CommandP2SPermissions {
                             String name = context.getArgument("name", String.class);
                             Group group = PermissionsHandler.getDB().getGroup(name);
                             group.setParent(name);
-                            Helper.sendChatToPlayer(context.getSource(), "Set parent to: " + name, ChatFormatting.GOLD);
+                            Helper.sendChatToPlayer(context.getSource().getPlayerOrException(), "Set parent to: " + name, ChatFormatting.GOLD);
                             PermissionsHandler.getDB().save();
                             return 1;
                         }))).then(Commands.literal("clear").executes(context -> {
                     String name = context.getArgument("name", String.class);
                     Group group = PermissionsHandler.getDB().getGroup(name);
                     group.setParent(null);
-                    Helper.sendChatToPlayer(context.getSource(), "Cleared parent group.", ChatFormatting.GOLD);
+                    Helper.sendChatToPlayer(context.getSource().getPlayerOrException(), "Cleared parent group.", ChatFormatting.GOLD);
                     PermissionsHandler.getDB().save();
                     return 1;
                 })).then(Commands.literal("player").executes(context -> {
-                    Helper.sendChatToPlayer(context.getSource(), "Use 'p2sperm player <name> group add|remove <group>' OR '<name> perm add|remove <node>'", ChatFormatting.RED);
+                    Helper.sendChatToPlayer(context.getSource().getPlayerOrException(), "Use 'p2sperm player <name> group add|remove <group>' OR '<name> perm add|remove <node>'", ChatFormatting.RED);
                     return 1;
                 })).then(Commands.argument("name", StringArgumentType.string())
                         .then(Commands.literal("group")
@@ -143,11 +143,11 @@ public class CommandP2SPermissions {
                                                     String group = context.getArgument("group", String.class);
                                                     Player player = PermissionsHandler.getDB().getPlayer(name);
                                                     if (player == null) {
-                                                        Helper.sendChatToPlayer(context.getSource(), "Player '" + name + "' does not exist.", ChatFormatting.RED);
+                                                        Helper.sendChatToPlayer(context.getSource().getPlayerOrException(), "Player '" + name + "' does not exist.", ChatFormatting.RED);
                                                         return 1;
                                                     }
                                                     player.addGroup(group);
-                                                    Helper.sendChatToPlayer(context.getSource(), "Added group '" + group + "' to player '" + name + "'.", ChatFormatting.GOLD);
+                                                    Helper.sendChatToPlayer(context.getSource().getPlayerOrException(), "Added group '" + group + "' to player '" + name + "'.", ChatFormatting.GOLD);
                                                     PermissionsHandler.getDB().save();
                                                     return 1;
                                                 }))) //end of add
@@ -158,11 +158,11 @@ public class CommandP2SPermissions {
                                                     String group = context.getArgument("group", String.class);
                                                     Player player = PermissionsHandler.getDB().getPlayer(name);
                                                     if (player == null) {
-                                                        Helper.sendChatToPlayer(context.getSource(), "Player '" + name + "' does not exist.", ChatFormatting.RED);
+                                                        Helper.sendChatToPlayer(context.getSource().getPlayerOrException(), "Player '" + name + "' does not exist.", ChatFormatting.RED);
                                                         return 1;
                                                     }
                                                     player.removeGroup(group);
-                                                    Helper.sendChatToPlayer(context.getSource(), "Removed group '" + group + "' from player '" + name + "'.", ChatFormatting.GOLD);
+                                                    Helper.sendChatToPlayer(context.getSource().getPlayerOrException(), "Removed group '" + group + "' from player '" + name + "'.", ChatFormatting.GOLD);
                                                     PermissionsHandler.getDB().save();
                                                     return 1;
                                                 }))) //end of remove
@@ -174,11 +174,11 @@ public class CommandP2SPermissions {
                                                             String node = context.getArgument("node", String.class);
                                                             Player player = PermissionsHandler.getDB().getPlayer(name);
                                                             if (player == null) {
-                                                                Helper.sendChatToPlayer(context.getSource(), "Player '" + name + "' does not exist.", ChatFormatting.RED);
+                                                                Helper.sendChatToPlayer(context.getSource().getPlayerOrException(), "Player '" + name + "' does not exist.", ChatFormatting.RED);
                                                                 return 1;
                                                             }
                                                             player.addNode(new Node(node));
-                                                            Helper.sendChatToPlayer(context.getSource(), "Added node '" + node + "' to player '" + name + "'.", ChatFormatting.GOLD);
+                                                            Helper.sendChatToPlayer(context.getSource().getPlayerOrException(), "Added node '" + node + "' to player '" + name + "'.", ChatFormatting.GOLD);
                                                             PermissionsHandler.getDB().save();
                                                             return 1;
                                                         }))) //end of add
@@ -189,11 +189,11 @@ public class CommandP2SPermissions {
                                                             String node = context.getArgument("node", String.class);
                                                             Player player = PermissionsHandler.getDB().getPlayer(name);
                                                             if (player == null) {
-                                                                Helper.sendChatToPlayer(context.getSource(), "Player '" + name + "' does not exist.", ChatFormatting.RED);
+                                                                Helper.sendChatToPlayer(context.getSource().getPlayerOrException(), "Player '" + name + "' does not exist.", ChatFormatting.RED);
                                                                 return 1;
                                                             }
                                                             player.removeNode(new Node(node));
-                                                            Helper.sendChatToPlayer(context.getSource(), "Removed node '" + node + "' from player '" + name + "'.", ChatFormatting.GOLD);
+                                                            Helper.sendChatToPlayer(context.getSource().getPlayerOrException(), "Removed node '" + node + "' from player '" + name + "'.", ChatFormatting.GOLD);
                                                             PermissionsHandler.getDB().save();
                                                             return 1;
                                                         })))))))); //end of remove

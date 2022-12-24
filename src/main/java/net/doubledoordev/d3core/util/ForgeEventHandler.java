@@ -33,6 +33,7 @@
 package net.doubledoordev.d3core.util;
 
 import net.minecraft.ChatFormatting;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.*;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Mth;
@@ -54,8 +55,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 /**
  * @author Dries007
  */
-public class ForgeEventHandler
-{
+public class ForgeEventHandler {
     public static final ForgeEventHandler FORGE_EVENT_HANDLER = new ForgeEventHandler();
     public boolean enableStringID;
     public boolean enableUnlocalizedName;
@@ -65,100 +65,82 @@ public class ForgeEventHandler
     public boolean printDeathCoords = true;
     public boolean claysTortureMode;
 
-    private ForgeEventHandler() {}
+    private ForgeEventHandler() {
+    }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
-    public void itemTooltipEventHandler(ItemTooltipEvent event)
-    {
-        if (event.showAdvancedItemTooltips)
-        {
-            if (enableStringID) event.getToolTip().add(ChatFormatting.DARK_AQUA + GameData.getItemRegistry().getNameForObject(event.getItemStack().getItem()));
-            if (enableUnlocalizedName) event.getToolTip().add(ChatFormatting.DARK_GREEN + event.getItemStack().getUnlocalizedName());
-            if (enableOreDictionary) for (int id : OreDictionary.getOreIDs(event.getItemStack())) event.getToolTip().add(ChatFormatting.DARK_PURPLE + OreDictionary.getOreName(id));
-            if (enableBurnTime && FurnaceBlockEntity.isFuel(event.getItemStack())) event.getToolTip().add(Component.nullToEmpty(ChatFormatting.GOLD + "Burns for " + FurnaceBlockEntity.isFuel(event.getItemStack()) + " ticks"));
-        }
+    public void itemTooltipEventHandler(ItemTooltipEvent event) {
+//     todo   if (event.showAdvancedItemTooltips)
+//        {
+//            if (enableStringID) event.getToolTip().add(ChatFormatting.DARK_AQUA + GameData.getItemRegistry().getNameForObject(event.getItemStack().getItem()));
+        if (enableUnlocalizedName)
+            event.getToolTip().add(new TextComponent(ChatFormatting.DARK_GREEN + event.getItemStack().getDescriptionId()));
+        if (enableBurnTime && FurnaceBlockEntity.isFuel(event.getItemStack()))
+            event.getToolTip().add(Component.nullToEmpty(ChatFormatting.GOLD + "Burns for " + FurnaceBlockEntity.isFuel(event.getItemStack()) + " ticks"));
+//        }
     }
 
     @SubscribeEvent()
-    public void entityDeathEvent(LivingDropsEvent event)
-    {
-        if (event.getEntityLiving() instanceof Player && claysTortureMode)
-        {
+    public void entityDeathEvent(LivingDropsEvent event) {
+        if (event.getEntityLiving() instanceof Player && claysTortureMode) {
             event.setCanceled(true);
-        }
-        else if (event.getEntityLiving() instanceof EnderMan && EndermanGriefing.dropCarrying)
-        {
+        } else if (event.getEntityLiving() instanceof EnderMan && EndermanGriefing.dropCarrying) {
             EnderMan entityEnderman = ((EnderMan) event.getEntityLiving());
-            if (entityEnderman.getCarriedBlock().getBlock() != Blocks.AIR)
-            {
-                ItemStack stack = new ItemStack(entityEnderman.getCarriedBlock().getBlock(), 1, entityEnderman.getCarryingData());
-                event.getDrops().add(new ItemEntity(entityEnderman.level, entityEnderman.getX(), entityEnderman.getY(), entityEnderman.getZ(), stack));
-            }
+//            todo if (entityEnderman.getCarriedBlock().getBlock() != Blocks.AIR) {
+//                ItemStack stack = new ItemStack(entityEnderman.getCarriedBlock().getBlock(), 1, entityEnderman.getCarryingData());
+//                event.getDrops().add(new ItemEntity(entityEnderman.level, entityEnderman.getX(), entityEnderman.getY(), entityEnderman.getZ(), stack));
+//            }
         }
     }
 
     @SubscribeEvent()
-    public void playerDeath(LivingDeathEvent event)
-    {
-        if (event.getEntityLiving() instanceof Player && printDeathCoords)
-        {
+    public void playerDeath(LivingDeathEvent event) {
+        if (event.getEntityLiving() instanceof Player && printDeathCoords) {
             TextComponent posText = new TextComponent("X: " + Mth.floor(event.getEntityLiving().getX()) + " Y: " + Mth.floor(event.getEntityLiving().getY() + 0.5d) + " Z: " + Mth.floor(event.getEntityLiving().getZ()));
-            try
-            {
-                if (!MinecraftServer.getServer().getCommandManager().getPossibleCommands((CommandSourceStack) event.getEntityLiving(), "tp").isEmpty())
+            /*todo try {
+                if (!event.getEntityLiving().createCommandSourceStack().hasPermission(2))//todo check .getCommandManager().getPossibleCommands((CommandSourceStack) event.getEntityLiving(), "tp").isEmpty())
                 {
                     posText.withStyle(new Style().setItalic(true)
                             .setChatHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent("Click to teleport!")))
                             .setChatClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tp " + event.getEntityLiving().getX() + " " + (event.getEntityLiving().getY() + 0.5d) + " " + event.getEntityLiving().getZ())));
                 }
-            }
-            catch (Exception ignored)
-            {
+            } catch (Exception ignored) {
 
-            }
+            }*/
 
-            ((Player) event.getEntityLiving()).displayClientMessage(new TextComponent("You died at ").setStyle(Style.EMPTY.withColor(ChatFormatting.AQUA)).appendSibling(posText));
+            ((Player) event.getEntityLiving()).displayClientMessage(new TextComponent("You died at ").setStyle(Style.EMPTY.withColor(ChatFormatting.AQUA)).append(posText), false);
         }
     }
 
     @SubscribeEvent()
-    public void sleepEvent(PlayerSleepInBedEvent event)
-    {
-        if (nosleep || CoreConstants.isAprilFools())
-        {
+    public void sleepEvent(PlayerSleepInBedEvent event) {
+        if (nosleep || CoreConstants.isAprilFools()) {
             event.setResult(Player.BedSleepingProblem.OTHER_PROBLEM);
         }
     }
 
     @SubscribeEvent
-    public void aprilFools(ServerChatEvent event)
-    {
-        if (CoreConstants.isAprilFools())
-        {
+    public void aprilFools(ServerChatEvent event) {
+        if (CoreConstants.isAprilFools()) {
             Style style = event.getComponent().getStyle();
             float chance = 0.25f;
-            if (CoreConstants.RANDOM.nextFloat() < chance)
-            {
+            if (CoreConstants.RANDOM.nextFloat() < chance) {
                 style.withBold(true);
                 chance *= chance;
             }
-            if (CoreConstants.RANDOM.nextFloat() < chance)
-            {
+            if (CoreConstants.RANDOM.nextFloat() < chance) {
                 style.withItalic(true);
                 chance *= chance;
             }
-            if (CoreConstants.RANDOM.nextFloat() < chance)
-            {
+            if (CoreConstants.RANDOM.nextFloat() < chance) {
                 style.withUnderlined(true);
                 chance *= chance;
             }
-            if (CoreConstants.RANDOM.nextFloat() < chance)
-            {
+            if (CoreConstants.RANDOM.nextFloat() < chance) {
                 style.withStrikethrough(true);
                 chance *= chance;
             }
-            if (CoreConstants.RANDOM.nextFloat() < chance)
-            {
+            if (CoreConstants.RANDOM.nextFloat() < chance) {
                 style.withObfuscated(true);
             }
             style.withColor(ChatFormatting.values()[CoreConstants.RANDOM.nextInt(ChatFormatting.values().length)]);
@@ -167,10 +149,8 @@ public class ForgeEventHandler
     }
 
     @SubscribeEvent
-    public void aprilFools(PlayerEvent.NameFormat event)
-    {
-        if (CoreConstants.isAprilFools())
-        {
+    public void aprilFools(PlayerEvent.NameFormat event) {
+        if (CoreConstants.isAprilFools()) {
             event.setDisplayname(Component.nullToEmpty("§k" + event.getDisplayname())); //todo §k
         }
     }

@@ -32,12 +32,11 @@ package net.doubledoordev.pay2spawn.types;
 
 import com.google.gson.JsonObject;
 import net.doubledoordev.pay2spawn.Pay2Spawn;
-import net.doubledoordev.pay2spawn.network.MusicMessage;
 import net.doubledoordev.pay2spawn.permissions.Node;
 import net.doubledoordev.pay2spawn.types.guis.MusicTypeGui;
 import net.doubledoordev.pay2spawn.util.Constants;
-import net.minecraft.entity.player.Player;
-import net.minecraft.entity.player.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.nbt.CompoundTag;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -86,7 +85,7 @@ public class MusicType extends TypeBase
     @Override
     public void spawnServerSide(ServerPlayer player, CompoundTag dataFromClient, CompoundTag rewardData)
     {
-        Pay2Spawn.getSnw().sendTo(new MusicMessage(dataFromClient.getString(SOUND_KEY)), (ServerPlayer) player);
+//        Pay2Spawn.getSnw().sendTo(new MusicMessage(dataFromClient.getString(SOUND_KEY)), (ServerPlayer) player);
     }
 
     @Override
