@@ -80,20 +80,16 @@ public abstract class ShapeGuiBase extends HelperGuiBase
 
     protected ListModel<String> getBlockDataModel()
     {
-        return new AbstractListModel<String>()
-        {
+        return new AbstractListModel<>() {
             @Override
-            public int getSize()
-            {
+            public int getSize() {
                 return data.getAsJsonArray(BLOCKDATA_KEY).size();
             }
 
             @Override
-            public String getElementAt(int index)
-            {
+            public String getElementAt(int index) {
                 JsonObject object = data.getAsJsonArray(BLOCKDATA_KEY).get(index).getAsJsonObject();
-                String s = readValue(BLOCKID_KEY, object);
-                if (object.has(META_KEY)) s += ":" + readValue(META_KEY, object);
+                String s = "minecraft:dirt";//todo readValue(BLOCKID_KEY, object);
                 if (object.has(WEIGHT_KEY)) s += " x " + readValue(WEIGHT_KEY, object);
                 if (object.has(TEDATA_KEY)) s += " TE: " + object.get(TEDATA_KEY).toString();
                 return s;

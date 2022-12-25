@@ -30,21 +30,20 @@
 
 package net.doubledoordev.pay2spawn.types.guis;
 
+import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.Tesselator;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import net.doubledoordev.pay2spawn.Pay2Spawn;
 import net.doubledoordev.pay2spawn.network.StructureImportMessage;
 import net.doubledoordev.pay2spawn.util.Helper;
 import net.doubledoordev.pay2spawn.util.shapes.IShape;
 import net.doubledoordev.pay2spawn.util.shapes.PointI;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.Tesselator;
-import net.minecraft.client.renderer.entity.RenderManager;
-import net.minecraft.init.Items;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraftforge.client.event.RenderWorldLastEvent;
+import net.minecraft.world.item.Items;
+import net.minecraftforge.client.event.RenderLevelLastEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 
@@ -246,89 +245,88 @@ public class StructureImporter
     }
 
     @SubscribeEvent
-    public void renderEvent(RenderWorldLastEvent event)
+    public void renderEvent(RenderLevelLastEvent event)
     {
         if (selection.size() == 0 && points.size() == 0 && p1 == null && p2 == null) return;
 
         Tesselator tess = Tesselator.getInstance();
-        Tesselator.renderingWorldRenderer = false;
+        BufferBuilder buffer = tess.getBuilder();
 
-        GL11.glPushMatrix();
-        GL11.glEnable(GL12.GL_RESCALE_NORMAL);
-        GL11.glDisable(GL11.GL_DEPTH_TEST);
-        GL11.glDisable(GL11.GL_TEXTURE_2D);
+//        GL11.glPushMatrix();
+//        GL11.glEnable(GL12.GL_RESCALE_NORMAL);
+//        GL11.glDisable(GL11.GL_DEPTH_TEST);
+//        GL11.glDisable(GL11.GL_TEXTURE_2D);
 
-        GL11.glTranslated(-RenderManager.renderPosX, -RenderManager.renderPosY, 1 - RenderManager.renderPosZ);
-        GL11.glScalef(1.0F, 1.0F, 1.0F);
+//        GL11.glTranslated(-RenderManager.renderPosX, -RenderManager.renderPosY, 1 - RenderManager.renderPosZ);
+//        GL11.glScalef(1.0F, 1.0F, 1.0F);
 
         if (!renderSelectionOnlyCheckBox.isSelected())
         {
             synchronized (points)
             {
-                GL11.glLineWidth(1f);
-                GL11.glColor3d(0, 1, 0);
-                for (PointI point : points) point.render(tess);
+//                GL11.glLineWidth(1f);
+//                GL11.glColor3d(0, 1, 0);
+                for (PointI point : points) point.render(buffer);
             }
         }
 
         synchronized (selection)
         {
-            GL11.glLineWidth(2f);
-            GL11.glColor3d(1, 0, 0);
-            for (IShape point : selection) point.render(tess);
+//            GL11.glLineWidth(2f);
+//            GL11.glColor3d(1, 0, 0);
+            for (IShape point : selection) point.render(buffer);
         }
 
         if (pointList.getSelectedIndex() != -1 && tempPointsArray.length < pointList.getSelectedIndex())
         {
-            GL11.glColor3d(0, 0, 1);
-            tempPointsArray[pointList.getSelectedIndex()].render(tess);
+//            GL11.glColor3d(0, 0, 1);
+            tempPointsArray[pointList.getSelectedIndex()].render(buffer);
         }
 
         if (mode == Mode.BOX && p1 != null)
         {
-            Helper.renderPoint(p1, tess, 246.0 / 255.0, 59.0 / 255.0, 246.0 / 255.0);
+            Helper.renderPoint(p1, buffer, 246.0 / 255.0, 59.0 / 255.0, 246.0 / 255.0);
         }
 
         if (mode == Mode.BOX && p2 != null)
         {
-            Helper.renderPoint(p2, tess, 59.0 / 243.0, 243.0 / 255.0, 246.0 / 255.0);
+            Helper.renderPoint(p2, buffer, 59.0 / 243.0, 243.0 / 255.0, 246.0 / 255.0);
         }
 
-        GL11.glDisable(GL12.GL_RESCALE_NORMAL);
-        GL11.glEnable(GL11.GL_DEPTH_TEST);
-        GL11.glEnable(GL11.GL_TEXTURE_2D);
+//        GL11.glDisable(GL12.GL_RESCALE_NORMAL);
+//        GL11.glEnable(GL11.GL_DEPTH_TEST);
+//        GL11.glEnable(GL11.GL_TEXTURE_2D);
         // tess.renderingWorldRenderer = true;
-        GL11.glPopMatrix();
+//        GL11.glPopMatrix();
     }
 
     @SubscribeEvent
     public void clickEvent(PlayerInteractEvent e)
     {
-        if (e.Player.getHeldItem() == null || e.Player.getHeldItem().getItem() != Items.stick) return;
+        if (e.getPlayer().getMainHandItem() == null || e.getPlayer().getMainHandItem().getItem() != Items.STICK) return;
         e.setCanceled(true);
 
-        if (e.action == PlayerInteractEvent.Action.LEFT_CLICK_BLOCK) click(Click.LEFT, e.x, e.y, e.z);
-        else if (e.action == PlayerInteractEvent.Action.RIGHT_CLICK_BLOCK) click(Click.RIGHT, e.x, e.y, e.z);
+        if (e instanceof PlayerInteractEvent.LeftClickBlock)
+            click(Click.LEFT, e.getPos().getX(), e.getPos().getY(), e.getPos().getZ());
+        else if (e instanceof PlayerInteractEvent.RightClickBlock)
+            click(Click.RIGHT, e.getPos().getX(), e.getPos().getY(), e.getPos().getZ());
     }
 
     private void click(Click click, int x, int y, int z)
     {
-        switch (mode)
-        {
-            case SINGLE:
-                synchronized (selection)
-                {
+        switch (mode) {
+            case SINGLE -> {
+                synchronized (selection) {
                     if (click == Click.LEFT) selection.remove(new PointI(x, y, z));
                     if (click == Click.RIGHT) selection.add(new PointI(x, y, z));
                 }
-                break;
-            case BOX:
-                synchronized (selection)
-                {
+            }
+            case BOX -> {
+                synchronized (selection) {
                     if (click == Click.LEFT) p1 = new PointI(x, y, z);
                     if (click == Click.RIGHT) p2 = new PointI(x, y, z);
                 }
-                break;
+            }
         }
         updateBtns();
     }

@@ -39,8 +39,7 @@ import net.doubledoordev.pay2spawn.cmd.CommandP2SPermissions;
 import net.doubledoordev.pay2spawn.cmd.CommandP2SServer;
 import net.doubledoordev.pay2spawn.configurator.ConfiguratorManager;
 import net.doubledoordev.pay2spawn.configurator.HTMLGenerator;
-import net.doubledoordev.pay2spawn.network.MessageMessage;
-import net.doubledoordev.pay2spawn.network.TestMessage;
+import net.doubledoordev.pay2spawn.network.*;
 import net.doubledoordev.pay2spawn.permissions.PermissionsHandler;
 import net.doubledoordev.pay2spawn.types.TypeBase;
 import net.doubledoordev.pay2spawn.types.TypeRegistry;
@@ -178,20 +177,18 @@ public class Pay2Spawn implements ID3Mod {
         int id = 0;
         snw = NetworkRegistry.newSimpleChannel(new ResourceLocation(MODID, "main"), () -> PROTOCOL_VERSION, PROTOCOL_VERSION::equals, PROTOCOL_VERSION::equals);
 
-        snw.messageBuilder(TestMessage.class, id++).encoder(TestMessage::toBytes).decoder(TestMessage::fromBytes).consumer(TestMessage::handle).add();
-        snw.messageBuilder(MessageMessage.class, id++).encoder(MessageMessage::toBytes).decoder(MessageMessage::fromBytes).consumer(MessageMessage::handle).add();
+        snw.messageBuilder(TestMessage.class, id++).encoder(TestMessage::toBytes).decoder(TestMessage::new).consumer(TestMessage::handle).add();
+        snw.messageBuilder(MessageMessage.class, id++).encoder(MessageMessage::toBytes).decoder(MessageMessage::new).consumer(MessageMessage::handle).add();
+//        snw.messageBuilder(NbtRequestMessage.class, id++).encoder(NbtRequestMessage::toBytes).decoder(NbtRequestMessage::new).consumer(NbtRequestMessage::handle).add();
+//        snw.messageBuilder(NbtRequestMessage.class, id++).encoder(NbtRequestMessage::toBytes).decoder(NbtRequestMessage::new).consumer(NbtRequestMessage::handle).add(); //todo server
+        snw.messageBuilder(RewardMessage.class, id++).encoder(RewardMessage::toBytes).decoder(RewardMessage::new).consumer(RewardMessage::handle).add();
+        snw.messageBuilder(StatusMessage.class, id++).encoder(StatusMessage::toBytes).decoder(StatusMessage::new).consumer(StatusMessage::handle).add();
+//        snw.messageBuilder(StatusMessage.class, id++).encoder(StatusMessage::toBytes).decoder(StatusMessage::new).consumer(StatusMessage::handle).add(); //todo server
+        snw.messageBuilder(StructureImportMessage.class, id++).encoder(StructureImportMessage::toBytes).decoder(StructureImportMessage::new).consumer(StructureImportMessage::handle).add();
+//        snw.messageBuilder(StructureImportMessage.class, id++).encoder(StructureImportMessage::toBytes).decoder(StructureImportMessage::new).consumer(StructureImportMessage::handle).add(); //todo server
+        snw.messageBuilder(HTMLuploadMessage.class, id++).encoder(HTMLuploadMessage::toBytes).decoder(HTMLuploadMessage::new).consumer(HTMLuploadMessage::handle).add();
+        snw.messageBuilder(CrashMessage.class, id++).encoder(CrashMessage::toBytes).decoder(CrashMessage::new).consumer(CrashMessage::handle).add();
 
-
-        snw.registerMessage(id++, MusicMessage.Handler.class, MusicMessage.class,  Dist.CLIENT);
-        snw.registerMessage(id++, NbtRequestMessage.Handler.class, NbtRequestMessage.class, Dist.CLIENT);
-        snw.registerMessage(id++, NbtRequestMessage.Handler.class, NbtRequestMessage.class, Dist.DEDICATED_SERVER);
-        snw.registerMessage(id++, RewardMessage.Handler.class, RewardMessage.class,  Dist.DEDICATED_SERVER);
-        snw.registerMessage(id++, StatusMessage.Handler.class, StatusMessage.class,  Dist.DEDICATED_SERVER);
-        snw.registerMessage(id++, StatusMessage.Handler.class, StatusMessage.class,  Dist.CLIENT);
-        snw.registerMessage(id++, StructureImportMessage.Handler.class, StructureImportMessage.class, Dist.DEDICATED_SERVER);
-        snw.registerMessage(id++, StructureImportMessage.Handler.class, StructureImportMessage.class, Dist.CLIENT);
-        snw.registerMessage(id++, HTMLuploadMessage.Handler.class, HTMLuploadMessage.class,  Dist.DEDICATED_SERVER);
-        snw.registerMessage(id++, CrashMessage.Handler.class, CrashMessage.class,  Dist.CLIENT);
 
         TypeRegistry.preInit();
         Statistics.preInit();
@@ -200,7 +197,7 @@ public class Pay2Spawn implements ID3Mod {
     }
 
     public void commonSetup(FMLCommonSetupEvent event) {
-        ServerTickHandler.INSTANCE.init();
+//        ServerTickHandler.INSTANCE.init();
 
         rewardsDB = new RewardsDB(getRewardDBFile());
 

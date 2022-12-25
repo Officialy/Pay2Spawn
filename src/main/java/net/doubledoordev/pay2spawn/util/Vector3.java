@@ -30,7 +30,7 @@
 
 package net.doubledoordev.pay2spawn.util;
 
-import net.minecraft.entity.Entity;
+import net.minecraft.world.entity.Entity;
 
 /**
  * Used to throw an entity to the player
@@ -64,7 +64,7 @@ public class Vector3
 
     public Vector3 setAsVelocity(Entity entity, double multiplier)
     {
-        entity.setVelocity(x * multiplier, y * multiplier, z * multiplier);
+        entity.setDeltaMovement(x * multiplier, y * multiplier, z * multiplier);
         return this;
     }
 }

@@ -34,9 +34,13 @@
 //import com.google.gson.JsonObject;
 //import net.doubledoordev.pay2spawn.Pay2Spawn;
 //import net.doubledoordev.pay2spawn.permissions.Node;
-//import net.doubledoordev.pay2spawn.types.guis.FireworksTypeGui;
 //import net.minecraft.nbt.CompoundTag;
 //import net.minecraft.nbt.ListTag;
+//import net.minecraft.server.level.ServerPlayer;
+//import net.minecraft.world.entity.player.Player;
+//import net.minecraft.world.entity.projectile.FireworkRocketEntity;
+//import net.minecraft.world.item.ItemStack;
+//import net.minecraft.world.item.Items;
 //
 //import java.lang.reflect.Field;
 //import java.util.Collection;
@@ -114,7 +118,7 @@
 //         * YOU CAN'T TOUCH THIS.
 //         * No srsly. Touch it and you rebuild it from scratch!
 //         */
-//        ItemStack out = new ItemStack((Item) Item.itemRegistry.getObject("fireworks"));
+//        ItemStack out = Items.FIREWORK_ROCKET.getDefaultInstance();//new ItemStack((Item) Item.itemRegistry.getObject("fireworks"));
 //        CompoundTag tag = new CompoundTag();
 //        CompoundTag fireworks = new CompoundTag();
 //        fireworks.putByte(FLIGHT_KEY, (byte) 0);
@@ -138,7 +142,7 @@
 //        tag.put(FIREWORKS_KEY, fireworks);
 //        out.setTag(tag);
 //
-//        tag = out.writeToNBT(new CompoundTag());
+//        tag = out.save(new CompoundTag());
 //
 //        tag.putInt(RADIUS_KEY, 10);
 //        tag.putInt(AMOUNT_KEY, 10);
@@ -149,7 +153,7 @@
 //    @Override
 //    public void spawnServerSide(ServerPlayer player, CompoundTag dataFromClient, CompoundTag rewardData)
 //    {
-//        ItemStack itemStack = ItemStack.loadItemStackFromNBT(dataFromClient);
+//        ItemStack itemStack = ItemStack.of(dataFromClient);
 //
 //        if (itemStack == null)
 //        {
@@ -158,7 +162,7 @@
 //        }
 //
 //        int flight = 0;
-//        CompoundTag nbttagcompound1 = itemStack.get().getCompound(FIREWORKS_KEY);
+//        CompoundTag nbttagcompound1 = itemStack.getTag().getCompound(FIREWORKS_KEY);
 //        if (nbttagcompound1 != null) flight += nbttagcompound1.getByte(FLIGHT_KEY);
 //
 //        try
@@ -172,7 +176,7 @@
 //                fireworkAgeField.set(entityfireworkrocket, 1);
 //                lifetimeField.set(entityfireworkrocket, 10 + 10 * flight);
 //                player.level.addFreshEntity(entityfireworkrocket);
-//                if (i == rndFirework && dataFromClient.contains(RIDETHISMOB_KEY) && dataFromClient.getBoolean(RIDETHISMOB_KEY)) player.mountEntity(entityfireworkrocket);
+//                if (i == rndFirework && dataFromClient.contains(RIDETHISMOB_KEY) && dataFromClient.getBoolean(RIDETHISMOB_KEY)) player.startRiding(entityfireworkrocket);
 //            }
 //        }
 //        catch (IllegalAccessException e)

@@ -210,7 +210,7 @@ public class StructureType extends TypeBase {
                 ChestBlockEntity chest = new ChestBlockEntity(BlockPos.ZERO, Blocks.CHEST.defaultBlockState());
                 chest.setItem(13, new ItemStack(Items.GOLDEN_APPLE));
                 CompoundTag chestNbt = new CompoundTag();
-                chest.load(chestNbt); //was writeToNBT
+                chest.load(chestNbt); //was save
                 compound.put(TEDATA_KEY, chestNbt);
 
                 blockDataNbt.add(compound);
@@ -231,7 +231,7 @@ public class StructureType extends TypeBase {
                 SpawnerBlockEntity mobSpawner = new SpawnerBlockEntity();
                 mobSpawner.func_145881_a().setEntityName(EntityList.getStringFromID((Integer) mob));
                 CompoundTag spawnerNbt = new CompoundTag();
-                mobSpawner.writeToNBT(spawnerNbt);
+                mobSpawner.save(spawnerNbt);
 
                 // Removes some clutter, not really necessary though
                 spawnerNbt.remove("x");

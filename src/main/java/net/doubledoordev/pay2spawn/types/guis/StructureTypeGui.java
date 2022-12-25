@@ -34,6 +34,7 @@ import com.google.common.base.Strings;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.Tesselator;
 import net.doubledoordev.pay2spawn.configurator.Configurator;
 import net.doubledoordev.pay2spawn.network.TestMessage;
@@ -45,6 +46,7 @@ import net.doubledoordev.pay2spawn.util.shapes.Shapes;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraftforge.client.event.RenderLevelLastEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
@@ -65,31 +67,29 @@ import static net.doubledoordev.pay2spawn.util.Constants.*;
 /**
  * @author Dries007
  */
-public class StructureTypeGui extends HelperGuiBase
-{
+public class StructureTypeGui extends HelperGuiBase {
     private static StructureTypeGui instance;
     public final ArrayList<IShape> ishapes = new ArrayList<>();
-    public JPanel        panel1;
-    public JTextField    HTMLTextField;
-    public JScrollPane   scrollPane;
-    public JTextPane     jsonPane;
-    public JButton       parseFromJsonButton;
-    public JButton       saveButton;
-    public JButton       updateJsonButton;
-    public JButton       testButton;
-    public JButton       addShapeButton;
+    public JPanel panel1;
+    public JTextField HTMLTextField;
+    public JScrollPane scrollPane;
+    public JTextPane jsonPane;
+    public JButton parseFromJsonButton;
+    public JButton saveButton;
+    public JButton updateJsonButton;
+    public JButton testButton;
+    public JButton addShapeButton;
     public JList<String> shapeList;
-    public JButton       removeShapeButton;
-    public JButton       importButton;
-    public JCheckBox     renderShapesIngameCheckBox;
-    public JCheckBox     renderSelectedShapeInCheckBox;
-    public JsonArray shapes   = new JsonArray();
-    public boolean   disabled = false;
-    private JCheckBox  rotateBasedOnPlayerCheckBox;
+    public JButton removeShapeButton;
+    public JButton importButton;
+    public JCheckBox renderShapesIngameCheckBox;
+    public JCheckBox renderSelectedShapeInCheckBox;
+    public JsonArray shapes = new JsonArray();
+    public boolean disabled = false;
+    private JCheckBox rotateBasedOnPlayerCheckBox;
     private JTextField baseRotation;
 
-    public StructureTypeGui(int rewardID, String name, JsonObject inputData, HashMap<String, String> typeMap)
-    {
+    public StructureTypeGui(int rewardID, String name, JsonObject inputData, HashMap<String, String> typeMap) {
         super(rewardID, name, inputData, typeMap);
         instance = this;
 
@@ -97,35 +97,31 @@ public class StructureTypeGui extends HelperGuiBase
         makeAndOpen();
     }
 
-    public static void importCallback(CompoundTag root)
-    {
+    public static void importCallback(CompoundTag root) {
         ListTag list = root.getList("list", COMPOUND);
-        for (int i = 0; i < list.size(); i++)
-        {
-            instance.shapes.add(JsonNBTHelper.parseNBT(Shapes.addShapeType(list.getCompoundTagAt(i), PointI.class)));
+        for (int i = 0; i < list.size(); i++) {
+            instance.shapes.add(JsonNBTHelper.parseNBT(Shapes.addShapeType(list.getCompound(i), PointI.class)));
         }
         instance.updateJson();
         instance.shapeList.clearSelection();
     }
 
     @Override
-    public void setupDialog()
-    {
+    public void setupDialog() {
         dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         new ForgeEventbusDialogThing(dialog, this);
 
-        synchronized (ishapes)
-        {
+        synchronized (ishapes) {
             ishapes.clear();
             if (shapes == null) shapes = new JsonArray();
 
-            for (JsonElement element : shapes) ishapes.add(Shapes.loadShape(JsonNBTHelper.parseJSON(element.getAsJsonObject())));
+            for (JsonElement element : shapes)
+                ishapes.add(Shapes.loadShape(JsonNBTHelper.parseJSON(element.getAsJsonObject())));
         }
     }
 
     @Override
-    public void readJson()
-    {
+    public void readJson() {
         HTMLTextField.setText(readValue(CUSTOMHTML, data));
 
         shapes = data.getAsJsonArray(SHAPES_KEY);
@@ -138,18 +134,17 @@ public class StructureTypeGui extends HelperGuiBase
     }
 
     @Override
-    public void updateJson()
-    {
+    public void updateJson() {
         if (!Strings.isNullOrEmpty(HTMLTextField.getText())) storeValue(CUSTOMHTML, data, HTMLTextField.getText());
 
         data.add(SHAPES_KEY, shapes);
         storeValue(ROTATE_KEY, data, rotateBasedOnPlayerCheckBox.isSelected() ? TRUE_BYTE : FALSE_BYTE);
         storeValue(BASEROTATION_KEY, data, baseRotation.getText());
 
-        synchronized (ishapes)
-        {
+        synchronized (ishapes) {
             ishapes.clear();
-            for (JsonElement element : shapes) ishapes.add(Shapes.loadShape(JsonNBTHelper.parseJSON(element.getAsJsonObject())));
+            for (JsonElement element : shapes)
+                ishapes.add(Shapes.loadShape(JsonNBTHelper.parseJSON(element.getAsJsonObject())));
         }
 
         shapeList.updateUI();
@@ -158,89 +153,69 @@ public class StructureTypeGui extends HelperGuiBase
     }
 
     @Override
-    public void setupListeners()
-    {
-        testButton.addActionListener(new ActionListener()
-        {
+    public void setupListeners() {
+        testButton.addActionListener(new ActionListener() {
             @Override
-            public void actionPerformed(ActionEvent e)
-            {
+            public void actionPerformed(ActionEvent e) {
                 updateJson();
                 TestMessage.sendToServer(name, data);
             }
         });
-        saveButton.addActionListener(new ActionListener()
-        {
+        saveButton.addActionListener(new ActionListener() {
             @Override
-            public void actionPerformed(ActionEvent e)
-            {
+            public void actionPerformed(ActionEvent e) {
                 updateJson();
                 Configurator.instance.callback(rewardID, name, data);
 
                 dialog.dispose();
             }
         });
-        parseFromJsonButton.addActionListener(new ActionListener()
-        {
+        parseFromJsonButton.addActionListener(new ActionListener() {
             @Override
-            public void actionPerformed(ActionEvent e)
-            {
-                try
-                {
+            public void actionPerformed(ActionEvent e) {
+                try {
                     data = JSON_PARSER.parse(jsonPane.getText()).getAsJsonObject();
                     readJson();
                     jsonPane.setForeground(Color.black);
                     shapeList.clearSelection();
-                }
-                catch (Exception e1)
-                {
+                } catch (Exception e1) {
                     jsonPane.setForeground(Color.red);
                     e1.printStackTrace();
                 }
             }
         });
-        updateJsonButton.addActionListener(new ActionListener()
-        {
+        updateJsonButton.addActionListener(new ActionListener() {
             @Override
-            public void actionPerformed(ActionEvent e)
-            {
+            public void actionPerformed(ActionEvent e) {
                 updateJson();
             }
         });
-        addShapeButton.addActionListener(new ActionListener()
-        {
+        addShapeButton.addActionListener(new ActionListener() {
             @Override
-            public void actionPerformed(ActionEvent e)
-            {
+            public void actionPerformed(ActionEvent e) {
                 Shapes.MAP.get(JOptionPane.showInputDialog(instance.panel1, "Please pick a new shape to add.", "Pick a shape", JOptionPane.QUESTION_MESSAGE, null, Shapes.LIST.toArray(), Shapes.LIST.get(0))).openGui(-1, new JsonObject(), instance);
                 shapeList.clearSelection();
             }
         });
-        shapeList.addMouseListener(new MouseAdapter()
-        {
+        shapeList.addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseClicked(MouseEvent e)
-            {
-                if (e.getClickCount() == 2)
-                {
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() == 2) {
                     JsonObject object = shapes.get(shapeList.getSelectedIndex()).getAsJsonObject();
                     Shapes.MAP.get(readValue(Shapes.SHAPE_KEY, object)).openGui(shapeList.getSelectedIndex(), object, instance);
                     shapeList.clearSelection();
                 }
             }
         });
-        removeShapeButton.addMouseListener(new MouseAdapter()
-        {
+        removeShapeButton.addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseClicked(MouseEvent e)
-            {
+            public void mouseClicked(MouseEvent e) {
                 JsonArray newShapes = new JsonArray();
                 int[] ints = shapeList.getSelectedIndices();
                 HashSet<Integer> selection = new HashSet<>(ints.length);
                 for (int i : ints) selection.add(i);
 
-                for (int i = 0; i < shapes.size(); i++)
-                {
+                for (int i = 0; i < shapes.size(); i++) {
                     if (!selection.contains(i)) newShapes.add(shapes.get(i));
                 }
                 shapes = newShapes;
@@ -249,36 +224,29 @@ public class StructureTypeGui extends HelperGuiBase
                 shapeList.clearSelection();
             }
         });
-        importButton.addMouseListener(new MouseAdapter()
-        {
+        importButton.addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseClicked(MouseEvent e)
-            {
+            public void mouseClicked(MouseEvent e) {
                 shapeList.clearSelection();
                 new StructureImporter(instance);
             }
         });
-        rotateBasedOnPlayerCheckBox.addActionListener(new AbstractAction()
-        {
+        rotateBasedOnPlayerCheckBox.addActionListener(new AbstractAction() {
             @Override
-            public void actionPerformed(ActionEvent e)
-            {
+            public void actionPerformed(ActionEvent e) {
                 baseRotation.setEnabled(rotateBasedOnPlayerCheckBox.isSelected());
             }
         });
     }
 
     @Override
-    public JPanel getPanel()
-    {
+    public JPanel getPanel() {
         return panel1;
     }
 
-    public void callback(int id, JsonObject data)
-    {
+    public void callback(int id, JsonObject data) {
         if (id == -1) shapes.add(data);
-        else
-        {
+        else {
             JsonArray newShape = new JsonArray();
             for (int i = 0; i < shapes.size(); i++) if (i != id) newShape.add(shapes.get(i));
             newShape.add(data);
@@ -288,19 +256,15 @@ public class StructureTypeGui extends HelperGuiBase
         shapeList.clearSelection();
     }
 
-    private void setupModels()
-    {
-        shapeList.setModel(new AbstractListModel<String>()
-        {
+    private void setupModels() {
+        shapeList.setModel(new AbstractListModel<String>() {
             @Override
-            public int getSize()
-            {
+            public int getSize() {
                 return shapes.size();
             }
 
             @Override
-            public String getElementAt(int index)
-            {
+            public String getElementAt(int index) {
                 JsonObject object = shapes.get(index).getAsJsonObject();
                 return instance.readValue(Shapes.SHAPE_KEY, object) + ": " + object.toString();
             }
@@ -308,31 +272,27 @@ public class StructureTypeGui extends HelperGuiBase
     }
 
     @SubscribeEvent
-    public void renderEvent(RenderWorldLastEvent event)
-    {
+    public void renderEvent(RenderLevelLastEvent event) {
         if (disabled || !renderShapesIngameCheckBox.isSelected()) return;
         if (ishapes.size() == 0) return;
 
         Tesselator tess = Tesselator.getInstance();
-        Tesselator.renderingWorldRenderer = false;
+        BufferBuilder buffer = tess.getBuilder();
 
-        GL11.glPushMatrix();
-        GL11.glEnable(GL12.GL_RESCALE_NORMAL);
-        GL11.glDisable(GL11.GL_DEPTH_TEST);
-        GL11.glDisable(GL11.GL_TEXTURE_2D);
+//        GL11.glPushMatrix();
+//        GL11.glEnable(GL12.GL_RESCALE_NORMAL);
+//        GL11.glDisable(GL11.GL_DEPTH_TEST);
+//        GL11.glDisable(GL11.GL_TEXTURE_2D);
+//
+//        GL11.glTranslated(-RenderManager.renderPosX, -RenderManager.renderPosY, 1 - RenderManager.renderPosZ);
+//        GL11.glTranslated(Helper.round(Minecraft.getInstance().player.getX()), Helper.round(Minecraft.getInstance().player.getY()), Helper.round(Minecraft.getInstance().player.getZ()));
+//        GL11.glScalef(1.0F, 1.0F, 1.0F);
 
-        GL11.glTranslated(-RenderManager.renderPosX, -RenderManager.renderPosY, 1 - RenderManager.renderPosZ);
-        GL11.glTranslated(Helper.round(Minecraft.getInstance().player.getX()), Helper.round(Minecraft.getInstance().player.getY()), Helper.round(Minecraft.getInstance().player.getZ()));
-        GL11.glScalef(1.0F, 1.0F, 1.0F);
-
-        if (rotateBasedOnPlayerCheckBox.isSelected())
-        {
-            try
-            {
+        if (rotateBasedOnPlayerCheckBox.isSelected()) {
+            try {
                 int i = Integer.parseInt(baseRotation.getText());
-                if (i != -1)
-                {
-                    GL11.glRotated(90 * i, 0, -1, 0);
+                if (i != -1) {
+//                    GL11.glRotated(90 * i, 0, -1, 0);
 
                     switch (i) {
                         case 1 -> GL11.glTranslated(-1, 0, 0);
@@ -340,13 +300,11 @@ public class StructureTypeGui extends HelperGuiBase
                         case 3 -> GL11.glTranslated(0, 0, 1);
                     }
                 }
-            }
-            catch (Exception ignored)
-            {
+            } catch (Exception ignored) {
             }
 
             int rot = Helper.getHeading(Minecraft.getInstance().player);
-            GL11.glRotated(90 * rot, 0, -1, 0);
+//            GL11.glRotated(90 * rot, 0, -1, 0);
 
             switch (rot) {
                 case 1 -> GL11.glTranslated(-1, 0, 0);
@@ -355,36 +313,31 @@ public class StructureTypeGui extends HelperGuiBase
             }
         }
 
-        synchronized (ishapes)
-        {
-            GL11.glLineWidth(1f);
-            GL11.glColor3d(1, 1, 1);
-            for (IShape ishape : ishapes)
-            {
-                ishape.render(tess);
+        synchronized (ishapes) {
+//            GL11.glLineWidth(1f);
+//            GL11.glColor3d(1, 1, 1);
+            for (IShape ishape : ishapes) {
+                ishape.render(buffer);
             }
 
-            if (renderSelectedShapeInCheckBox.isSelected())
-            {
-                GL11.glLineWidth(2f);
-                GL11.glColor3d(0, 0, 1);
-                for (int i : shapeList.getSelectedIndices())
-                {
+            if (renderSelectedShapeInCheckBox.isSelected()) {
+//                GL11.glLineWidth(2f);
+//                GL11.glColor3d(0, 0, 1);
+                for (int i : shapeList.getSelectedIndices()) {
                     // Fuck event based bullshit that causes IndexOutOfBoundsExceptions & NullPointerExceptions out of nowhere.
-                    if (i < ishapes.size())
-                    {
+                    if (i < ishapes.size()) {
                         IShape shape = ishapes.get(i);
-                        if (shape != null) shape.render(tess);
+                        if (shape != null) shape.render(buffer);
                     }
                 }
             }
         }
 
-        GL11.glDisable(GL12.GL_RESCALE_NORMAL);
-        GL11.glEnable(GL11.GL_DEPTH_TEST);
-        GL11.glEnable(GL11.GL_TEXTURE_2D);
+//        GL11.glDisable(GL12.GL_RESCALE_NORMAL);
+//        GL11.glEnable(GL11.GL_DEPTH_TEST);
+//        GL11.glEnable(GL11.GL_TEXTURE_2D);
         // tess.renderingWorldRenderer = true;
-        GL11.glPopMatrix();
+//        GL11.glPopMatrix();
     }
 
     {
@@ -401,8 +354,7 @@ public class StructureTypeGui extends HelperGuiBase
      *
      * @noinspection ALL
      */
-    private void $$$setupUI$$$()
-    {
+    private void $$$setupUI$$$() {
         panel1 = new JPanel();
         panel1.setLayout(new GridBagLayout());
         final JPanel panel2 = new JPanel();
@@ -649,8 +601,7 @@ public class StructureTypeGui extends HelperGuiBase
     /**
      * @noinspection ALL
      */
-    public JComponent $$$getRootComponent$$$()
-    {
+    public JComponent $$$getRootComponent$$$() {
         return panel1;
     }
 }

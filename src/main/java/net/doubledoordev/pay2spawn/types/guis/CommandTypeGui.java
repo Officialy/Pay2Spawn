@@ -87,51 +87,29 @@ public class CommandTypeGui extends HelperGuiBase
     @Override
     public void setupListeners()
     {
-        testButton.addActionListener(new ActionListener()
-        {
-            @Override
-            public void actionPerformed(ActionEvent e)
+        testButton.addActionListener(e -> {
+            updateJson();
+            TestMessage.sendToServer(name, data);
+        });
+        saveButton.addActionListener(e -> {
+            updateJson();
+            Configurator.instance.callback(rewardID, name, data);
+            dialog.dispose();
+        });
+        parseFromJsonButton.addActionListener(e -> {
+            try
             {
-                updateJson();
-                TestMessage.sendToServer(name, data);
+                data = JSON_PARSER.parse(jsonPane.getText()).getAsJsonObject();
+                readJson();
+                jsonPane.setForeground(Color.black);
+            }
+            catch (Exception e1)
+            {
+                jsonPane.setForeground(Color.red);
+                e1.printStackTrace();
             }
         });
-        saveButton.addActionListener(new ActionListener()
-        {
-            @Override
-            public void actionPerformed(ActionEvent e)
-            {
-                updateJson();
-                Configurator.instance.callback(rewardID, name, data);
-                dialog.dispose();
-            }
-        });
-        parseFromJsonButton.addActionListener(new ActionListener()
-        {
-            @Override
-            public void actionPerformed(ActionEvent e)
-            {
-                try
-                {
-                    data = JSON_PARSER.parse(jsonPane.getText()).getAsJsonObject();
-                    readJson();
-                    jsonPane.setForeground(Color.black);
-                }
-                catch (Exception e1)
-                {
-                    jsonPane.setForeground(Color.red);
-                    e1.printStackTrace();
-                }
-            }
-        });
-        updateJsonButton.addActionListener(new ActionListener()
-        {
-            @Override
-            public void actionPerformed(ActionEvent e)
-            {
-                updateJson();
-            }
-        });
+        updateJsonButton.addActionListener(e -> updateJson());
     }
 
     @Override

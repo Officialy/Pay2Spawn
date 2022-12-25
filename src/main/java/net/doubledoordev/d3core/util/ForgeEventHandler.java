@@ -84,13 +84,13 @@ public class ForgeEventHandler {
     public void entityDeathEvent(LivingDropsEvent event) {
         if (event.getEntityLiving() instanceof Player && claysTortureMode) {
             event.setCanceled(true);
-        } else if (event.getEntityLiving() instanceof EnderMan && EndermanGriefing.dropCarrying) {
-            EnderMan entityEnderman = ((EnderMan) event.getEntityLiving());
+        }// else if (event.getEntityLiving() instanceof EnderMan && EndermanGriefing.dropCarrying) {
+        //  EnderMan entityEnderman = ((EnderMan) event.getEntityLiving());
 //            todo if (entityEnderman.getCarriedBlock().getBlock() != Blocks.AIR) {
 //                ItemStack stack = new ItemStack(entityEnderman.getCarriedBlock().getBlock(), 1, entityEnderman.getCarryingData());
 //                event.getDrops().add(new ItemEntity(entityEnderman.level, entityEnderman.getX(), entityEnderman.getY(), entityEnderman.getZ(), stack));
 //            }
-        }
+       // }
     }
 
     @SubscribeEvent()

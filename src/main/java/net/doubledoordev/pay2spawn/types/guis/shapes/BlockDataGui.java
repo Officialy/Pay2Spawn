@@ -48,23 +48,19 @@ import static net.doubledoordev.pay2spawn.util.Constants.JSON_PARSER;
 /**
  * @author Dries007
  */
-public class BlockDataGui extends HelperGuiBase implements IIHasCallback
-{
+public class BlockDataGui extends HelperGuiBase implements IIHasCallback {
     private final ShapeGuiBase callback;
-    public        JScrollPane  scrollPane;
-    public        JTextPane    jsonPane;
-    public        JPanel       panel1;
-    public        JButton      saveButton;
-    public        JTextField   blockIDField;
-    public        JTextField   metaField;
-    public        JTextField   weightField;
-    public        JButton      parseFromJsonButton;
-    public        JButton      updateJsonButton;
-    public        JButton      importNextBlockRightButton;
+    public JScrollPane scrollPane;
+    public JTextPane jsonPane;
+    public JPanel panel1;
+    public JButton saveButton;
+    public JTextField weightField;
+    public JButton parseFromJsonButton;
+    public JButton updateJsonButton;
+    public JButton importNextBlockRightButton;
     public BlockDataGui instance = this;
 
-    public BlockDataGui(int rewardID, JsonObject inputData, ShapeGuiBase callback)
-    {
+    public BlockDataGui(int rewardID, JsonObject inputData, ShapeGuiBase callback) {
         super(rewardID, "BlockData", inputData, StructureType.typeMap);
         this.callback = callback;
 
@@ -83,83 +79,63 @@ public class BlockDataGui extends HelperGuiBase implements IIHasCallback
     }
 
     @Override
-    public void readJson()
-    {
-        blockIDField.setText(readValue(BLOCKID_KEY, data));
-        metaField.setText(readValue(META_KEY, data));
+    public void readJson() {
         weightField.setText(readValue(WEIGHT_KEY, data));
 
         jsonPane.setText(GSON.toJson(data));
     }
 
     @Override
-    public void updateJson()
-    {
-        storeValue(BLOCKID_KEY, data, blockIDField.getText());
-        storeValue(META_KEY, data, metaField.getText());
+    public void updateJson() {
         storeValue(WEIGHT_KEY, data, weightField.getText());
 
         jsonPane.setText(GSON.toJson(data));
     }
 
     @Override
-    public void setupListeners()
-    {
-        saveButton.addActionListener(new ActionListener()
-        {
+    public void setupListeners() {
+        saveButton.addActionListener(new ActionListener() {
             @Override
-            public void actionPerformed(ActionEvent e)
-            {
+            public void actionPerformed(ActionEvent e) {
                 updateJson();
                 callback.callback(rewardID, data);
                 dialog.dispose();
             }
         });
-        parseFromJsonButton.addActionListener(new ActionListener()
-        {
+        parseFromJsonButton.addActionListener(new ActionListener() {
             @Override
-            public void actionPerformed(ActionEvent e)
-            {
-                try
-                {
+            public void actionPerformed(ActionEvent e) {
+                try {
                     data = JSON_PARSER.parse(jsonPane.getText()).getAsJsonObject();
                     readJson();
                     jsonPane.setForeground(Color.black);
-                }
-                catch (Exception e1)
-                {
+                } catch (Exception e1) {
                     jsonPane.setForeground(Color.red);
                     e1.printStackTrace();
                 }
             }
         });
-        updateJsonButton.addActionListener(new ActionListener()
-        {
+        updateJsonButton.addActionListener(new ActionListener() {
             @Override
-            public void actionPerformed(ActionEvent e)
-            {
+            public void actionPerformed(ActionEvent e) {
                 updateJson();
             }
         });
-        importNextBlockRightButton.addActionListener(new ActionListener()
-        {
+        importNextBlockRightButton.addActionListener(new ActionListener() {
             @Override
-            public void actionPerformed(ActionEvent e)
-            {
+            public void actionPerformed(ActionEvent e) {
                 NbtRequestMessage.requestBlock(instance);
             }
         });
     }
 
     @Override
-    public JPanel getPanel()
-    {
+    public JPanel getPanel() {
         return panel1;
     }
 
     @Override
-    public void callback(Object... data)
-    {
+    public void callback(Object... data) {
         this.data = JSON_PARSER.parse((String) data[0]).getAsJsonObject();
         readJson();
     }
@@ -178,8 +154,7 @@ public class BlockDataGui extends HelperGuiBase implements IIHasCallback
      *
      * @noinspection ALL
      */
-    private void $$$setupUI$$$()
-    {
+    private void $$$setupUI$$$() {
         panel1 = new JPanel();
         panel1.setLayout(new GridBagLayout());
         final JPanel panel2 = new JPanel();
@@ -239,20 +214,16 @@ public class BlockDataGui extends HelperGuiBase implements IIHasCallback
         gbc.gridy = 2;
         gbc.anchor = GridBagConstraints.WEST;
         panel1.add(label3, gbc);
-        blockIDField = new JTextField();
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
         gbc.gridy = 0;
         gbc.anchor = GridBagConstraints.WEST;
         gbc.fill = GridBagConstraints.HORIZONTAL;
-        panel1.add(blockIDField, gbc);
-        metaField = new JTextField();
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
         gbc.gridy = 1;
         gbc.anchor = GridBagConstraints.WEST;
         gbc.fill = GridBagConstraints.HORIZONTAL;
-        panel1.add(metaField, gbc);
         weightField = new JTextField();
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
@@ -302,8 +273,7 @@ public class BlockDataGui extends HelperGuiBase implements IIHasCallback
     /**
      * @noinspection ALL
      */
-    public JComponent $$$getRootComponent$$$()
-    {
+    public JComponent $$$getRootComponent$$$() {
         return panel1;
     }
 }

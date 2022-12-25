@@ -27,7 +27,7 @@ println "Java: ${System.getProperty 'java.version'}, JVM: ${System.getProperty '
 minecraft {
     mappings channel: 'official', version: '1.18.2'
 
-     accessTransformer = file('src/main/resources/META-INF/P2S_at.cfg') // Currently, this location cannot be changed from the default.
+     accessTransformer = file('src/main/resources/META-INF/p2s_at.cfg') // Currently, this location cannot be changed from the default.
      accessTransformer = file('src/main/resources/META-INF/D3Core_at.cfg') // Currently, this location cannot be changed from the default.
 
     runs {

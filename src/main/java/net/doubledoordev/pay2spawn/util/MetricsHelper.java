@@ -56,7 +56,7 @@ public class MetricsHelper
         if (metrics != null) return;
         try
         {
-            metrics = new Metrics(NAME + "2", Pay2Spawn.getVersion());
+            metrics = new Metrics(NAME + "2", "0.1" /*todo Pay2Spawn.getVersion()*/);
             if (FMLLoader.getDist().isClient())
             {
                 metrics.createGraph("RewardCount").addPlotter(new Metrics.Plotter()

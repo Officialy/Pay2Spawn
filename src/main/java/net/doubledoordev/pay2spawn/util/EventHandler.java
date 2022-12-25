@@ -31,23 +31,26 @@
 package net.doubledoordev.pay2spawn.util;
 
 import com.google.gson.JsonObject;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import net.doubledoordev.pay2spawn.hud.Hud;
 import net.doubledoordev.pay2spawn.network.NbtRequestMessage;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.gui.Font;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.entity.player.EntityInteractEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 
 import java.util.ArrayList;
+
+import static net.doubledoordev.pay2spawn.util.Constants.MODID;
 
 /**
  * Handler for all forge events.
  *
  * @author Dries007
  */
+@Mod.EventBusSubscriber(modid = MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class EventHandler
 {
     static boolean entityTracking = false, blockTracking = false;
@@ -82,19 +85,19 @@ public class EventHandler
         {
             blockTracking = false;
 
-            NbtRequestMessage.requestBlock(e.x, e.y, e.z, e.world.provider.dimensionId);
+            NbtRequestMessage.requestBlock(e.getPos().getX(), e.getPos().getY(), e.getPos().getZ(), e.getWorld().dimension().getRegistryName());
 
             e.setCanceled(true);
         }
     }
 
     @SubscribeEvent
-    public void event(EntityInteractEvent event)
+    public void event(PlayerInteractEvent.EntityInteract event)
     {
         if (entityTracking)
         {
             entityTracking = false;
-            NbtRequestMessage.requestByEntityID(event.target.getEntityId());
+            NbtRequestMessage.requestByEntityID(event.getTarget().getId());
         }
     }
 
@@ -104,28 +107,28 @@ public class EventHandler
         ArrayList<String> bottomLeft = new ArrayList<>();
         ArrayList<String> bottomRight = new ArrayList<>();
 
-        FontRenderer fontRenderer = Minecraft.getInstance().fontRenderer;
+        Font fontRenderer = Minecraft.getInstance().font;
 
-        Hud.INSTANCE.render(event.left, event.right, bottomLeft, bottomRight);
+        Hud.INSTANCE.render(event.getLeft(), event.getRight(), bottomLeft, bottomRight);
 
-        int baseHeight = event.resolution.getScaledHeight() - 25 - bottomLeft.size() * 10;
-        if (!Minecraft.getInstance().ingameGUI.getChatGUI().getChatOpen())
+        int baseHeight = event.getWindow().getGuiScaledHeight() - 25 - bottomLeft.size() * 10;
+        if (!Minecraft.getInstance().gui.getChat().isChatFocused())
         {
             for (int x = 0; x < bottomLeft.size(); x++)
             {
                 String msg = bottomLeft.get(x);
-                fontRenderer.drawStringWithShadow(msg, 2, baseHeight + 2 + x * 10, 0xFFFFFF);
+                fontRenderer.draw(event.getMatrixStack(), msg, 2, baseHeight + 2 + x * 10, 0xFFFFFF);
             }
         }
 
-        baseHeight = event.resolution.getScaledHeight() - 25 - bottomRight.size() * 10;
-        if (!Minecraft.getInstance().ingameGUI.getChatGUI().getChatOpen())
+        baseHeight = event.getWindow().getGuiScaledHeight() - 25 - bottomRight.size() * 10;
+        if (!Minecraft.getInstance().gui.getChat().isChatFocused())
         {
             for (int x = 0; x < bottomRight.size(); x++)
             {
                 String msg = bottomRight.get(x);
-                int w = fontRenderer.getStringWidth(msg);
-                fontRenderer.drawStringWithShadow(msg, event.resolution.getScaledWidth() - w - 10, baseHeight + 2 + x * 10, 0xFFFFFF);
+                int w = fontRenderer.width(msg);
+                fontRenderer.draw(event.getMatrixStack(), msg, event.getWindow().getGuiScaledWidth() - w - 10, baseHeight + 2 + x * 10, 0xFFFFFF);
             }
         }
     }

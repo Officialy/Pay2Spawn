@@ -30,6 +30,7 @@
 
 package net.doubledoordev.pay2spawn.util.shapes;
 
+import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.Tesselator;
 import net.doubledoordev.pay2spawn.util.Helper;
 import net.minecraft.nbt.CompoundTag;
@@ -140,7 +141,7 @@ public abstract class AbstractShape implements IShape
     }
 
     @Override
-    public void render(Tesselator tess)
+    public void render(BufferBuilder tess)
     {
         if (temppoints == null || System.currentTimeMillis() - tempPointsTime > RENDERTIMEOUT)
         {

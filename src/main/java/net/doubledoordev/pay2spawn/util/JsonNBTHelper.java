@@ -42,7 +42,6 @@ import net.minecraft.world.level.block.Block;
 
 import java.util.Map;
 
-import static net.doubledoordev.pay2spawn.types.StructureType.BLOCKID_KEY;
 import static net.doubledoordev.pay2spawn.util.Constants.*;
 
 /**
@@ -93,7 +92,7 @@ public class JsonNBTHelper {
     public static JsonArray parseNBT(ListTag nbtArray) {
         JsonArray jsonArray = new JsonArray();
         for (int i = 0; i < nbtArray.size(); i++) {
-            switch (nbtArray.func_150303_d) {
+            switch (nbtArray.getElementType()) { //todo was func_150303_d
                 case 5 -> jsonArray.add(parseNBT(FloatTag.valueOf(nbtArray.getFloat(i))));
                 case 6 -> jsonArray.add(parseNBT(DoubleTag.valueOf(nbtArray.getDouble(i))));
                 case 8 -> jsonArray.add(parseNBT(StringTag.valueOf(nbtArray.getString(i))));
@@ -109,7 +108,7 @@ public class JsonNBTHelper {
         boolean isItemStack = isItemStack(compound);
         JsonObject jsonObject = new JsonObject();
         for (Object object : compound.getAllKeys()) {
-            if (object.equals("id") && isItemStack) // Itemstack?
+            /*todo if (object.equals("id") && isItemStack) // Itemstack?
             {
                 int id = compound.getShort("id");
                 Item item = GameData.getItemRegistry().getObjectById(id);
@@ -119,9 +118,9 @@ public class JsonNBTHelper {
                 int id = compound.getInt(BLOCKID_KEY);
                 Block block = GameData.getBlockRegistry().getObjectById(id);
                 jsonObject.addProperty(BLOCKID_KEY, NBTTypes[compound.get(BLOCKID_KEY).getId()] + ":" + (block == GameData.getBlockRegistry().getDefaultValue() ? id : GameData.getBlockRegistry().getNameForObject(block)));
-            } else {
+            } else {*/
                 jsonObject.add(object.toString(), parseNBT(compound.get(object.toString())));
-            }
+//            }
         }
         return jsonObject;
     }

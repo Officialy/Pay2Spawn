@@ -43,22 +43,18 @@ import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;
-import io.netty.buffer.ByteBuf;
 import net.doubledoordev.pay2spawn.util.shapes.PointI;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtIo;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.TextComponent;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import org.lwjgl.opengl.GL11;
 
-import javax.swing.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -454,14 +450,14 @@ public class Helper
         return null;
     }
 
-    public static void writeLongStringToByteBuf(ByteBuf buf, String s)
+    public static void writeLongStringToByteBuf(FriendlyByteBuf buf, String s)
     {
         byte[] bytes = s.getBytes(Charsets.UTF_8);
         buf.writeInt(bytes.length);
         buf.writeBytes(bytes);
     }
 
-    public static String readLongStringToByteBuf(ByteBuf buf)
+    public static String readLongStringToByteBuf(FriendlyByteBuf buf)
     {
         byte[] bytes = new byte[buf.readInt()];
         buf.readBytes(bytes);

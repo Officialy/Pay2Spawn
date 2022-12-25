@@ -31,7 +31,6 @@
 package net.doubledoordev.pay2spawn.network;
 
 import com.google.gson.JsonObject;
-import io.netty.buffer.ByteBuf;
 import net.doubledoordev.pay2spawn.Pay2Spawn;
 import net.doubledoordev.pay2spawn.permissions.BanHelper;
 import net.doubledoordev.pay2spawn.permissions.Node;
@@ -76,15 +75,15 @@ public class TestMessage {
     }
 
 
-    public static TestMessage fromBytes(FriendlyByteBuf buf) {
-        name = ByteBufUtils.readUTF8String(buf);
-        data = ByteBufUtils.readTag(buf);
+    public TestMessage(FriendlyByteBuf buf) {
+        name = buf.readUtf();
+        data = buf.readNbt();
     }
 
 
     public void toBytes(FriendlyByteBuf buf) {
-        buf.writeUTF8String(buf, name);
-        buf.writeTag(buf, data);
+        buf.writeUtf(name);
+        buf.writeNbt(data);
     }
 
     public static void handle(TestMessage message, Supplier<NetworkEvent.Context> ctx) {
@@ -102,7 +101,7 @@ public class TestMessage {
                 Pay2Spawn.getLogger().warn(ctx.get().getSender().getName() + " tried using globally banned node " + node + ".");
                 return;
             }
-            if (PermissionsHandler.needPermCheck(ctx.get().getSender()) && !PermissionsHandler.hasPermissionNode(ctx.get().getSender(), node)) {
+            if (PermissionsHandler.needPermCheck(ctx.get().getSender()) && !PermissionsHandler.hasPermissionNode(ctx.get().getSender(), node)) { //todo serverplayer
                 Pay2Spawn.getLogger().warn(ctx.get().getSender().getDisplayName() + " doesn't have perm node " + node.toString());
                 return;
             }

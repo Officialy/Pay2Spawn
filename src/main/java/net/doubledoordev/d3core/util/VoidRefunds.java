@@ -95,7 +95,7 @@ public class VoidRefunds
         if (FMLLoader.getDist().isClient()) return;
         Inventory oldInventory = map.get(event.getPlayer().getUUID());
         if (oldInventory == null) return;
-        event.getPlayer().getInventory().copyInventory(oldInventory);
+        event.getPlayer().getInventory().replaceWith(oldInventory);
         map.remove(event.getPlayer().getUUID());
     }
 }

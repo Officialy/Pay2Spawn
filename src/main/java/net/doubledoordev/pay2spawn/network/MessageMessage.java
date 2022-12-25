@@ -31,18 +31,15 @@
 package net.doubledoordev.pay2spawn.network;
 
 import com.google.common.base.Strings;
-
-import com.google.common.base.Supplier;
-import io.netty.buffer.ByteBuf;
-import io.netty.handler.codec.mqtt.MqttEncoder;
 import net.doubledoordev.pay2spawn.Pay2Spawn;
 import net.doubledoordev.pay2spawn.util.Donation;
 import net.doubledoordev.pay2spawn.util.Helper;
 import net.doubledoordev.pay2spawn.util.Reward;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.TextComponent;
-import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.network.NetworkEvent;
+
+import java.util.function.Supplier;
 
 import static net.doubledoordev.pay2spawn.util.Constants.GSON;
 import static net.doubledoordev.pay2spawn.util.Constants.GSON_NOPP;
@@ -64,23 +61,17 @@ public class MessageMessage {
         this.donation = donation;
     }
 
-    public MessageMessage() {
-
-    }
-
-    public static MessageMessage fromBytes(FriendlyByteBuf buf) {
-        message = ByteBufUtils.readUTF8String(buf);
-        name = ByteBufUtils.readUTF8String(buf);
+    public MessageMessage(FriendlyByteBuf buf) {
+        message = buf.readUtf();
+        name = buf.readUtf();
         amount = buf.readDouble();
         countdown = buf.readInt();
-
         donation = GSON.fromJson(Helper.readLongStringToByteBuf(buf), Donation.class);
-        return new MessageMessage();
     }
 
     public void toBytes(FriendlyByteBuf buf) {
-        MqttEncoder.writeUTF8String(buf, reward.getMessage());
-        ByteBufUtils.writeUTF8String(buf, reward.getName());
+        buf.writeUtf(reward.getMessage());
+        buf.writeUtf(reward.getName());
         buf.writeDouble(reward.getAmount());
         buf.writeInt(reward.getCountdown());
 

@@ -136,13 +136,13 @@
 //                        entity2.setPosition(entity.getX(), entity.getY(), entity.getZ());
 //                        entity2.getEntityData().put(Constants.NAME, p2sTag.copy());
 //                        player.level.addFreshEntity(entity2);
-//                        entity1.mountEntity(entity2);
-//                        if (tag.getCompound(RIDING_KEY).contains(RIDETHISMOB_KEY) && tag.getCompound(RIDING_KEY).getBoolean(RIDETHISMOB_KEY)) player.mountEntity(entity2);
+//                        entity1.startRiding(entity2);
+//                        if (tag.getCompound(RIDING_KEY).contains(RIDETHISMOB_KEY) && tag.getCompound(RIDING_KEY).getBoolean(RIDETHISMOB_KEY)) player.startRiding(entity2);
 //                    }
 //
 //                    entity1 = entity2;
 //                }
-//                if (dataFromClient.contains(RIDETHISMOB_KEY) && dataFromClient.getBoolean(RIDETHISMOB_KEY)) player.mountEntity(entity);
+//                if (dataFromClient.contains(RIDETHISMOB_KEY) && dataFromClient.getBoolean(RIDETHISMOB_KEY)) player.startRiding(entity);
 //                if (dataFromClient.contains(THROWTOWARDSPLAYER_KEY) && dataFromClient.getBoolean(THROWTOWARDSPLAYER_KEY))
 //                {
 //                    Vector3 v = new Vector3(entity, player).normalize();

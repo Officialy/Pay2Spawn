@@ -47,9 +47,9 @@ public class PermissionsHandler
     private static PermissionsDB   permissionsDB = new PermissionsDB();
     private static HashSet<String> nodes         = new HashSet<>();
 
-    public static boolean hasPermissionNode(Player player, Node node)
+    public static boolean hasPermissionNode(ServerPlayer player, Node node)
     {
-        return permissionsDB.check(player.getCommandSenderName(), node);
+        return permissionsDB.check(player.getName().getString(), node);
     }
 
     public static void init() throws IOException
@@ -67,7 +67,7 @@ public class PermissionsHandler
     public static boolean needPermCheck(ServerPlayer player)
     {
         MinecraftServer mcs = player.getServer();
-        return !(mcs.isSingleplayer() || mcs.getConfigurationManager().func_152596_g(player.getGameProfile()));
+        return !(mcs.isSingleplayer() || mcs.getPlayerList().isOp(player.getGameProfile()));
     }
 
     public static PermissionsDB getDB()
