@@ -50,7 +50,7 @@ import java.util.Random;
 public class Constants
 {
     public static final String NAME  = "Pay2Spawn";
-    public static final String MODID = "P2S";
+    public static final String MODID = "p2s";
 
     public static final String SERVER_CAT       = MODID + "_server";
     public static final String FILTER_CAT       = MODID + "_filter";

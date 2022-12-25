@@ -33,6 +33,7 @@
 package net.doubledoordev.d3core.util;
 
 import net.doubledoordev.oldforge.Configuration;
+import net.doubledoordev.pay2spawn.util.Constants;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.player.Inventory;
@@ -42,6 +43,7 @@ import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.loading.FMLLoader;
 
 import java.util.HashMap;
@@ -52,6 +54,7 @@ import static net.doubledoordev.d3core.util.CoreConstants.MODID;
 /**
  * @author Dries007
  */
+@Mod.EventBusSubscriber(modid = Constants.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class VoidRefunds
 {
     public static final VoidRefunds VOID_REFUNDS = new VoidRefunds();

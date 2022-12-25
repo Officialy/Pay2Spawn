@@ -57,10 +57,7 @@ public class CoreConstants
     public static final String BASEURL          = "http://doubledoordev.net/";
     public static final String PERKSURL         = BASEURL + "perks.json";
     public static final String MAVENURL         = BASEURL + "maven/";
-    /**
-     * @see net.doubledoordev.d3core.client.ModConfigGuiFactory
-     */
-    public static final String MOD_GUI_FACTORY = "net.doubledoordev.d3core.client.ModConfigGuiFactory";
+
     public static final Gson   GSON = new GsonBuilder().setPrettyPrinting().registerTypeAdapter(Node.class, new Node.JsonHelper()).create();
     public static final Joiner JOINER_DOT = Joiner.on('.');
     public static final Random RANDOM = new Random();

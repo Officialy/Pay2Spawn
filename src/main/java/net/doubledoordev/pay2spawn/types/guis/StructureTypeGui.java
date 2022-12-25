@@ -48,6 +48,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraftforge.client.event.RenderLevelLastEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 
@@ -67,6 +68,8 @@ import static net.doubledoordev.pay2spawn.util.Constants.*;
 /**
  * @author Dries007
  */
+@Mod.EventBusSubscriber(modid = MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
+
 public class StructureTypeGui extends HelperGuiBase {
     private static StructureTypeGui instance;
     public final ArrayList<IShape> ishapes = new ArrayList<>();

@@ -50,47 +50,41 @@ import static net.doubledoordev.pay2spawn.util.Constants.JSON_PARSER;
  *
  * @author Dries007
  */
-public class TwitchalertsChecker extends AbstractChecker implements Runnable
-{
+public class TwitchalertsChecker extends AbstractChecker implements Runnable {
     public final static SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
     public final static TwitchalertsChecker INSTANCE = new TwitchalertsChecker();
-    public final static String                 NAME     = "twitchalerts";
-    public final static String                 CAT      = BASECAT_TRACKERS + '.' + NAME;
-    public              String                 URL      = "http://www.twitchalerts.com/api/donations?access_token=%s";
+    public final static String NAME = "twitchalerts";
+    public final static String CAT = BASECAT_TRACKERS + '.' + NAME;
+    public String URL = "https://streamlabs.com/api/v1.0/donations?access_token=access_token&limit=50";
 
     DonationsBasedHudEntry topDonationsBasedHudEntry, recentDonationsBasedHudEntry;
 
     String APIKey = "";
-    boolean enabled  = false;
-    int     interval = 20;
+    boolean enabled = false;
+    int interval = 20;
 
-    private TwitchalertsChecker()
-    {
+    private TwitchalertsChecker() {
         super();
     }
 
     @Override
-    public String getName()
-    {
+    public String getName() {
         return NAME;
     }
 
     @Override
-    public void init()
-    {
+    public void init() {
         new Thread(this, getName()).start();
     }
 
     @Override
-    public boolean enabled()
-    {
+    public boolean enabled() {
         return enabled && !APIKey.isEmpty();
     }
 
     @Override
-    public void doConfig(Configuration configuration)
-    {
-        configuration.addCustomCategoryComment(CAT, "This is the checker for twitchalerts.com");
+    public void doConfig(Configuration configuration) {
+        configuration.addCustomCategoryComment(CAT, "This is the checker for streamlabs.com");
 
         enabled = configuration.get(CAT, "enabled", enabled).getBoolean(enabled);
 
@@ -104,8 +98,7 @@ public class TwitchalertsChecker extends AbstractChecker implements Runnable
 
         // Donation tracker doesn't allow a poll interval faster than 20 seconds
         // They will IP ban anyone using a time below 20 so force the value to be safe
-        if (interval < 20)
-        {
+        if (interval < 20) {
             interval = 20;
             // Now force the config setting to 20
             configuration.get(CAT, "interval", "The time in between polls minimum 5 (in seconds).").set(interval);
@@ -113,20 +106,17 @@ public class TwitchalertsChecker extends AbstractChecker implements Runnable
     }
 
     @Override
-    public DonationsBasedHudEntry[] getDonationsBasedHudEntries()
-    {
-        return new DonationsBasedHudEntry[] {topDonationsBasedHudEntry, recentDonationsBasedHudEntry};
+    public DonationsBasedHudEntry[] getDonationsBasedHudEntries() {
+        return new DonationsBasedHudEntry[]{topDonationsBasedHudEntry, recentDonationsBasedHudEntry};
     }
 
     @Override
-    public void run()
-    {
+    public void run() {
         // Process any current donations from the API
         processDonationAPI(true);
 
         // Start the processing loop
-        while (true)
-        {
+        while (true) {
             // Pause the configured wait period
             doWait(interval);
 
@@ -140,41 +130,31 @@ public class TwitchalertsChecker extends AbstractChecker implements Runnable
      *
      * @param firstRun <code>boolean</code> used to identify previous donations that should not be processed.
      */
-    private void processDonationAPI(boolean firstRun)
-    {
-        try
-        {
-            JsonObject root = JSON_PARSER.parse(Helper.readUrl(new URL(String.format(URL, APIKey)), new String[] {"User-Agent", "Mozilla/5.0 (X11; Linux x86_64; rv:12.0) Gecko/20100101 Firefox/21.0"})).getAsJsonObject();
+    private void processDonationAPI(boolean firstRun) {
+        try {
+            JsonObject root = JSON_PARSER.parse(Helper.readUrl(new URL(String.format(URL, APIKey)), new String[]{"User-Agent", "Mozilla/5.0 (X11; Linux x86_64; rv:12.0) Gecko/20100101 Firefox/21.0"})).getAsJsonObject();
             JsonArray donations = root.getAsJsonArray("donations");
-            for (JsonElement jsonElement : donations)
-            {
+            for (JsonElement jsonElement : donations) {
                 Donation donation = getDonation(jsonElement.getAsJsonObject());
 
                 // Make sure we have a donation to work with and see if this is a first run
-                if (donation != null && firstRun == true)
-                {
+                if (donation != null && firstRun == true) {
                     // This is a first run so add to current list/done ids
                     topDonationsBasedHudEntry.add(donation);
                     recentDonationsBasedHudEntry.add(donation);
                     doneIDs.add(donation.id);
-                }
-                else if (donation != null)
-                {
+                } else if (donation != null) {
                     // We have a donation and this is a loop check so process the donation
                     process(donation, true, this);
                 }
             }
-        }
-        catch (IOException e)
-        {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private Donation getDonation(JsonObject jsonObject)
-    {
-        try
-        {
+    private Donation getDonation(JsonObject jsonObject) {
+        try {
             // Attempt to parse the data we need for the donation
             String username = jsonObject.get("donator").getAsJsonObject().get("name").getAsString();
             String note = jsonObject.has("message") ? jsonObject.get("message").getAsString() : "";
@@ -184,9 +164,7 @@ public class TwitchalertsChecker extends AbstractChecker implements Runnable
 
             // We have all the data we need to return the Donation object
             return new Donation(id, amount, timestamp, username, note);
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             // We threw an error so just log it and move on
             e.printStackTrace();
         }

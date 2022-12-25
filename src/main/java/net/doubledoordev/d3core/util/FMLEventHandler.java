@@ -48,14 +48,19 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.LogicalSide;
+import net.minecraftforge.fml.common.Mod;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
 
+import static net.doubledoordev.pay2spawn.util.Constants.MODID;
+
 /**
  * @author Dries007
  */
+@Mod.EventBusSubscriber(modid = MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
+
 public class FMLEventHandler
 {
     public static final FMLEventHandler FML_EVENT_HANDLER = new FMLEventHandler();

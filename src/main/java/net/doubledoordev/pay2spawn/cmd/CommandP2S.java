@@ -72,7 +72,7 @@ public class CommandP2S {
 //        return;
 //    }
 
-    public void processCommand(CommandDispatcher<CommandSourceStack> dispatcher) {
+    public static void processCommand(CommandDispatcher<CommandSourceStack> dispatcher) {
         LiteralArgumentBuilder<CommandSourceStack> builder = Commands.literal("pay2spawn");
         builder.then(Commands.literal("help")).executes(context -> {
             context.getSource().sendSuccess(new TranslatableComponent("p2s.command.p2s.help"), false);

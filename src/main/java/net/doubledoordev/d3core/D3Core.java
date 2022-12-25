@@ -39,10 +39,12 @@ import net.doubledoordev.oldforge.Configuration;
 import net.minecraft.client.gui.components.ChatComponent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.javafmlmod.FMLModContainer;
 import net.minecraftforge.fml.loading.FMLLoader;
 import org.apache.commons.io.FileUtils;
@@ -71,7 +73,7 @@ import static net.doubledoordev.d3core.util.VoidRefunds.VOID_REFUNDS;
 /**
  * @author Dries007
  */
-@Mod(MODID)
+//todo seperate mods @Mod(MODID)
 public class D3Core implements ID3Mod {
     public static D3Core instance;
     public static boolean aprilFools = true;
@@ -91,6 +93,10 @@ public class D3Core implements ID3Mod {
     public D3Core() {
         instance = this;
 
+        IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
+
+//        modEventBus.addListener(this::commonSetup);
+
         MinecraftForge.EVENT_BUS.register(this);
         MinecraftForge.EVENT_BUS.register(FML_EVENT_HANDLER);
         MinecraftForge.EVENT_BUS.register(VOID_REFUNDS);
@@ -105,7 +111,7 @@ public class D3Core implements ID3Mod {
         PermissionsDB.load();
     }
 
-    public void init(FMLCommonSetupEvent event) throws IOException {
+    public void commonSetup(FMLCommonSetupEvent event) {
         Materials.load();
 
         try {

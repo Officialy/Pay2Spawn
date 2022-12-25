@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<!--
+  ~ Copyright (c) 2014, DoubleDoorDevelopment
+  ~ All rights reserved.
+  ~
+  ~ Redistribution and use in source and binary forms, with or without
+  ~ modification, are permitted provided that the following conditions are met:
+  ~
+  ~ * Redistributions of source code must retain the above copyright notice, this
+  ~   list of conditions and the following disclaimer.
+  ~
+  ~ * Redistributions in binary form must reproduce the above copyright notice,
+  ~   this list of conditions and the following disclaimer in the documentation
+  ~   and/or other materials provided with the distribution.
+  ~
+  ~ * Neither the name of the project nor the names of its
+  ~   contributors may be used to endorse or promote products derived from
+  ~   this software without specific prior written permission.
+  ~
+  ~ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+  ~ AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+  ~ IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+  ~ DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+  ~ FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+  ~ DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+  ~ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+  ~ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+  ~ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ~ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  -->
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>Pay2Spawn</title>
+        <meta name="author" content="Dries007">
+        <meta name="Generator" content="Pay2Spawn">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <!-- Le styles -->
+        <link href="https://netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css" rel="stylesheet">
+        <link href="https://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+        <!-- Custom style for footer, centering of all text and the table -->
+        <style type="text/css">
+        html, body {
+	        height: 100%; text-align: center;
+        }
+        th {
+          text-align: center;
+        }
+        #wrap {
+          min-height: 100%;
+          height: auto;
+          margin: 0 auto -50px;
+          padding: 0 0 50px;
+        }
+        #footer {
+          height: 50px;
+        }
+        </style>
+	</head>
+	<body>
+  <!-- Container -->
+  <div class="container container-narrow" id="wrap">
+    <div class="row">
+      <h2>Help or hurt ${channel}!</h2>
+      <p>Donate the appropriate amount!<br>
+      Click any row for more details.</p>
+    </div>
+    <div class="row">
+      <div class="panel-group" id="accordion">
+        <!-- BEGIN REWARDS -->
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h4 class="panel-title">
+              <a data-toggle="collapse" data-parent="#accordion" href="#collapse${reward.uid}">
+              <div class="row">
+                  <div class="col-sm-6 text-right">$${reward.amount}:</div>
+                  <div class="col-sm-6 text-left">${reward.name}</div>
+                </div>
+              </a>
+            </h4>
+          </div>
+          <div id="collapse${reward.uid}" class="panel-collapse collapse">
+            <div class="panel-body">
+              <b>Countdown:</b> ${reward.countdown} sec.<br>
+              <b>Message:</b> ${reward.message}<br>
+              <b>Types:</b> ${reward.types}<br>
+              <b>Exact rewards:</b><br>
+              ${reward.rewards}
+            </div>
+          </div>
+        </div>
+        <!-- END REWARDS -->
+      </div>
+    </div>
+  </div>
+  <!-- Footer -->
+		<div id="footer">
+			<div class="container">
+				<p class="muted credit">
+					<a href="https://github.com/CCM-Modding/Pay2Spawn">&copy; Dries007 & CCM</a> 2014<br>
+					Built with 
+					<a href="http://getbootstrap.com/">Bootstrap</a> &amp; <a href="http://www.bootstrapcdn.com/">Bootstrap CDN</a>.
+				</p>
+			</div>
+		</div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+		<script src="https://netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script>
+  </body>
+</html>

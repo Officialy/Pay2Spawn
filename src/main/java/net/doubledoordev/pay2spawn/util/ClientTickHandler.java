@@ -46,11 +46,13 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 
 import java.util.HashSet;
 import java.util.Iterator;
 
 import static net.doubledoordev.pay2spawn.util.Constants.JSON_PARSER;
+import static net.doubledoordev.pay2spawn.util.Constants.MODID;
 
 /**
  * Client side tick things
@@ -58,6 +60,8 @@ import static net.doubledoordev.pay2spawn.util.Constants.JSON_PARSER;
  *
  * @author Dries007
  */
+@Mod.EventBusSubscriber(modid = MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
+
 public class ClientTickHandler
 {
     public static final ClientTickHandler INSTANCE = new ClientTickHandler();

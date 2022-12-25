@@ -35,6 +35,7 @@ import net.doubledoordev.pay2spawn.hud.Hud;
 import net.doubledoordev.pay2spawn.network.NbtRequestMessage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
@@ -112,7 +113,7 @@ public class EventHandler
         Hud.INSTANCE.render(event.getLeft(), event.getRight(), bottomLeft, bottomRight);
 
         int baseHeight = event.getWindow().getGuiScaledHeight() - 25 - bottomLeft.size() * 10;
-        if (!Minecraft.getInstance().gui.getChat().isChatFocused())
+        if (!(Minecraft.getInstance().screen instanceof ChatScreen))
         {
             for (int x = 0; x < bottomLeft.size(); x++)
             {
@@ -122,7 +123,7 @@ public class EventHandler
         }
 
         baseHeight = event.getWindow().getGuiScaledHeight() - 25 - bottomRight.size() * 10;
-        if (!Minecraft.getInstance().gui.getChat().isChatFocused())
+        if (!(Minecraft.getInstance().screen instanceof ChatScreen))
         {
             for (int x = 0; x < bottomRight.size(); x++)
             {

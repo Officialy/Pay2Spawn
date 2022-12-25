@@ -1,0 +1,3 @@
+Enchantment list file
+| ID | name | minLvl | maxLvl |
++----+------+--------+--------+

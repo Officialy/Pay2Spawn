@@ -31,6 +31,7 @@
 package net.doubledoordev.pay2spawn;
 
 import com.mojang.brigadier.CommandDispatcher;
+import net.doubledoordev.d3core.D3Core;
 import net.doubledoordev.d3core.util.ID3Mod;
 import net.doubledoordev.pay2spawn.checkers.CheckerHandler;
 import net.doubledoordev.pay2spawn.client.Rendering;
@@ -78,7 +79,7 @@ import static net.doubledoordev.pay2spawn.util.Constants.*;
  *
  * @author Dries007
  */
-@Mod.EventBusSubscriber(modid = MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
+@Mod.EventBusSubscriber(modid = MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 @Mod(MODID)
 public class Pay2Spawn implements ID3Mod {
     public static final HashSet<String> playersWithValidConfig = new HashSet<>();
@@ -161,7 +162,7 @@ public class Pay2Spawn implements ID3Mod {
 
     public Pay2Spawn() throws IOException {
         instance = this;
-
+        D3Core d3Core = new D3Core();
         configFolder = new File(FMLLoader.getGamePath()+"/"+"config"+"/", NAME);
         //noinspection ResultOfMethodCallIgnored
         configFolder.mkdirs();
@@ -173,6 +174,7 @@ public class Pay2Spawn implements ID3Mod {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
 
         modEventBus.addListener(this::commonSetup);
+        modEventBus.addListener(d3Core::commonSetup);
 
         int id = 0;
         snw = NetworkRegistry.newSimpleChannel(new ResourceLocation(MODID, "main"), () -> PROTOCOL_VERSION, PROTOCOL_VERSION::equals, PROTOCOL_VERSION::equals);
@@ -281,6 +283,7 @@ public class Pay2Spawn implements ID3Mod {
         CommandDispatcher<CommandSourceStack> commandDispatcher = event.getDispatcher();
         CommandP2SPermissions.processCommand(commandDispatcher);
         CommandP2SServer.processCommand(commandDispatcher);
+        CommandP2S.processCommand(commandDispatcher);
     }
 
 //    @Override
