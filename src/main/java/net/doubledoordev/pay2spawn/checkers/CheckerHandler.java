@@ -59,7 +59,7 @@ public class CheckerHandler {
         register(ChildsplayChecker.INSTANCE);
         register(TwitchChecker.INSTANCE);
         register(FundrazrChecker.INSTANCE);
-        register(TwitchalertsChecker.INSTANCE);
+        register(StreamLabsChecker.INSTANCE);
         register(ClassyChecker.INSTANCE);
         register(FileSystemChecker.INSTANCE);
         register(ExtraLifeChecker.INSTANCE);

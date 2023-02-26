@@ -47,13 +47,12 @@ import net.doubledoordev.pay2spawn.types.TypeRegistry;
 import net.doubledoordev.pay2spawn.util.*;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.ClientCommandHandler;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLLoader;
@@ -68,9 +67,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.HashSet;
-import java.util.Map;
 
 import static net.doubledoordev.pay2spawn.util.Constants.*;
 
@@ -132,8 +129,8 @@ public class Pay2Spawn implements ID3Mod {
     }
 
     public static void reloadDB_Server() throws Exception {
-//        StatusMessage.serverConfig = GSON_NOPP.toJson(JSON_PARSER.parse(new FileReader(getRewardDBFile())));
-//        StatusMessage.sendConfigToAllPlayers();
+        StatusMessage.serverConfig = GSON_NOPP.toJson(JSON_PARSER.parse(new FileReader(getRewardDBFile())));
+        StatusMessage.sendConfigToAllPlayers();
     }
 
     public static void reloadDBFromServer(String input) {
@@ -164,7 +161,7 @@ public class Pay2Spawn implements ID3Mod {
         instance = this;
         D3Core d3Core = new D3Core();
         configFolder = new File(FMLLoader.getGamePath()+"/"+"config"+"/", NAME);
-        //noinspection ResultOfMethodCallIgnored
+//        noinspection ResultOfMethodCallIgnored
         configFolder.mkdirs();
 
         File configFile = new File(configFolder, NAME + ".cfg");
@@ -175,6 +172,7 @@ public class Pay2Spawn implements ID3Mod {
 
         modEventBus.addListener(this::commonSetup);
         modEventBus.addListener(d3Core::commonSetup);
+        modEventBus.addListener(this::clientSetup);
 
         int id = 0;
         snw = NetworkRegistry.newSimpleChannel(new ResourceLocation(MODID, "main"), () -> PROTOCOL_VERSION, PROTOCOL_VERSION::equals, PROTOCOL_VERSION::equals);
@@ -203,12 +201,6 @@ public class Pay2Spawn implements ID3Mod {
 
         rewardsDB = new RewardsDB(getRewardDBFile());
 
-       /* if (FMLLoader.getDist().isClient()) {
-            CheckerHandler.init();
-            new EventHandler();
-            ClientCommandHandler.instance.registerCommand(new CommandP2S());
-        }*/
-
 //        CustomAI.INSTANCE.init();
 
         ClientTickHandler.INSTANCE.init();
@@ -229,9 +221,11 @@ public class Pay2Spawn implements ID3Mod {
         if (newConfig && FMLLoader.getDist().isClient()) {
             JOptionPane pane = new JOptionPane();
             pane.setMessageType(JOptionPane.WARNING_MESSAGE);
-            pane.setMessage("Please configure Pay2Spawn properly BEFORE you try launching this instance again.\n" +
-                    "You should provide AT LEAST your channel in the config.\n\n" +
-                    "If you need help with the configuring of your rewards, contact us!");
+            pane.setMessage("""
+                    Please configure Pay2Spawn properly BEFORE you try launching this instance again.
+                    You should provide AT LEAST your channel in the config.
+
+                    If you need help with the configuring of your rewards, contact us!""");
             JDialog dialog = pane.createDialog("Please configure Pay2Spawn!");
             dialog.setAlwaysOnTop(true);
             dialog.setVisible(true);
@@ -248,42 +242,46 @@ public class Pay2Spawn implements ID3Mod {
             if (FMLLoader.getDist().isClient()) {
                 JOptionPane pane = new JOptionPane();
                 pane.setMessageType(JOptionPane.INFORMATION_MESSAGE);
-                pane.setMessage("You can now (and should) use string id's (minecraft:stone) instead of actual id's.\n" +
-                        "Go and convert all of your json entries NOW.\n\n" +
-                        "There is a new item spawning type, called 'Items' instead of 'Item'.\n" +
-                        "It supports multiple items at once, or picking one (weighted) random item.\n\n" +
-                        "You can also now set a name and/or lore tag in your config file, and it will be applied to all items spawned.\n\n" +
-                        "Also, the metrics has been re-enabled as it does not crash the game anymore.\n" +
-                        "Leave it on if you want us to continue p2s development.");
+                pane.setMessage("""
+                        Pay2Spawn has been updated to a new major version.
+                        There is a new item spawning type, called 'Items' instead of 'Item'.
+                        It supports multiple items at once, or picking one (weighted) random item.
+
+                        You can also now set a name and/or lore tag in your config file, and it will be applied to all items spawned.
+
+                        Also, the metrics has been re-enabled as it does not crash the game anymore.
+                        Leave it on if you want us to continue p2s development.""");
                 JDialog dialog = pane.createDialog("Some major Pay2Spawn changes");
                 dialog.setAlwaysOnTop(true);
                 dialog.setVisible(true);
             }
         }
-
         config.syncConfig();
-
-        if (FMLLoader.getDist().isClient()) {
-            Rendering.init();
-        }
     }
 
     @SubscribeEvent
     public void serverStarting(ServerStartingEvent event) throws IOException {
         PermissionsHandler.init();
-//        try {
-//            StatusMessage.serverConfig = GSON_NOPP.toJson(JSON_PARSER.parse(new FileReader(new File(instance.configFolder, NAME + ".json"))));
-//        } catch (FileNotFoundException e) {
-//            e.printStackTrace();
-//        }
+        try {
+            StatusMessage.serverConfig = GSON_NOPP.toJson(JSON_PARSER.parse(new FileReader(new File(instance.configFolder, NAME + ".json"))));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 
     @SubscribeEvent
     public void onRegisterCommandEvent(RegisterCommandsEvent event) {
         CommandDispatcher<CommandSourceStack> commandDispatcher = event.getDispatcher();
-        CommandP2SPermissions.processCommand(commandDispatcher);
-        CommandP2SServer.processCommand(commandDispatcher);
-        CommandP2S.processCommand(commandDispatcher);
+        CommandP2SPermissions.register(commandDispatcher);
+        CommandP2SServer.register(commandDispatcher);
+        CommandP2S.register(commandDispatcher);
+    }
+
+    public void clientSetup(FMLClientSetupEvent event) {
+        CheckerHandler.init();
+        new EventHandler();
+
+        Rendering.init();
     }
 
 //    @Override

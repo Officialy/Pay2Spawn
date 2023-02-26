@@ -50,20 +50,20 @@ import static net.doubledoordev.pay2spawn.util.Constants.JSON_PARSER;
  *
  * @author Dries007
  */
-public class TwitchalertsChecker extends AbstractChecker implements Runnable {
+public class StreamLabsChecker extends AbstractChecker implements Runnable {
     public final static SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-    public final static TwitchalertsChecker INSTANCE = new TwitchalertsChecker();
-    public final static String NAME = "twitchalerts";
+    public final static StreamLabsChecker INSTANCE = new StreamLabsChecker();
+    public final static String NAME = "streamlabs";
     public final static String CAT = BASECAT_TRACKERS + '.' + NAME;
-    public String URL = "https://streamlabs.com/api/v1.0/donations?access_token=access_token&limit=50";
+    public String URL = "https://streamlabs.com/api/v1.0/donations?access_token=%s";
 
     DonationsBasedHudEntry topDonationsBasedHudEntry, recentDonationsBasedHudEntry;
 
-    String APIKey = "";
+    String socketAPIKey = "";
     boolean enabled = false;
     int interval = 20;
 
-    private TwitchalertsChecker() {
+    private StreamLabsChecker() {
         super();
     }
 
@@ -79,7 +79,7 @@ public class TwitchalertsChecker extends AbstractChecker implements Runnable {
 
     @Override
     public boolean enabled() {
-        return enabled && !APIKey.isEmpty();
+        return enabled && !socketAPIKey.isEmpty();
     }
 
     @Override
@@ -88,7 +88,7 @@ public class TwitchalertsChecker extends AbstractChecker implements Runnable {
 
         enabled = configuration.get(CAT, "enabled", enabled).getBoolean(enabled);
 
-        APIKey = configuration.get(CAT, "APIKey", APIKey).getString();
+        socketAPIKey = configuration.get(CAT, "APIKey", socketAPIKey).getString();
         interval = configuration.get(CAT, "interval", interval, "The time in between polls minimum 20 (in seconds).").getInt();
         min_donation = configuration.get(CAT, "min_donation", min_donation, "Donations below this amount will only be added to statistics and will not spawn rewards").getDouble();
         URL = configuration.get(CAT, "url", URL, "Donation Tracker API end point string").getString();
@@ -132,7 +132,7 @@ public class TwitchalertsChecker extends AbstractChecker implements Runnable {
      */
     private void processDonationAPI(boolean firstRun) {
         try {
-            JsonObject root = JSON_PARSER.parse(Helper.readUrl(new URL(String.format(URL, APIKey)), new String[]{"User-Agent", "Mozilla/5.0 (X11; Linux x86_64; rv:12.0) Gecko/20100101 Firefox/21.0"})).getAsJsonObject();
+            JsonObject root = JSON_PARSER.parse(Helper.readUrl(new URL(String.format(URL, socketAPIKey)), new String[]{"User-Agent", "Mozilla/5.0 (X11; Linux x86_64; rv:12.0) Gecko/20100101 Firefox/21.0"})).getAsJsonObject();
             JsonArray donations = root.getAsJsonArray("donations");
             for (JsonElement jsonElement : donations) {
                 Donation donation = getDonation(jsonElement.getAsJsonObject());

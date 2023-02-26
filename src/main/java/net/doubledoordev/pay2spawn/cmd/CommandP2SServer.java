@@ -34,19 +34,14 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.doubledoordev.pay2spawn.Pay2Spawn;
-import net.doubledoordev.pay2spawn.util.Constants;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.TextComponent;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
-
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * The server side only command
@@ -64,7 +59,7 @@ public class CommandP2SServer {
         return HELP;
     }
 
-    public static void processCommand(CommandDispatcher<CommandSourceStack> sender) {
+    public static void register(CommandDispatcher<CommandSourceStack> sender) {
         LiteralArgumentBuilder<CommandSourceStack> builder = Commands.literal("pay2spawn").requires(cs -> cs.hasPermission(2)).executes(
                 context -> {
                     sendChatToPlayer(context.getSource(), HELP, ChatFormatting.AQUA);
@@ -110,7 +105,7 @@ public class CommandP2SServer {
         }));
 
 //        sendChatToPlayer(context.getSource(), "Unknown command. Protip: Use tab completion!", ChatFormatting.RED);
-
+        sender.register(builder);
     }
     
 /*    public List addTabCompletionOptions(CommandSourceStack sender, String[] args) {

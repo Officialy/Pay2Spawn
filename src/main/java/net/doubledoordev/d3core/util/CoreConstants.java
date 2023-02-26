@@ -52,7 +52,7 @@ import java.util.Random;
  */
 public class CoreConstants
 {
-    public static final String MODID            = "d3core";
+    public static final String MODID            = "assets/d3core";
     public static final String NAME             = "D³ Core";
     public static final String BASEURL          = "http://doubledoordev.net/";
     public static final String PERKSURL         = BASEURL + "perks.json";

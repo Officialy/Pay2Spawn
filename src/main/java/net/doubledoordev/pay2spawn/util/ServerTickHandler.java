@@ -55,10 +55,11 @@
 //    @SubscribeEvent
 //    public void tickEvent(TickEvent.PlayerTickEvent event)
 //    {
-//        if (event.phase != TickEvent.Phase.START) return;
+//        if (event.phase != TickEvent.Phase.START)
+//            return;
 //
 //        CompoundTag data = event.player.getEntityData().getCompound(Player.PERSISTED_NBT_TAG).getCompound("P2S");
-//        for (Type t : Type.values())
+//        for (PlayerModificationType.Type t : PlayerModificationType.Type.values())
 //        {
 //            if (t.isTimable())
 //            {

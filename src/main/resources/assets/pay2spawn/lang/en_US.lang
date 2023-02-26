@@ -15,3 +15,4 @@ d3.pay2spawn.config.types.tooltip=Global settings per type
 
 d3.pay2spawn.config.trackers=Tracker settings
 d3.pay2spawn.config.trackers.tooltip=API keys, ...
+p2s.command.p2s.help=Pay2Spawn commands

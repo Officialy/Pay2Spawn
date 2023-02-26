@@ -47,11 +47,8 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.world.entity.player.Player;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -72,8 +69,9 @@ public class CommandP2S {
 //        return;
 //    }
 
-    public static void processCommand(CommandDispatcher<CommandSourceStack> dispatcher) {
-        LiteralArgumentBuilder<CommandSourceStack> builder = Commands.literal("pay2spawn");
+    public static void register(CommandDispatcher<CommandSourceStack> sender) {
+        LiteralArgumentBuilder<CommandSourceStack> builder = sender.register(Commands.literal("pay2spawn")).createBuilder();
+
         builder.then(Commands.literal("help")).executes(context -> {
             context.getSource().sendSuccess(new TranslatableComponent("p2s.command.p2s.help"), false);
             return 1;

@@ -61,7 +61,6 @@ import static net.doubledoordev.pay2spawn.util.Constants.MODID;
  * @author Dries007
  */
 @Mod.EventBusSubscriber(modid = MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
-
 public class ClientTickHandler
 {
     public static final ClientTickHandler INSTANCE = new ClientTickHandler();

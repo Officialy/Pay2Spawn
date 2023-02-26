@@ -41,11 +41,6 @@ import net.doubledoordev.pay2spawn.util.Helper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ServerPlayer;
-
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * The main permission system command
@@ -54,7 +49,7 @@ import java.util.List;
  */
 public class CommandP2SPermissions {
 
-    public static void processCommand(CommandDispatcher<CommandSourceStack> sender) {
+    public static void register(CommandDispatcher<CommandSourceStack> sender) {
         LiteralArgumentBuilder<CommandSourceStack> builder = Commands.literal("p2sperm").executes(context -> {
             Helper.sendChatToPlayer(context.getSource().getPlayerOrException(), "Use '/p2sperm group|groups|player' for more info.", ChatFormatting.RED);
             return 0;
@@ -197,6 +192,8 @@ public class CommandP2SPermissions {
                                                             PermissionsHandler.getDB().save();
                                                             return 1;
                                                         })))))))); //end of remove
+
+        sender.register(builder);
     }
         /*case "player" -> {
             if (args.length < 5) {
