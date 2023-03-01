@@ -160,7 +160,7 @@ public class Pay2Spawn implements ID3Mod {
     public Pay2Spawn() throws IOException {
         instance = this;
         D3Core d3Core = new D3Core();
-        configFolder = new File(FMLLoader.getGamePath()+"/"+"config"+"/", NAME);
+        configFolder = new File(FMLLoader.getGamePath() + "/" + "config" + "/", NAME);
 //        noinspection ResultOfMethodCallIgnored
         configFolder.mkdirs();
 

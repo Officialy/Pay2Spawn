@@ -47,22 +47,21 @@ import static net.doubledoordev.pay2spawn.util.Constants.*;
  * @author Dries007
  * @see net.doubledoordev.pay2spawn.Pay2Spawn#getConfig()
  */
-public class P2SConfig
-{
-    public final static String HUD           = MODID + ".Hud";
+public class P2SConfig {
+    public final static String HUD = MODID + ".Hud";
     public static final String CONFIGVERSION = "4";
-    public final boolean       majorConfigVersionChange;
+    public final boolean majorConfigVersionChange;
     public Configuration configuration;
     public boolean forceServerconfig = false;
-    public boolean forceP2S          = false;
-    public String  channel           = "";
+    public boolean forceP2S = false;
+    public String channel = "";
     public Pattern[] blacklist_Name_p;
     public Pattern[] blacklist_Note_p;
     public Pattern[] whitelist_Name_p;
     public Pattern[] whitelist_Note_p;
-    public String   serverMessage = "$streamer got $$amount from $name and $reward_name was triggered!";
-    public String   allItemName   = "";
-    public String[] allItemLore   = {};
+    public String serverMessage = "$streamer got $$amount from $name and $reward_name was triggered!";
+    public String allItemName = "";
+    public String[] allItemLore = {};
 
     @SuppressWarnings("FieldCanBeLocal")
     private String[] blacklist_Name = {"fuck", "cunt", "dick", "shit"};
@@ -73,15 +72,13 @@ public class P2SConfig
     @SuppressWarnings("FieldCanBeLocal")
     private String[] whitelist_Note = {};
 
-    public P2SConfig(File file)
-    {
+    public P2SConfig(File file) {
         configuration = new Configuration(file);
 
         String cvk = "configversion";
         majorConfigVersionChange = !configuration.getCategory(MODID.toLowerCase()).keySet().contains(cvk) || !configuration.get(MODID, cvk, CONFIGVERSION).getString().equals(CONFIGVERSION);
 
-        if (majorConfigVersionChange)
-        {
+        if (majorConfigVersionChange) {
             configuration = new Configuration(file);
             configuration.get(MODID, cvk, CONFIGVERSION).set(CONFIGVERSION);
         }
@@ -97,8 +94,7 @@ public class P2SConfig
         configuration.setCategoryLanguageKey(BASECAT_TRACKERS, "d3.pay2spawn.config.trackers");
     }
 
-    public void syncConfig()
-    {
+    public void syncConfig() {
         {
             configuration.addCustomCategoryComment(SERVER_CAT, "Anything here can override client side settings.\nAlso used for SSP");
 
@@ -112,19 +108,23 @@ public class P2SConfig
 
             blacklist_Name = configuration.get(FILTER_CAT, "blacklist_Name", blacklist_Name, "If matches, name gets changed to Anonymous. Overrules whitelist.").getStringList();
             blacklist_Name_p = new Pattern[blacklist_Name.length];
-            for (int i = 0; i < blacklist_Name.length; i++) blacklist_Name_p[i] = Pattern.compile(Helper.removeQuotes(blacklist_Name[i]), Pattern.CASE_INSENSITIVE);
+            for (int i = 0; i < blacklist_Name.length; i++)
+                blacklist_Name_p[i] = Pattern.compile(Helper.removeQuotes(blacklist_Name[i]), Pattern.CASE_INSENSITIVE);
 
             blacklist_Note = configuration.get(FILTER_CAT, "blacklist_Note", blacklist_Note, "If matches, the match gets removed. Overrules whitelist.").getStringList();
             blacklist_Note_p = new Pattern[blacklist_Note.length];
-            for (int i = 0; i < blacklist_Note.length; i++) blacklist_Note_p[i] = Pattern.compile(Helper.removeQuotes(blacklist_Note[i]), Pattern.CASE_INSENSITIVE);
+            for (int i = 0; i < blacklist_Note.length; i++)
+                blacklist_Note_p[i] = Pattern.compile(Helper.removeQuotes(blacklist_Note[i]), Pattern.CASE_INSENSITIVE);
 
             whitelist_Name = configuration.get(FILTER_CAT, "whitelist_Name", whitelist_Name, "If NOT matches, name gets changed to Anonymous. Overruled by blacklist.").getStringList();
             whitelist_Name_p = new Pattern[whitelist_Name.length];
-            for (int i = 0; i < whitelist_Name.length; i++) whitelist_Name_p[i] = Pattern.compile(Helper.removeQuotes(whitelist_Name[i]), Pattern.CASE_INSENSITIVE);
+            for (int i = 0; i < whitelist_Name.length; i++)
+                whitelist_Name_p[i] = Pattern.compile(Helper.removeQuotes(whitelist_Name[i]), Pattern.CASE_INSENSITIVE);
 
             whitelist_Note = configuration.get(FILTER_CAT, "whitelist_Note", whitelist_Note, "If NOT matches, note gets removed. Overruled by blacklist.").getStringList();
             whitelist_Note_p = new Pattern[whitelist_Note.length];
-            for (int i = 0; i < whitelist_Note.length; i++) whitelist_Note_p[i] = Pattern.compile(Helper.removeQuotes(whitelist_Note[i]), Pattern.CASE_INSENSITIVE);
+            for (int i = 0; i < whitelist_Note.length; i++)
+                whitelist_Note_p[i] = Pattern.compile(Helper.removeQuotes(whitelist_Note[i]), Pattern.CASE_INSENSITIVE);
         }
 
         CheckerHandler.doConfig(configuration);
