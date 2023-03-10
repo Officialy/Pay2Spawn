@@ -55,7 +55,7 @@ public class StreamLabsChecker extends AbstractChecker implements Runnable {
     public final static StreamLabsChecker INSTANCE = new StreamLabsChecker();
     public final static String NAME = "streamlabs";
     public final static String CAT = BASECAT_TRACKERS + '.' + NAME;
-    public String URL = "https://streamlabs.com/api/v1.0/donations?access_token=%s";
+    public String URL = "https://sockets.streamlabs.com?token=";
 
     DonationsBasedHudEntry topDonationsBasedHudEntry, recentDonationsBasedHudEntry;
 
