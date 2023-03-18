@@ -1,11 +1,11 @@
-.gradle
-build
-run
+.gradle/
+build/
+run/
 jars*
-out
+out/
 *.iml
 *.ipr
 *.iws
-.idea
+.idea/
 *.json
 .DS_Store
