@@ -37,5 +37,5 @@ package net.doubledoordev.pay2spawn.util;
  */
 public interface IIHasCallback
 {
-    public void callback(Object... data);
+    void callback(Object... data);
 }

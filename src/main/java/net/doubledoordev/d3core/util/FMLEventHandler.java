@@ -60,7 +60,6 @@ import static net.doubledoordev.pay2spawn.util.Constants.MODID;
  * @author Dries007
  */
 @Mod.EventBusSubscriber(modid = MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
-
 public class FMLEventHandler
 {
     public static final FMLEventHandler FML_EVENT_HANDLER = new FMLEventHandler();

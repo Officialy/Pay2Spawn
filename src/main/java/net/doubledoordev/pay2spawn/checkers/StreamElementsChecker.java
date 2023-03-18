@@ -33,37 +33,41 @@ package net.doubledoordev.pay2spawn.checkers;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import net.doubledoordev.oldforge.Configuration;
+import net.doubledoordev.pay2spawn.Pay2Spawn;
 import net.doubledoordev.pay2spawn.hud.DonationsBasedHudEntry;
 import net.doubledoordev.pay2spawn.util.Donation;
-import net.doubledoordev.pay2spawn.util.Helper;
-import net.doubledoordev.oldforge.Configuration;
 
 import java.io.IOException;
-import java.net.URL;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.text.SimpleDateFormat;
 
 import static net.doubledoordev.pay2spawn.util.Constants.BASECAT_TRACKERS;
-import static net.doubledoordev.pay2spawn.util.Constants.JSON_PARSER;
 
 /**
  * For donation-tracker.com
  *
  * @author Dries007
  */
-public class StreamLabsChecker extends AbstractChecker implements Runnable {
-    public final static SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-    public final static StreamLabsChecker INSTANCE = new StreamLabsChecker();
-    public final static String NAME = "streamlabs";
+public class StreamElementsChecker extends AbstractChecker implements Runnable {
+
+    public final static StreamElementsChecker INSTANCE = new StreamElementsChecker();
+    public final static String NAME = "streamelements";
     public final static String CAT = BASECAT_TRACKERS + '.' + NAME;
-    public String URL = "https://sockets.streamlabs.com?token=";
+    public String URL = "https://api.streamelements.com/kappa/v2/tips/";
+    private static String JWT_TOKEN = "";
+    private static String channelId = "";
 
     DonationsBasedHudEntry topDonationsBasedHudEntry, recentDonationsBasedHudEntry;
 
-    String socketAPIKey = "";
     boolean enabled = false;
     int interval = 20;
 
-    private StreamLabsChecker() {
+    private StreamElementsChecker() {
         super();
     }
 
@@ -79,16 +83,17 @@ public class StreamLabsChecker extends AbstractChecker implements Runnable {
 
     @Override
     public boolean enabled() {
-        return enabled && !socketAPIKey.isEmpty();
+        return enabled && !JWT_TOKEN.isEmpty();
     }
 
     @Override
     public void doConfig(Configuration configuration) {
-        configuration.addCustomCategoryComment(CAT, "This is the checker for streamlabs.com");
+        configuration.addCustomCategoryComment(CAT, "This is the checker for streamelements.com");
 
         enabled = configuration.get(CAT, "enabled", enabled).getBoolean(enabled);
 
-        socketAPIKey = configuration.get(CAT, "APIKey", socketAPIKey).getString();
+        JWT_TOKEN = configuration.get(CAT, "APIKey", JWT_TOKEN).getString();
+        channelId = configuration.get(CAT, "channelId", channelId).getString();
         interval = configuration.get(CAT, "interval", interval, "The time in between polls minimum 20 (in seconds).").getInt();
         min_donation = configuration.get(CAT, "min_donation", min_donation, "Donations below this amount will only be added to statistics and will not spawn rewards").getDouble();
         URL = configuration.get(CAT, "url", URL, "Donation Tracker API end point string").getString();
@@ -132,8 +137,19 @@ public class StreamLabsChecker extends AbstractChecker implements Runnable {
      */
     private void processDonationAPI(boolean firstRun) {
         try {
-            JsonObject root = JSON_PARSER.parse(Helper.readUrl(new URL(String.format(URL, socketAPIKey)), new String[]{"User-Agent", "Mozilla/5.0 (X11; Linux x86_64; rv:12.0) Gecko/20100101 Firefox/21.0"})).getAsJsonObject();
-            JsonArray donations = root.getAsJsonArray("donations");
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(URL + channelId + "?limit=1"))
+                    .header("Content-Type", "application/json")
+                    .header("Authorization", "Bearer " + JWT_TOKEN)
+                    .method("GET", HttpRequest.BodyPublishers.noBody())
+                    .build();
+
+            HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+
+            JsonObject root = JsonParser.parseString(response.body()).getAsJsonObject();
+            Pay2Spawn.getLogger().info(root);
+
+            JsonArray donations = root.getAsJsonArray("docs");
             for (JsonElement jsonElement : donations) {
                 Donation donation = getDonation(jsonElement.getAsJsonObject());
 
@@ -148,19 +164,22 @@ public class StreamLabsChecker extends AbstractChecker implements Runnable {
                     process(donation, true, this);
                 }
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+
+        } catch (InterruptedException | IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
     private Donation getDonation(JsonObject jsonObject) {
         try {
             // Attempt to parse the data we need for the donation
-            String username = jsonObject.get("donator").getAsJsonObject().get("name").getAsString();
-            String note = jsonObject.has("message") ? jsonObject.get("message").getAsString() : "";
-            long timestamp = SIMPLE_DATE_FORMAT.parse(jsonObject.get("created_at").getAsString()).getTime();
-            double amount = jsonObject.get("amount").getAsDouble();
-            String id = jsonObject.get("id").getAsString();
+            String username = jsonObject.get("donation").getAsJsonObject().get("user").getAsJsonObject().get("username").getAsString();
+            String note = jsonObject.get("donation").getAsJsonObject().has("message") ? jsonObject.get("donation").getAsJsonObject().get("message").getAsString() : "";
+
+            SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+            long timestamp = SIMPLE_DATE_FORMAT.parse(jsonObject.get("createdAt").getAsString()).getTime();
+            double amount = jsonObject.get("donation").getAsJsonObject().get("amount").getAsDouble();
+            String id = jsonObject.get("_id").getAsString();
 
             // We have all the data we need to return the Donation object
             return new Donation(id, amount, timestamp, username, note);

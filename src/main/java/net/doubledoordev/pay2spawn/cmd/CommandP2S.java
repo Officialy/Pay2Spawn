@@ -69,8 +69,8 @@ public class CommandP2S {
 //        return;
 //    }
 
-    public static void register(CommandDispatcher<CommandSourceStack> sender) {
-        LiteralArgumentBuilder<CommandSourceStack> builder = sender.register(Commands.literal("pay2spawn")).createBuilder();
+    public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
+        LiteralArgumentBuilder<CommandSourceStack> builder = dispatcher.register(Commands.literal("p2s")).createBuilder();
 
         builder.then(Commands.literal("help")).executes(context -> {
             context.getSource().sendSuccess(new TranslatableComponent("p2s.command.p2s.help"), false);
@@ -210,7 +210,7 @@ public class CommandP2S {
             return 1;
     }));*/
 //                Helper.msg(ChatFormatting.RED + "Unknown command. Protip Use tab completion!");
-
+        dispatcher.register(builder);
     }
 
  /*   public List addTabCompletionOptions(CommandSourceStack sender, String[] args) {

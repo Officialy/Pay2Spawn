@@ -63,6 +63,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.swing.*;
+import java.awt.*;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -158,6 +159,8 @@ public class Pay2Spawn implements ID3Mod {
     }*/
 
     public Pay2Spawn() throws IOException {
+        System.setProperty("java.awt.headless", "false");
+        logger.info("Is Headless: " + GraphicsEnvironment.isHeadless());
         instance = this;
         D3Core d3Core = new D3Core();
         configFolder = new File(FMLLoader.getGamePath() + "/" + "config" + "/", NAME);
@@ -260,7 +263,7 @@ public class Pay2Spawn implements ID3Mod {
     }
 
     @SubscribeEvent
-    public void serverStarting(ServerStartingEvent event) throws IOException {
+    public static void serverStarting(ServerStartingEvent event) throws IOException {
         PermissionsHandler.init();
         try {
             StatusMessage.serverConfig = GSON_NOPP.toJson(JSON_PARSER.parse(new FileReader(new File(instance.configFolder, NAME + ".json"))));
@@ -270,7 +273,7 @@ public class Pay2Spawn implements ID3Mod {
     }
 
     @SubscribeEvent
-    public void onRegisterCommandEvent(RegisterCommandsEvent event) {
+    public static void onRegisterCommandEvent(RegisterCommandsEvent event) {
         CommandDispatcher<CommandSourceStack> commandDispatcher = event.getDispatcher();
         CommandP2SPermissions.register(commandDispatcher);
         CommandP2SServer.register(commandDispatcher);

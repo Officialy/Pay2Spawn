@@ -53,6 +53,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.NetworkEvent;
 import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.GameData;
 
 import java.util.function.Supplier;
 
@@ -202,46 +203,46 @@ public class NbtRequestMessage {
                     CompoundTag nbt = new CompoundTag();
                     Entity entity = ctx.get().getSender().level.getEntity(message.entityIdOrSlot);
                     entity.save(nbt);
-//                        todo entity.writeToNBTOptional(nbt);
+                    entity.writeToNBTOptional(nbt);
                     nbt.putString("id", EntityList.getEntityString(entity));
                     return new NbtRequestMessage(message.type, JsonNBTHelper.parseNBT(nbt).toString());
-                }
+                }*/
                 case FIREWORK -> {
                     ItemStack itemStack = ctx.get().getSender().getMainHandItem();
                     if (itemStack != null && itemStack.getItem() instanceof FireworkRocketItem) {
-                        return new NbtRequestMessage(message.type, JsonNBTHelper.parseNBT(ctx.get().getSender().getUseItem().save(new CompoundTag())).toString());
+//                        return new NbtRequestMessage(message.type, JsonNBTHelper.parseNBT(ctx.get().getSender().getUseItem().save(new CompoundTag())).toString());
                     } else {
                         Helper.sendChatToPlayer(ctx.get().getSender(), "You are not holding an ItemFirework...", ChatFormatting.RED);
                     }
-                }*/
-        /*  todo      case ITEM -> {
+                }
+                case ITEM -> {
                     if (message.entityIdOrSlot == -1) {
                         if (ctx.get().getSender().getMainHandItem() != null) {
-                            return new NbtRequestMessage(message.type, message.entityIdOrSlot, JsonNBTHelper.parseNBT(ctx.get().getSender().getMainHandItem().save(new CompoundTag())).toString());
+//                            return new NbtRequestMessage(message.type, message.entityIdOrSlot, JsonNBTHelper.parseNBT(ctx.get().getSender().getMainHandItem().save(new CompoundTag())).toString());
                         } else {
                             Helper.sendChatToPlayer(ctx.get().getSender(), "You are not holding an item...", ChatFormatting.RED);
                         }
                     } else {
                         ItemStack stack = ctx.get().getSender().getInventory().getItem(message.entityIdOrSlot);
-                        if (stack != null)
-                            return new NbtRequestMessage(message.type, message.entityIdOrSlot, JsonNBTHelper.parseNBT(stack.save(new CompoundTag())).toString());
-                        else return new NbtRequestMessage(message.type, message.entityIdOrSlot, "{}");
+//                        if (stack != null)
+//                            return new NbtRequestMessage(message.type, message.entityIdOrSlot, JsonNBTHelper.parseNBT(stack.save(new CompoundTag())).toString());
+//                        else return new NbtRequestMessage(message.type, message.entityIdOrSlot, "{}");
                     }
                 }
                 case BLOCK -> {
                     CompoundTag compound = new CompoundTag();
                     Level world = ResourceKey.create(Registry.DIMENSION_REGISTRY, message.dim);
-//                        compound.putInt(BLOCKID_KEY, Block.getIdFromBlock(world.getBlock(message.x, message.y, message.z)));
-                    //compound.putString(StructureType.BLOCKID_KEY, GameData.getBlockRegistry().getNameForObject(world.getBlock(message.x, message.y, message.z)));
-//                        compound.putInt(StructureType.META_KEY, world.getBlockMetadata(message.x, message.y, message.z));
+//                    compound.putInt(BLOCKID_KEY, Block.getIdFromBlock(world.getBlock(message.x, message.y, message.z)));
+//                    compound.putString(StructureType.BLOCKID_KEY, GameData.getBlockRegistry().getNameForObject(world.getBlockState(new BlockPos(message.x, message.y, message.z)).getBlock()));
+//                    compound.putInt(StructureType.META_KEY, world.getBlockMetadata(message.x, message.y, message.z));
                     BlockEntity tileEntity = world.getBlockEntity(new BlockPos(message.x, message.y, message.z));
                     if (tileEntity != null) {
                         CompoundTag te = new CompoundTag();
                         tileEntity.save(te);
                         compound.put(StructureType.TEDATA_KEY, te);
                     }
-                    return new NbtRequestMessage(message.type, JsonNBTHelper.parseNBT(compound).toString());
-                }*/
+//                    return new NbtRequestMessage(message.type, JsonNBTHelper.parseNBT(compound).toString());
+                }
             }
         }
     }

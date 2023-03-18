@@ -41,6 +41,7 @@ import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashSet;
 
@@ -69,20 +70,11 @@ public class Hud
     {
         for (IHudEntry hudEntry : set)
         {
-            switch (hudEntry.getPosition())
-            {
-                case 1:
-                    hudEntry.addToList(left);
-                    break;
-                case 2:
-                    hudEntry.addToList(right);
-                    break;
-                case 3:
-                    hudEntry.addToList(bottomLeft);
-                    break;
-                case 4:
-                    hudEntry.addToList(bottomRight);
-                    break;
+            switch (hudEntry.getPosition()) {
+                case 1 -> hudEntry.addToList(left);
+                case 2 -> hudEntry.addToList(right);
+                case 3 -> hudEntry.addToList(bottomLeft);
+                case 4 -> hudEntry.addToList(bottomRight);
             }
         }
     }
@@ -114,7 +106,7 @@ public class Hud
 
             try
             {
-                FileUtils.writeStringToFile(new File(folder, hudEntry.getFilename()), joiner.join(lines));
+                FileUtils.writeStringToFile(new File(folder, hudEntry.getFilename()), joiner.join(lines), Charset.defaultCharset());
             }
             catch (IOException e)
             {
@@ -123,7 +115,7 @@ public class Hud
         }
         try
         {
-            FileUtils.writeStringToFile(new File(folder, "Combined.txt"), joiner.join(allLines));
+            FileUtils.writeStringToFile(new File(folder, "Combined.txt"), joiner.join(allLines), Charset.defaultCharset());
         }
         catch (IOException e)
         {

@@ -34,11 +34,13 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.doubledoordev.pay2spawn.Pay2Spawn;
+import net.doubledoordev.pay2spawn.util.Constants;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
@@ -85,10 +87,10 @@ public class CommandP2SServer {
             int count = 0;
             for (ServerLevel world : context.getSource().getServer().getAllLevels()) {
                 for (Entity entity : world.getAllEntities()) {
-                  /*todo  if (entity.getEntityData().contains(Constants.NAME)) {
+                  if (entity.getEntityData().getAll().contains(Constants.NAME)) { //todo check if this works
                         count++;
                         entity.kill();
-                    }*/
+                    }
                 }
             }
             sendChatToPlayer(context.getSource(), "Removed " + count + " entities.", ChatFormatting.GREEN);

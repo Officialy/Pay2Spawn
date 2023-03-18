@@ -56,13 +56,8 @@ public class CheckerHandler {
     private static HashMap<String, AbstractChecker> map = new HashMap<>();
 
     static {
-        register(ChildsplayChecker.INSTANCE);
         register(TwitchChecker.INSTANCE);
-        register(FundrazrChecker.INSTANCE);
-        register(StreamLabsChecker.INSTANCE);
-        register(ClassyChecker.INSTANCE);
-        register(FileSystemChecker.INSTANCE);
-        register(ExtraLifeChecker.INSTANCE);
+        register(StreamElementsChecker.INSTANCE);
     }
 
     public static Collection<AbstractChecker> getAbstractCheckers() {
