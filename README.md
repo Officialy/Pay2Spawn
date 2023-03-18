@@ -1,4 +1,4 @@
-Pay2Spawn
+Pay2Spawn Continued
 =========
 
 Screw or help your favourite streamer!<br>
