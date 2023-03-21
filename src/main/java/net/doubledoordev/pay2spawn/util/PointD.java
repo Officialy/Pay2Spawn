@@ -30,6 +30,7 @@
 
 package net.doubledoordev.pay2spawn.util;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 
@@ -191,6 +192,10 @@ public class PointD {
          /*todo   if (world.isBlockNormalCubeDefault(intX(), intY() + y, intZ(), false)) {
                 return false;
             }*/
+
+            //todo check this
+            if (!world.getBlockState(new BlockPos(intX(), intY() + y, intZ())).getMaterial().isSolid())
+                return false;
         }
         return true;
     }

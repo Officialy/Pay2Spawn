@@ -47,102 +47,78 @@ import static net.doubledoordev.pay2spawn.util.Constants.*;
 /**
  * @author Dries007
  */
-public class RandomItemTypeGui extends HelperGuiBase
-{
-    public JTextField  itemNameField;
+public class RandomItemTypeGui extends HelperGuiBase {
+    public JTextField itemNameField;
     public JScrollPane scrollPane;
-    public JTextPane   jsonPane;
-    public JButton     parseFromJsonButton;
-    public JButton     saveButton;
-    public JButton     updateJsonButton;
-    public JButton     testButton;
-    public JPanel      panel1;
-    public JTextField  HTMLTextField;
+    public JTextPane jsonPane;
+    public JButton parseFromJsonButton;
+    public JButton saveButton;
+    public JButton updateJsonButton;
+    public JButton testButton;
+    public JPanel panel1;
+    public JTextField HTMLTextField;
 
-    public RandomItemTypeGui(int rewardID, String name, JsonObject inputData, HashMap<String, String> typeMap)
-    {
+    public RandomItemTypeGui(int rewardID, String name, JsonObject inputData, HashMap<String, String> typeMap) {
         super(rewardID, name, inputData, typeMap);
 
         makeAndOpen();
     }
 
     @Override
-    public void readJson()
-    {
-        if (data.has(TAG_KEY) && data.getAsJsonObject(TAG_KEY).has(DISPLAY_KEY)) itemNameField.setText(readValue(NAME_KEY, data.getAsJsonObject(TAG_KEY).getAsJsonObject(DISPLAY_KEY)));
+    public void readJson() {
+        if (data.has(TAG_KEY) && data.getAsJsonObject(TAG_KEY).has(DISPLAY_KEY)) {
+            itemNameField.setText(readValue(NAME_KEY, data.getAsJsonObject(TAG_KEY).getAsJsonObject(DISPLAY_KEY)));
+        }
 
         HTMLTextField.setText(readValue(CUSTOMHTML, data));
         jsonPane.setText(GSON.toJson(data));
     }
 
     @Override
-    public void updateJson()
-    {
-        if (!Strings.isNullOrEmpty(itemNameField.getText()))
-        {
-            if (!data.has(TAG_KEY)) data.add(TAG_KEY, new JsonObject());
-            if (!data.getAsJsonObject(TAG_KEY).has(DISPLAY_KEY)) data.getAsJsonObject(TAG_KEY).add(DISPLAY_KEY, new JsonObject());
+    public void updateJson() {
+        if (!Strings.isNullOrEmpty(itemNameField.getText())) {
+            if (!data.has(TAG_KEY)) {
+                data.add(TAG_KEY, new JsonObject());
+            }
+            if (!data.getAsJsonObject(TAG_KEY).has(DISPLAY_KEY)) {
+                data.getAsJsonObject(TAG_KEY).add(DISPLAY_KEY, new JsonObject());
+            }
             storeValue(NAME_KEY, data.getAsJsonObject(TAG_KEY).getAsJsonObject(DISPLAY_KEY), itemNameField.getText());
         }
 
-        if (!Strings.isNullOrEmpty(HTMLTextField.getText())) storeValue(CUSTOMHTML, data, HTMLTextField.getText());
+        if (!Strings.isNullOrEmpty(HTMLTextField.getText())) {
+            storeValue(CUSTOMHTML, data, HTMLTextField.getText());
+        }
 
         jsonPane.setText(GSON.toJson(data));
     }
 
     @Override
-    public void setupListeners()
-    {
-        testButton.addActionListener(new ActionListener()
-        {
-            @Override
-            public void actionPerformed(ActionEvent e)
-            {
-                updateJson();
-                TestMessage.sendToServer(name, data);
+    public void setupListeners() {
+        testButton.addActionListener(e -> {
+            updateJson();
+            TestMessage.sendToServer(name, data);
+        });
+        saveButton.addActionListener(e -> {
+            updateJson();
+            Configurator.instance.callback(rewardID, name, data);
+            dialog.dispose();
+        });
+        parseFromJsonButton.addActionListener(e -> {
+            try {
+                data = JSON_PARSER.parse(jsonPane.getText()).getAsJsonObject();
+                readJson();
+                jsonPane.setForeground(Color.black);
+            } catch (Exception e1) {
+                jsonPane.setForeground(Color.red);
+                e1.printStackTrace();
             }
         });
-        saveButton.addActionListener(new ActionListener()
-        {
-            @Override
-            public void actionPerformed(ActionEvent e)
-            {
-                updateJson();
-                Configurator.instance.callback(rewardID, name, data);
-                dialog.dispose();
-            }
-        });
-        parseFromJsonButton.addActionListener(new ActionListener()
-        {
-            @Override
-            public void actionPerformed(ActionEvent e)
-            {
-                try
-                {
-                    data = JSON_PARSER.parse(jsonPane.getText()).getAsJsonObject();
-                    readJson();
-                    jsonPane.setForeground(Color.black);
-                }
-                catch (Exception e1)
-                {
-                    jsonPane.setForeground(Color.red);
-                    e1.printStackTrace();
-                }
-            }
-        });
-        updateJsonButton.addActionListener(new ActionListener()
-        {
-            @Override
-            public void actionPerformed(ActionEvent e)
-            {
-                updateJson();
-            }
-        });
+        updateJsonButton.addActionListener(e -> updateJson());
     }
 
     @Override
-    public JPanel getPanel()
-    {
+    public JPanel getPanel() {
         return panel1;
     }
 
@@ -160,8 +136,7 @@ public class RandomItemTypeGui extends HelperGuiBase
      *
      * @noinspection ALL
      */
-    private void $$$setupUI$$$()
-    {
+    private void $$$setupUI$$$() {
         panel1 = new JPanel();
         panel1.setLayout(new GridBagLayout());
         final JPanel panel2 = new JPanel();
@@ -311,8 +286,7 @@ public class RandomItemTypeGui extends HelperGuiBase
     /**
      * @noinspection ALL
      */
-    public JComponent $$$getRootComponent$$$()
-    {
+    public JComponent $$$getRootComponent$$$() {
         return panel1;
     }
 }

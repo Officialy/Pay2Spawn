@@ -36,6 +36,7 @@ import net.doubledoordev.pay2spawn.hud.DonationsBasedHudEntry;
 import net.doubledoordev.pay2spawn.util.Donation;
 import net.doubledoordev.pay2spawn.util.Statistics;
 import net.minecraft.client.Minecraft;
+import net.minecraftforge.fml.loading.FMLLoader;
 
 import java.util.HashSet;
 
@@ -77,9 +78,11 @@ public abstract class AbstractChecker {
     }
 
     protected void process(Donation donation, boolean msg, AbstractChecker tracker) {
-        if (Minecraft.getInstance().player == null || !Pay2Spawn.enable) {
-            if (!backlog.contains(donation)) backlog.add(donation);
-            return;
+        if (FMLLoader.getDist().isClient()) {
+            if (Minecraft.getInstance().player == null || !Pay2Spawn.enable) {
+                if (!backlog.contains(donation)) backlog.add(donation);
+                return;
+            }
         }
 
         if (!doneIDs.contains(donation.id)) {

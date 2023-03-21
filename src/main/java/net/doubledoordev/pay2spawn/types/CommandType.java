@@ -33,10 +33,8 @@ package net.doubledoordev.pay2spawn.types;
 import com.google.gson.JsonObject;
 import net.doubledoordev.pay2spawn.permissions.Node;
 import net.doubledoordev.pay2spawn.types.guis.CommandTypeGui;
-import net.minecraft.client.gui.components.ChatComponent;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.MinecraftServer;
 import net.doubledoordev.oldforge.Configuration;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
@@ -76,7 +74,7 @@ public class CommandType extends TypeBase {
 
     @Override
     public void spawnServerSide(ServerPlayer player, CompoundTag dataFromClient, CompoundTag rewardData) {
-//    todo    MinecraftServer.getServer().getCommandManager().executeCommand(new cmdSender((ServerPlayer) player), dataFromClient.getString(COMMAND_KEY));
+//        player.getServer().getCommands().performCommand(new CMDSender((ServerPlayer) player), dataFromClient.getString(COMMAND_KEY));
     }
 
     @Override
@@ -94,7 +92,7 @@ public class CommandType extends TypeBase {
     @Override
     public Collection<Node> getPermissionNodes() {
         HashSet<Node> nodes = new HashSet<>();
-      /*todo  if (server != null) {
+       /* if (server != null) {
             for (Object o : server.getCommandManager().getCommands().values()) {
                 ICommand command = (ICommand) o;
                 commands.add(command.getCommandName());
@@ -121,8 +119,8 @@ public class CommandType extends TypeBase {
         return id;
     }
 
-    public class cmdSender extends ServerPlayer {
-        public cmdSender(ServerPlayer player) {
+    public class CMDSender extends ServerPlayer {
+        public CMDSender(ServerPlayer player) {
             super(player.server, player.server.overworld(), player.getGameProfile());
 //            this.theItemInWorldManager.thisPlayerMP = player;
 //            this.playerNetServerHandler = player.playerNetServerHandler;

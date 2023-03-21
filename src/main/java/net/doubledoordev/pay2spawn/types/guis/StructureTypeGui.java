@@ -34,8 +34,10 @@ import com.google.common.base.Strings;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.math.Vector3f;
 import net.doubledoordev.pay2spawn.configurator.Configurator;
 import net.doubledoordev.pay2spawn.network.TestMessage;
 import net.doubledoordev.pay2spawn.util.Helper;
@@ -46,9 +48,12 @@ import net.doubledoordev.pay2spawn.util.shapes.Shapes;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderLevelLastEvent;
+import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.loading.FMLLoader;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 
@@ -275,72 +280,75 @@ public class StructureTypeGui extends HelperGuiBase {
     }
 
     @SubscribeEvent
-    public void renderEvent(RenderLevelLastEvent event) {
-        if (disabled || !renderShapesIngameCheckBox.isSelected()) return;
-        if (ishapes.size() == 0) return;
+    public void renderEvent(RenderLevelStageEvent event) {
+        if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_TRIPWIRE_BLOCKS) {
+            if (disabled || !renderShapesIngameCheckBox.isSelected()) return;
+            if (ishapes.size() == 0) return;
 
-        Tesselator tess = Tesselator.getInstance();
-        BufferBuilder buffer = tess.getBuilder();
+            Tesselator tess = Tesselator.getInstance();
+            BufferBuilder buffer = tess.getBuilder();
 
 //        GL11.glPushMatrix();
 //        GL11.glEnable(GL12.GL_RESCALE_NORMAL);
-//        GL11.glDisable(GL11.GL_DEPTH_TEST);
-//        GL11.glDisable(GL11.GL_TEXTURE_2D);
+            RenderSystem.disableDepthTest();
+            RenderSystem.disableTexture();
 //
 //        GL11.glTranslated(-RenderManager.renderPosX, -RenderManager.renderPosY, 1 - RenderManager.renderPosZ);
-//        GL11.glTranslated(Helper.round(Minecraft.getInstance().player.getX()), Helper.round(Minecraft.getInstance().player.getY()), Helper.round(Minecraft.getInstance().player.getZ()));
-//        GL11.glScalef(1.0F, 1.0F, 1.0F);
+            event.getPoseStack().translate(Helper.round(Minecraft.getInstance().player.getX()), Helper.round(Minecraft.getInstance().player.getY()), Helper.round(Minecraft.getInstance().player.getZ()));
 
-        if (rotateBasedOnPlayerCheckBox.isSelected()) {
-            try {
-                int i = Integer.parseInt(baseRotation.getText());
-                if (i != -1) {
+            if (rotateBasedOnPlayerCheckBox.isSelected()) {
+                try {
+                    int i = Integer.parseInt(baseRotation.getText());
+                    if (i != -1) {
 //                    GL11.glRotated(90 * i, 0, -1, 0);
 
-                    switch (i) {
-                        case 1 -> GL11.glTranslated(-1, 0, 0);
-                        case 2 -> GL11.glTranslated(-1, 0, 1);
-                        case 3 -> GL11.glTranslated(0, 0, 1);
+                        switch (i) {
+                            case 1 -> GL11.glTranslated(-1, 0, 0);
+                            case 2 -> GL11.glTranslated(-1, 0, 1);
+                            case 3 -> GL11.glTranslated(0, 0, 1);
+                        }
+                    }
+                } catch (Exception ignored) {
+                }
+                if (FMLLoader.getDist().isClient()) {
+                    if (Minecraft.getInstance().player != null) {
+                        int rot = Helper.getHeading(Minecraft.getInstance().player);
+                        event.getPoseStack().mulPose(Vector3f.YN.rotationDegrees(90 * rot));
+                        switch (rot) {
+                            case 1 -> GL11.glTranslated(-1, 0, 0);
+                            case 2 -> GL11.glTranslated(-1, 0, 1);
+                            case 3 -> GL11.glTranslated(0, 0, 1);
+                        }
                     }
                 }
-            } catch (Exception ignored) {
             }
 
-            int rot = Helper.getHeading(Minecraft.getInstance().player);
-//            GL11.glRotated(90 * rot, 0, -1, 0);
-
-            switch (rot) {
-                case 1 -> GL11.glTranslated(-1, 0, 0);
-                case 2 -> GL11.glTranslated(-1, 0, 1);
-                case 3 -> GL11.glTranslated(0, 0, 1);
-            }
-        }
-
-        synchronized (ishapes) {
+            synchronized (ishapes) {
 //            GL11.glLineWidth(1f);
+                RenderSystem.lineWidth(1f);
 //            GL11.glColor3d(1, 1, 1);
-            for (IShape ishape : ishapes) {
-                ishape.render(buffer);
-            }
+                for (IShape ishape : ishapes) {
+                    ishape.render(buffer);
+                }
 
-            if (renderSelectedShapeInCheckBox.isSelected()) {
+                if (renderSelectedShapeInCheckBox.isSelected()) {
 //                GL11.glLineWidth(2f);
 //                GL11.glColor3d(0, 0, 1);
-                for (int i : shapeList.getSelectedIndices()) {
-                    // Fuck event based bullshit that causes IndexOutOfBoundsExceptions & NullPointerExceptions out of nowhere.
-                    if (i < ishapes.size()) {
-                        IShape shape = ishapes.get(i);
-                        if (shape != null) shape.render(buffer);
+                    for (int i : shapeList.getSelectedIndices()) {
+                        // Fuck event based bullshit that causes IndexOutOfBoundsExceptions & NullPointerExceptions out of nowhere.
+                        if (i < ishapes.size()) {
+                            IShape shape = ishapes.get(i);
+                            if (shape != null) shape.render(buffer);
+                        }
                     }
                 }
             }
-        }
 
 //        GL11.glDisable(GL12.GL_RESCALE_NORMAL);
-//        GL11.glEnable(GL11.GL_DEPTH_TEST);
-//        GL11.glEnable(GL11.GL_TEXTURE_2D);
-        // tess.renderingWorldRenderer = true;
+            RenderSystem.enableDepthTest();
+            RenderSystem.enableTexture();
 //        GL11.glPopMatrix();
+        }
     }
 
     {

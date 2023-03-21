@@ -41,9 +41,11 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.world.item.Items;
+import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderLevelLastEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.loading.FMLLoader;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 
@@ -56,70 +58,58 @@ import java.util.HashSet;
 /**
  * @author Dries007
  */
-public class StructureImporter
-{
-    final StructureImporter instance  = this;
-    final HashSet<PointI>   points    = new HashSet<>();
-    final HashSet<IShape>   selection = new HashSet<>();
+public class StructureImporter {
+    final StructureImporter instance = this;
+    final HashSet<PointI> points = new HashSet<>();
+    final HashSet<IShape> selection = new HashSet<>();
     private final StructureTypeGui callback;
-    private final JDialog          dialog;
-    public        JPanel           panel1;
-    public        JList<String>    pointList;
-    public        JLabel           helpText;
-    public        JComboBox<Mode>  modeComboBox;
-    public        JButton          addFromSelectionButton;
-    public        JButton          removeFromSelectionButton;
-    public        JCheckBox        renderSelectionOnlyCheckBox;
-    public        JButton          clearSelectionButton;
-    public        JButton          importButton;
-    public        JCheckBox        disableAlreadyImportedShapesCheckBox;
+    private final JDialog dialog;
+    public JPanel panel1;
+    public JList<String> pointList;
+    public JLabel helpText;
+    public JComboBox<Mode> modeComboBox;
+    public JButton addFromSelectionButton;
+    public JButton removeFromSelectionButton;
+    public JCheckBox renderSelectionOnlyCheckBox;
+    public JButton clearSelectionButton;
+    public JButton importButton;
+    public JCheckBox disableAlreadyImportedShapesCheckBox;
     PointI[] tempPointsArray = points.toArray(new PointI[points.size()]);
-    Mode     mode            = Mode.SINGLE;
+    Mode mode = Mode.SINGLE;
     PointI p1; // For BOX mode
     PointI p2; // For BOX mode
 
-    public StructureImporter(final StructureTypeGui callback)
-    {
+    public StructureImporter(final StructureTypeGui callback) {
         this.callback = callback;
 
         modeComboBox.setModel(new DefaultComboBoxModel<>(Mode.values()));
-        pointList.setModel(new AbstractListModel<String>()
-        {
+        pointList.setModel(new AbstractListModel<String>() {
             @Override
-            public int getSize()
-            {
+            public int getSize() {
                 tempPointsArray = points.toArray(new PointI[points.size()]);
                 return tempPointsArray.length;
             }
 
             @Override
-            public String getElementAt(int index)
-            {
+            public String getElementAt(int index) {
                 tempPointsArray = points.toArray(new PointI[points.size()]);
                 return tempPointsArray[index].toString();
             }
         });
-        modeComboBox.addActionListener(new AbstractAction()
-        {
+        modeComboBox.addActionListener(new AbstractAction() {
             @Override
-            public void actionPerformed(ActionEvent e)
-            {
+            public void actionPerformed(ActionEvent e) {
                 mode = (Mode) modeComboBox.getSelectedItem();
                 helpText.setText(mode.helpText);
             }
         });
-        addFromSelectionButton.addActionListener(new AbstractAction()
-        {
+        addFromSelectionButton.addActionListener(new AbstractAction() {
             @Override
-            public void actionPerformed(ActionEvent e)
-            {
-                synchronized (points)
-                {
-                    synchronized (selection)
-                    {
+            public void actionPerformed(ActionEvent e) {
+                synchronized (points) {
+                    synchronized (selection) {
                         for (IShape shape : selection) points.addAll(shape.getPoints());
-                        if (p1 != null && p2 != null)
-                        {
+                        if (p1 != null && p2 != null) {
                             int minX = Math.min(p1.getX(), p2.getX());
                             int minY = Math.min(p1.getY(), p2.getY());
                             int minZ = Math.min(p1.getZ(), p2.getZ());
@@ -127,12 +117,9 @@ public class StructureImporter
                             int diffY = Math.max(p1.getY(), p2.getY()) - minY;
                             int diffZ = Math.max(p1.getZ(), p2.getZ()) - minZ;
 
-                            for (int x = 0; x <= diffX; x++)
-                            {
-                                for (int y = 0; y <= diffY; y++)
-                                {
-                                    for (int z = 0; z <= diffZ; z++)
-                                    {
+                            for (int x = 0; x <= diffX; x++) {
+                                for (int y = 0; y <= diffY; y++) {
+                                    for (int z = 0; z <= diffZ; z++) {
                                         PointI p = new PointI(minX + x, minY + y, minZ + z);
                                         points.add(p);
                                     }
@@ -147,18 +134,13 @@ public class StructureImporter
                 pointList.updateUI();
             }
         });
-        removeFromSelectionButton.addActionListener(new AbstractAction()
-        {
+        removeFromSelectionButton.addActionListener(new AbstractAction() {
             @Override
-            public void actionPerformed(ActionEvent e)
-            {
-                synchronized (points)
-                {
-                    synchronized (selection)
-                    {
+            public void actionPerformed(ActionEvent e) {
+                synchronized (points) {
+                    synchronized (selection) {
                         for (IShape shape : selection) points.removeAll(shape.getPoints());
-                        if (p1 != null && p2 != null)
-                        {
+                        if (p1 != null && p2 != null) {
                             int minX = Math.min(p1.getX(), p2.getX());
                             int minY = Math.min(p1.getY(), p2.getY());
                             int minZ = Math.min(p1.getZ(), p2.getZ());
@@ -166,12 +148,9 @@ public class StructureImporter
                             int diffY = Math.max(p1.getY(), p2.getY()) - minY;
                             int diffZ = Math.max(p1.getZ(), p2.getZ()) - minZ;
 
-                            for (int x = 0; x <= diffX; x++)
-                            {
-                                for (int y = 0; y <= diffY; y++)
-                                {
-                                    for (int z = 0; z <= diffZ; z++)
-                                    {
+                            for (int x = 0; x <= diffX; x++) {
+                                for (int y = 0; y <= diffY; y++) {
+                                    for (int z = 0; z <= diffZ; z++) {
                                         PointI p = new PointI(minX + x, minY + y, minZ + z);
                                         points.remove(p);
                                     }
@@ -186,44 +165,40 @@ public class StructureImporter
                 pointList.updateUI();
             }
         });
-        clearSelectionButton.addActionListener(new AbstractAction()
-        {
+        clearSelectionButton.addActionListener(new AbstractAction() {
             @Override
-            public void actionPerformed(ActionEvent e)
-            {
-                synchronized (selection)
-                {
+            public void actionPerformed(ActionEvent e) {
+                synchronized (selection) {
                     selection.clear();
                 }
                 pointList.updateUI();
                 updateBtns();
             }
         });
-        importButton.addActionListener(new AbstractAction()
-        {
+        importButton.addActionListener(new AbstractAction() {
             @Override
-            public void actionPerformed(ActionEvent e)
-            {
-                CompoundTag root = new CompoundTag();
-                root.putInt("x", -Helper.round(Minecraft.getInstance().player.getX()));
-                root.putInt("y", -Helper.round(Minecraft.getInstance().player.getY()));
-                root.putInt("z", -Helper.round(Minecraft.getInstance().player.getZ()));
-                ListTag list = new ListTag();
-                synchronized (points)
-                {
-                    for (PointI point : points) list.add(point.toNBT());
+            public void actionPerformed(ActionEvent e) {
+                if (FMLLoader.getDist().isClient()) {
+                    if (Minecraft.getInstance().player != null) {
+                        CompoundTag root = new CompoundTag();
+                        root.putInt("x", -Helper.round(Minecraft.getInstance().player.getX()));
+                        root.putInt("y", -Helper.round(Minecraft.getInstance().player.getY()));
+                        root.putInt("z", -Helper.round(Minecraft.getInstance().player.getZ()));
+                        ListTag list = new ListTag();
+                        synchronized (points) {
+                            for (PointI point : points) list.add(point.toNBT());
+                        }
+                        root.put("list", list);
+                        if (Helper.checkTooBigForNetwork(root)) return;
+                        Pay2Spawn.getSnw().sendToServer(new StructureImportMessage(root));
+                        dialog.dispose();
+                    }
                 }
-                root.put("list", list);
-                if (Helper.checkTooBigForNetwork(root)) return;
-                Pay2Spawn.getSnw().sendToServer(new StructureImportMessage(root));
-                dialog.dispose();
             }
         });
-        disableAlreadyImportedShapesCheckBox.addActionListener(new ActionListener()
-        {
+        disableAlreadyImportedShapesCheckBox.addActionListener(new ActionListener() {
             @Override
-            public void actionPerformed(ActionEvent e)
-            {
+            public void actionPerformed(ActionEvent e) {
                 callback.disabled = disableAlreadyImportedShapesCheckBox.isSelected();
             }
         });
@@ -245,8 +220,7 @@ public class StructureImporter
     }
 
     @SubscribeEvent
-    public void renderEvent(RenderLevelLastEvent event)
-    {
+    public void renderEvent(RenderLevelLastEvent event) {
         if (selection.size() == 0 && points.size() == 0 && p1 == null && p2 == null) return;
 
         Tesselator tess = Tesselator.getInstance();
@@ -260,36 +234,30 @@ public class StructureImporter
 //        GL11.glTranslated(-RenderManager.renderPosX, -RenderManager.renderPosY, 1 - RenderManager.renderPosZ);
 //        GL11.glScalef(1.0F, 1.0F, 1.0F);
 
-        if (!renderSelectionOnlyCheckBox.isSelected())
-        {
-            synchronized (points)
-            {
+        if (!renderSelectionOnlyCheckBox.isSelected()) {
+            synchronized (points) {
 //                GL11.glLineWidth(1f);
 //                GL11.glColor3d(0, 1, 0);
                 for (PointI point : points) point.render(buffer);
             }
         }
 
-        synchronized (selection)
-        {
+        synchronized (selection) {
 //            GL11.glLineWidth(2f);
 //            GL11.glColor3d(1, 0, 0);
             for (IShape point : selection) point.render(buffer);
         }
 
-        if (pointList.getSelectedIndex() != -1 && tempPointsArray.length < pointList.getSelectedIndex())
-        {
+        if (pointList.getSelectedIndex() != -1 && tempPointsArray.length < pointList.getSelectedIndex()) {
 //            GL11.glColor3d(0, 0, 1);
             tempPointsArray[pointList.getSelectedIndex()].render(buffer);
         }
 
-        if (mode == Mode.BOX && p1 != null)
-        {
+        if (mode == Mode.BOX && p1 != null) {
             Helper.renderPoint(p1, buffer, 246.0 / 255.0, 59.0 / 255.0, 246.0 / 255.0);
         }
 
-        if (mode == Mode.BOX && p2 != null)
-        {
+        if (mode == Mode.BOX && p2 != null) {
             Helper.renderPoint(p2, buffer, 59.0 / 243.0, 243.0 / 255.0, 246.0 / 255.0);
         }
 
@@ -301,8 +269,7 @@ public class StructureImporter
     }
 
     @SubscribeEvent
-    public void clickEvent(PlayerInteractEvent e)
-    {
+    public void clickEvent(PlayerInteractEvent e) {
         if (e.getPlayer().getMainHandItem() == null || e.getPlayer().getMainHandItem().getItem() != Items.STICK) return;
         e.setCanceled(true);
 
@@ -312,8 +279,7 @@ public class StructureImporter
             click(Click.RIGHT, e.getPos().getX(), e.getPos().getY(), e.getPos().getZ());
     }
 
-    private void click(Click click, int x, int y, int z)
-    {
+    private void click(Click click, int x, int y, int z) {
         switch (mode) {
             case SINGLE -> {
                 synchronized (selection) {
@@ -331,8 +297,7 @@ public class StructureImporter
         updateBtns();
     }
 
-    private void updateBtns()
-    {
+    private void updateBtns() {
         addFromSelectionButton.setEnabled(selection.size() != 0 || (p1 != null && p2 != null));
         removeFromSelectionButton.setEnabled(selection.size() != 0 || (p1 != null && p2 != null));
         clearSelectionButton.setEnabled(selection.size() != 0 || (p1 != null && p2 != null));
@@ -352,8 +317,7 @@ public class StructureImporter
      *
      * @noinspection ALL
      */
-    private void $$$setupUI$$$()
-    {
+    private void $$$setupUI$$$() {
         panel1 = new JPanel();
         panel1.setLayout(new GridBagLayout());
         final JScrollPane scrollPane1 = new JScrollPane();
@@ -469,34 +433,29 @@ public class StructureImporter
     /**
      * @noinspection ALL
      */
-    public JComponent $$$getRootComponent$$$()
-    {
+    public JComponent $$$getRootComponent$$$() {
         return panel1;
     }
 
-    enum Mode
-    {
+    enum Mode {
         SINGLE("Single block mode", "Right click => add block, Left click => remove block"),
         BOX("Box mode", "Right click => Point 1, Left click => Point 2");
 
         public final String name;
         public final String helpText;
 
-        Mode(String name, String helpText)
-        {
+        Mode(String name, String helpText) {
             this.name = name;
             this.helpText = helpText;
         }
 
         @Override
-        public String toString()
-        {
+        public String toString() {
             return name;
         }
     }
 
-    enum Click
-    {
+    enum Click {
         LEFT, RIGHT
     }
 }

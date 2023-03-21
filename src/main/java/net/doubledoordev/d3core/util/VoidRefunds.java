@@ -55,32 +55,30 @@ import static net.doubledoordev.d3core.util.CoreConstants.MODID;
  * @author Dries007
  */
 @Mod.EventBusSubscriber(modid = Constants.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
-public class VoidRefunds
-{
+public class VoidRefunds {
     public static final VoidRefunds VOID_REFUNDS = new VoidRefunds();
     private ResourceKey<Level>[] voidRefundDimensions;
 
     private final HashMap<UUID, Inventory> map = new HashMap<>();
 
-    private VoidRefunds()
-    {
+    private VoidRefunds() {
     }
 
-    public void config(Configuration configuration)
-    {
+    public void config(Configuration configuration) {
         final String catVoidDeaths = MODID + ".VoidDeaths";
         configuration.addCustomCategoryComment(catVoidDeaths, "In these dimensions, when you die to void damage, you will keep your items.");
 //    todo    voidRefundDimensions = configuration.get(catVoidDeaths, "refundDimensions", new int[] {}).getIntList();
     }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
-    public void livingDeathEvent(LivingDeathEvent event)
-    {
-        if (FMLLoader.getDist().isClient()) return;
-        if (event.getSource() != DamageSource.OUT_OF_WORLD || !(event.getEntity() instanceof Player)) return;
-        if (event.getEntityLiving().lastHurt >= (Float.MAX_VALUE / 2)) return; // try to ignore /kill command
-        for (ResourceKey<Level> dim : voidRefundDimensions)
-        {
+    public void livingDeathEvent(LivingDeathEvent event) {
+        if (FMLLoader.getDist().isClient())
+            return;
+        if (event.getSource() != DamageSource.OUT_OF_WORLD || !(event.getEntity() instanceof Player))
+            return;
+        if (event.getEntityLiving().lastHurt >= (Float.MAX_VALUE / 2))
+            return; // try to ignore /kill command
+        for (ResourceKey<Level> dim : voidRefundDimensions) {
             if (dim != event.getEntity().getLevel().dimension()) continue;
             event.setCanceled(true);
 
@@ -93,9 +91,9 @@ public class VoidRefunds
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
-    public void playerRespawnEvent(PlayerEvent.PlayerRespawnEvent event)
-    {
-        if (FMLLoader.getDist().isClient()) return;
+    public void playerRespawnEvent(PlayerEvent.PlayerRespawnEvent event) {
+        if (FMLLoader.getDist().isClient())
+            return;
         Inventory oldInventory = map.get(event.getPlayer().getUUID());
         if (oldInventory == null) return;
         event.getPlayer().getInventory().replaceWith(oldInventory);

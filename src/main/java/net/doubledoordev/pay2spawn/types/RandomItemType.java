@@ -36,6 +36,8 @@ import net.doubledoordev.pay2spawn.permissions.Node;
 import net.doubledoordev.pay2spawn.types.guis.RandomItemTypeGui;
 import net.doubledoordev.pay2spawn.util.Helper;
 import net.doubledoordev.pay2spawn.util.JsonNBTHelper;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.server.level.ServerPlayer;
@@ -50,33 +52,28 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 
-import static net.doubledoordev.pay2spawn.util.Constants.NBTTypes;
-import static net.doubledoordev.pay2spawn.util.Constants.STRING;
+import static net.doubledoordev.pay2spawn.util.Constants.*;
 
 /**
  * @author Dries007
  */
-public class RandomItemType extends TypeBase
-{
-    public static final String                  NAME_KEY    = "Name";
-    public static final String                  DISPLAY_KEY = "display";
-    public static final String                  TAG_KEY     = "tag";
-    public static final HashMap<String, String> typeMap     = new HashMap<>();
+public class RandomItemType extends TypeBase {
+    public static final String NAME_KEY = "Name";
+    public static final String DISPLAY_KEY = "display";
+    public static final String TAG_KEY = "tag";
+    public static final HashMap<String, String> typeMap = new HashMap<>();
 
-    static
-    {
+    static {
         typeMap.put(NAME_KEY, NBTTypes[STRING]);
     }
 
     @Override
-    public String getName()
-    {
+    public String getName() {
         return "randomItem";
     }
 
     @Override
-    public CompoundTag getExample()
-    {
+    public CompoundTag getExample() {
         CompoundTag root = new CompoundTag();
         CompoundTag tag = new CompoundTag();
         CompoundTag display = new CompoundTag();
@@ -88,52 +85,42 @@ public class RandomItemType extends TypeBase
     }
 
     @Override
-    public void spawnServerSide(ServerPlayer player, CompoundTag dataFromClient, CompoundTag rewardData)
-    {
-        try
-        {
+    public void spawnServerSide(ServerPlayer player, CompoundTag dataFromClient, CompoundTag rewardData) {
+        try {
             ItemStack is = ItemStack.of(dataFromClient);
 
-            if (is == null)
-            {
+            if (is == null) {
                 Pay2Spawn.getLogger().error("ItemStack from reward was null? NBT: {}", dataFromClient.toString());
                 return;
             }
 
             ItemEntity entity = player.drop(is, false);
             entity.setNoPickUpDelay();
-//            todo entity.func_145797_a(player.getCommandSenderName());
-        }
-        catch (Exception e)
-        {
+//            entity.func_145797_a(player.getCommandSenderName());
+        } catch (Exception e) {
             Pay2Spawn.getLogger().warn("ItemStack could not be spawned. Does the item exists? JSON: " + JsonNBTHelper.parseNBT(dataFromClient));
         }
     }
 
     @Override
-    public void openNewGui(int rewardID, JsonObject data)
-    {
+    public void openNewGui(int rewardID, JsonObject data) {
         new RandomItemTypeGui(rewardID, getName(), data, typeMap);
     }
 
     @Override
-    public Collection<Node> getPermissionNodes()
-    {
+    public Collection<Node> getPermissionNodes() {
         return new ArrayList<>();
     }
 
     @Override
-    public Node getPermissionNode(Player player, CompoundTag dataFromClient)
-    {
+    public Node getPermissionNode(Player player, CompoundTag dataFromClient) {
         ItemStack is;
-        do
-        {
+        do {
             is = pickRandomItemStack();
         } while (is == null || is.getItem() == null);
 
         CompoundTag nbtTagCompound = is.save(new CompoundTag());
-        for (Object o : dataFromClient.getAllKeys())
-        {
+        for (Object o : dataFromClient.getAllKeys()) {
             nbtTagCompound.put(o.toString(), dataFromClient.get(o.toString()));
         }
         is.readShareTag(nbtTagCompound); //todo was readFromNBT
@@ -143,20 +130,16 @@ public class RandomItemType extends TypeBase
     }
 
     @Override
-    public String replaceInTemplate(String id, JsonObject jsonObject)
-    {
+    public String replaceInTemplate(String id, JsonObject jsonObject) {
         return id;
     }
 
-    public ItemStack pickRandomItemStack()
-    {
+    public ItemStack pickRandomItemStack() {
         ArrayList<ItemStack> itemStacks = new ArrayList<>();
-        for (Object item : ForgeRegistries.ITEMS.getValues())
-        {
+        for (Object item : ForgeRegistries.ITEMS.getValues()) {
             itemStacks.add(new ItemStack((Item) item));
         }
-        for (Object block : ForgeRegistries.BLOCKS.getValues())
-        {
+        for (Object block : ForgeRegistries.BLOCKS.getValues()) {
             itemStacks.add(((Block) block).asItem().getDefaultInstance());
         }
 

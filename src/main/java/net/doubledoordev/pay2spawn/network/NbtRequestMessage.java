@@ -229,7 +229,7 @@ public class NbtRequestMessage {
 //                        else return new NbtRequestMessage(message.type, message.entityIdOrSlot, "{}");
                     }
                 }
-                case BLOCK -> {
+               /* case BLOCK -> {
                     CompoundTag compound = new CompoundTag();
                     Level world = ResourceKey.create(Registry.DIMENSION_REGISTRY, message.dim);
 //                    compound.putInt(BLOCKID_KEY, Block.getIdFromBlock(world.getBlock(message.x, message.y, message.z)));
@@ -242,7 +242,7 @@ public class NbtRequestMessage {
                         compound.put(StructureType.TEDATA_KEY, te);
                     }
 //                    return new NbtRequestMessage(message.type, JsonNBTHelper.parseNBT(compound).toString());
-                }
+                }*/
             }
         }
     }

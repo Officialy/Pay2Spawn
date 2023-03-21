@@ -39,6 +39,7 @@ import net.doubledoordev.pay2spawn.network.TestMessage;
 import net.doubledoordev.pay2spawn.util.IIHasCallback;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraftforge.fml.loading.FMLLoader;
 
 import javax.swing.*;
 import java.awt.*;
@@ -53,35 +54,32 @@ import static net.doubledoordev.pay2spawn.util.Constants.*;
 /**
  * @author Dries007
  */
-public class ItemsTypeGui extends HelperGuiBase implements IIHasCallback
-{
-    private JPanel       pane1;
-    private JButton      importHandBtn;
-    private JTextField   HTMLTextField;
-    private JScrollPane  scrollPane;
-    private JTextPane    jsonPane;
-    private JButton      parseFromJsonButton;
-    private JButton      saveButton;
-    private JButton      updateJsonButton;
-    private JButton      testButton;
-    private JButton      importHotbarBtn;
-    private JButton      importinventoryBtn;
+public class ItemsTypeGui extends HelperGuiBase implements IIHasCallback {
+    private JPanel pane1;
+    private JButton importHandBtn;
+    private JTextField HTMLTextField;
+    private JScrollPane scrollPane;
+    private JTextPane jsonPane;
+    private JButton parseFromJsonButton;
+    private JButton saveButton;
+    private JButton updateJsonButton;
+    private JButton testButton;
+    private JButton importHotbarBtn;
+    private JButton importinventoryBtn;
     private JRadioButton spawnAllRadioButton;
     private JRadioButton spawnOneRadioButton;
     private JRadioButton randomAllOrOneRadioButton;
 
     private ItemsTypeGui instance = this;
 
-    public ItemsTypeGui(int rewardID, String name, JsonObject inputData, HashMap<String, String> typeMap)
-    {
+    public ItemsTypeGui(int rewardID, String name, JsonObject inputData, HashMap<String, String> typeMap) {
         super(rewardID, name, inputData, typeMap);
 
         makeAndOpen();
     }
 
     @Override
-    public void readJson()
-    {
+    public void readJson() {
         HTMLTextField.setText(readValue(CUSTOMHTML, data));
 
         String ride = readValue(MODE_KEY, data);
@@ -93,8 +91,7 @@ public class ItemsTypeGui extends HelperGuiBase implements IIHasCallback
     }
 
     @Override
-    public void updateJson()
-    {
+    public void updateJson() {
         storeValue(MODE_KEY, data, randomAllOrOneRadioButton.isSelected() ? RANDOM_BOOLEAN : spawnOneRadioButton.isSelected() ? TRUE_BYTE : FALSE_BYTE);
 
         if (!Strings.isNullOrEmpty(HTMLTextField.getText())) storeValue(CUSTOMHTML, data, HTMLTextField.getText());
@@ -103,90 +100,74 @@ public class ItemsTypeGui extends HelperGuiBase implements IIHasCallback
     }
 
     @Override
-    public void setupListeners()
-    {
-        testButton.addActionListener(new ActionListener()
-        {
+    public void setupListeners() {
+        testButton.addActionListener(new ActionListener() {
             @Override
-            public void actionPerformed(ActionEvent e)
-            {
+            public void actionPerformed(ActionEvent e) {
                 updateJson();
                 TestMessage.sendToServer(name, data);
             }
         });
-        saveButton.addActionListener(new ActionListener()
-        {
+        saveButton.addActionListener(new ActionListener() {
             @Override
-            public void actionPerformed(ActionEvent e)
-            {
+            public void actionPerformed(ActionEvent e) {
                 updateJson();
                 Configurator.instance.callback(rewardID, name, data);
                 dialog.dispose();
             }
         });
-        parseFromJsonButton.addActionListener(new ActionListener()
-        {
+        parseFromJsonButton.addActionListener(new ActionListener() {
             @Override
-            public void actionPerformed(ActionEvent e)
-            {
-                try
-                {
+            public void actionPerformed(ActionEvent e) {
+                try {
                     data = JSON_PARSER.parse(jsonPane.getText()).getAsJsonObject();
                     readJson();
                     jsonPane.setForeground(Color.black);
-                }
-                catch (Exception e1)
-                {
+                } catch (Exception e1) {
                     jsonPane.setForeground(Color.red);
                     e1.printStackTrace();
                 }
             }
         });
-        updateJsonButton.addActionListener(new ActionListener()
-        {
+        updateJsonButton.addActionListener(new ActionListener() {
             @Override
-            public void actionPerformed(ActionEvent e)
-            {
+            public void actionPerformed(ActionEvent e) {
                 updateJson();
             }
         });
-        importHandBtn.addActionListener(new ActionListener()
-        {
+        importHandBtn.addActionListener(new ActionListener() {
             @Override
-            public void actionPerformed(ActionEvent e)
-            {
+            public void actionPerformed(ActionEvent e) {
                 NbtRequestMessage.requestItem(instance, -1);
             }
         });
-        importHotbarBtn.addActionListener(new ActionListener()
-        {
+        importHotbarBtn.addActionListener(new ActionListener() {
             @Override
-            public void actionPerformed(ActionEvent e)
-            {
+            public void actionPerformed(ActionEvent e) {
                 for (int i = 0; i < Inventory.getSelectionSize(); i++) NbtRequestMessage.requestItem(instance, i);
             }
         });
-        importinventoryBtn.addActionListener(new ActionListener()
-        {
+        importinventoryBtn.addActionListener(new ActionListener() {
             @Override
-            public void actionPerformed(ActionEvent e)
-            {
-                for (int i = 0; i < Minecraft.getInstance().player.getInventory().getContainerSize(); i++) NbtRequestMessage.requestItem(instance, i);
+            public void actionPerformed(ActionEvent e) {
+                if (FMLLoader.getDist().isClient()) {
+                    for (int i = 0; i < Minecraft.getInstance().player.getInventory().getContainerSize(); i++)
+                        NbtRequestMessage.requestItem(instance, i);
+                }
             }
         });
     }
 
     @Override
-    public JPanel getPanel()
-    {
+    public JPanel getPanel() {
         return pane1;
     }
 
     @Override
-    public void callback(Object... data)
-    {
+    public void callback(Object... data) {
         if (!this.data.has(ITEMS_KEY)) this.data.add(ITEMS_KEY, new JsonArray());
-        if (!data[0].equals("{}")) this.data.getAsJsonArray(ITEMS_KEY).add(JSON_PARSER.parse((String) data[0]).getAsJsonObject());
+        if (!data[0].equals("{}"))
+            this.data.getAsJsonArray(ITEMS_KEY).add(JSON_PARSER.parse((String) data[0]).getAsJsonObject());
         updateJson();
     }
 
@@ -204,8 +185,7 @@ public class ItemsTypeGui extends HelperGuiBase implements IIHasCallback
      *
      * @noinspection ALL
      */
-    private void $$$setupUI$$$()
-    {
+    private void $$$setupUI$$$() {
         pane1 = new JPanel();
         pane1.setLayout(new GridBagLayout());
         final JPanel panel1 = new JPanel();
@@ -395,8 +375,7 @@ public class ItemsTypeGui extends HelperGuiBase implements IIHasCallback
     /**
      * @noinspection ALL
      */
-    public JComponent $$$getRootComponent$$$()
-    {
+    public JComponent $$$getRootComponent$$$() {
         return pane1;
     }
 }
