@@ -92,7 +92,7 @@ public class TestMessage {
 
             CompoundTag rewardData = new CompoundTag();
             Helper.sendChatToPlayer(ctx.get().getSender(), "Testing reward " + message.name + ".");
-            Pay2Spawn.getLogger().info("Test by " + ctx.get().getSender().getName() + " Type: " + message.name + " Data: " + message.data);
+            Pay2Spawn.getLogger().info("Test by " + ctx.get().getSender().getName().getContents() + " Type: " + message.name + " Data: " + message.data);
             TypeBase type = TypeRegistry.getByName(message.name);
 
             Node node = type.getPermissionNode(ctx.get().getSender(), message.data);
@@ -102,7 +102,7 @@ public class TestMessage {
                 return;
             }
             if (PermissionsHandler.needPermCheck(ctx.get().getSender()) && !PermissionsHandler.hasPermissionNode(ctx.get().getSender(), node)) { //todo serverplayer
-                Pay2Spawn.getLogger().warn(ctx.get().getSender().getDisplayName() + " doesn't have perm node " + node.toString());
+                Pay2Spawn.getLogger().warn(ctx.get().getSender().getName().getContents() + " doesn't have perm node " + node.toString());
                 return;
             }
             type.spawnServerSide(ctx.get().getSender(), message.data, rewardData);

@@ -45,7 +45,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderLevelLastEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.loading.FMLLoader;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 
@@ -178,7 +178,7 @@ public class StructureImporter {
         importButton.addActionListener(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (FMLLoader.getDist().isClient()) {
+                if (FMLEnvironment.dist.isClient()) {
                     if (Minecraft.getInstance().player != null) {
                         CompoundTag root = new CompoundTag();
                         root.putInt("x", -Helper.round(Minecraft.getInstance().player.getX()));

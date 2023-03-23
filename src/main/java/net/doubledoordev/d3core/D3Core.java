@@ -46,6 +46,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.javafmlmod.FMLModContainer;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.loading.FMLLoader;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.impl.Log4JLogger;
@@ -92,10 +93,6 @@ public class D3Core implements ID3Mod {
 
     public D3Core() {
         instance = this;
-
-        IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
-
-//        modEventBus.addListener(this::commonSetup);
 
         MinecraftForge.EVENT_BUS.register(this);
         MinecraftForge.EVENT_BUS.register(FML_EVENT_HANDLER);

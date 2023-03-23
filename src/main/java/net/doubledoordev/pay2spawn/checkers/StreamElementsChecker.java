@@ -147,7 +147,7 @@ public class StreamElementsChecker extends AbstractChecker implements Runnable {
             HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
 
             JsonObject root = JsonParser.parseString(response.body()).getAsJsonObject();
-            Pay2Spawn.getLogger().info(root);
+//            Pay2Spawn.getLogger().info(root);
 
             JsonArray donations = root.getAsJsonArray("docs");
             for (JsonElement jsonElement : donations) {

@@ -52,13 +52,18 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.TextComponent;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.loading.FMLLoader;
-import org.lwjgl.opengl.GL11;
+import net.minecraftforge.fml.util.thread.SidedThreadGroups;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.swing.*;
 import java.io.BufferedReader;
@@ -128,7 +133,7 @@ public class Helper {
             format = format.replace("$uuid", getGameProfileFromName(donation.username.replaceAll("[^ -~]", "")).getId().toString());
         if (format.contains("$amount")) format = format.replace("$amount", donation.amount + "");
         if (format.contains("$note")) format = format.replace("$note", donation.note);
-        if (FMLLoader.getDist().isClient()) {
+        if (FMLEnvironment.dist.isClient()) {
             if (Minecraft.getInstance().player != null) {
                 if (format.contains("$streameruuid"))
                     format = format.replace("$streameruuid", Minecraft.getInstance().player.getGameProfile().getId().toString());
@@ -469,6 +474,11 @@ public class Helper {
      */
     public static boolean checkTooBigForNetwork(JsonObject object) {
         return checkTooBigForNetwork(JsonNBTHelper.parseJSON(object));
+    }
+
+    public static Entity getEntityByName(String name, Level level) {
+        EntityType<?> entity = ForgeRegistries.ENTITIES.getValue(new ResourceLocation(name));
+        return entity.create(level);
     }
 
     /**

@@ -35,7 +35,7 @@ import net.doubledoordev.d3core.util.libs.org.mcstats.Metrics;
 import net.doubledoordev.pay2spawn.Pay2Spawn;
 import net.doubledoordev.pay2spawn.checkers.AbstractChecker;
 import net.doubledoordev.pay2spawn.checkers.CheckerHandler;
-import net.minecraftforge.fml.loading.FMLLoader;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 
 import java.io.IOException;
 
@@ -57,7 +57,7 @@ public class MetricsHelper
         try
         {
             metrics = new Metrics(NAME + "2", "0.1" /*todo Pay2Spawn.getVersion()*/);
-            if (FMLLoader.getDist().isClient())
+            if (FMLEnvironment.dist.isClient())
             {
                 metrics.createGraph("RewardCount").addPlotter(new Metrics.Plotter()
                 {

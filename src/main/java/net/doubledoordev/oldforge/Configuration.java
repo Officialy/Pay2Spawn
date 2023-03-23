@@ -31,6 +31,7 @@ import java.util.regex.Pattern;
 
 import com.google.common.collect.ImmutableSet;
 import net.doubledoordev.d3core.D3Core;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.loading.FMLLoader;
 
 

@@ -55,6 +55,8 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.fml.loading.FMLEnvironment;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.simple.SimpleChannel;
@@ -175,14 +177,16 @@ public class Pay2Spawn implements ID3Mod {
 
         modEventBus.addListener(this::commonSetup);
         modEventBus.addListener(d3Core::commonSetup);
-        modEventBus.addListener(this::clientSetup);
+        if (FMLEnvironment.dist.isClient()) {
+            modEventBus.addListener(this::clientSetup);
+        }
 
         int id = 0;
         snw = NetworkRegistry.newSimpleChannel(new ResourceLocation(MODID, "main"), () -> PROTOCOL_VERSION, PROTOCOL_VERSION::equals, PROTOCOL_VERSION::equals);
 
         snw.messageBuilder(TestMessage.class, id++).encoder(TestMessage::toBytes).decoder(TestMessage::new).consumer(TestMessage::handle).add();
         snw.messageBuilder(MessageMessage.class, id++).encoder(MessageMessage::toBytes).decoder(MessageMessage::new).consumer(MessageMessage::handle).add();
-//        snw.messageBuilder(NbtRequestMessage.class, id++).encoder(NbtRequestMessage::toBytes).decoder(NbtRequestMessage::new).consumer(NbtRequestMessage::handle).add();
+        snw.messageBuilder(NbtRequestMessage.class, id++).encoder(NbtRequestMessage::toBytes).decoder(NbtRequestMessage::new).consumer(NbtRequestMessage::handle).add();
 //        snw.messageBuilder(NbtRequestMessage.class, id++).encoder(NbtRequestMessage::toBytes).decoder(NbtRequestMessage::new).consumer(NbtRequestMessage::handle).add(); //todo server
         snw.messageBuilder(RewardMessage.class, id++).encoder(RewardMessage::toBytes).decoder(RewardMessage::new).consumer(RewardMessage::handle).add();
         snw.messageBuilder(StatusMessage.class, id++).encoder(StatusMessage::toBytes).decoder(StatusMessage::new).consumer(StatusMessage::handle).add();
@@ -221,7 +225,7 @@ public class Pay2Spawn implements ID3Mod {
             e.printStackTrace();
         }
 
-        if (newConfig && FMLLoader.getDist().isClient()) {
+        if (newConfig && FMLEnvironment.dist.isClient()) {
             JOptionPane pane = new JOptionPane();
             pane.setMessageType(JOptionPane.WARNING_MESSAGE);
             pane.setMessage("""
@@ -242,7 +246,7 @@ public class Pay2Spawn implements ID3Mod {
 
             }
 
-            if (FMLLoader.getDist().isClient()) {
+            if (FMLEnvironment.dist.isClient()) {
                 JOptionPane pane = new JOptionPane();
                 pane.setMessageType(JOptionPane.INFORMATION_MESSAGE);
                 pane.setMessage("""

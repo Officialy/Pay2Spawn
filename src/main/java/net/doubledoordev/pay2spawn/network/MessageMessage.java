@@ -35,6 +35,7 @@ import net.doubledoordev.pay2spawn.Pay2Spawn;
 import net.doubledoordev.pay2spawn.util.Donation;
 import net.doubledoordev.pay2spawn.util.Helper;
 import net.doubledoordev.pay2spawn.util.Reward;
+import net.minecraft.Util;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraftforge.network.NetworkEvent;
@@ -94,10 +95,9 @@ public class MessageMessage {
             format = format.replace("$reward_amount", message.amount + "");
             format = format.replace("$reward_countdown", message.countdown + "");
 
-            ctx.get().getSender().displayClientMessage(new TextComponent(format), false);
+            ctx.get().getSender().sendMessage(new TextComponent(format),  Util.NIL_UUID);
             ctx.get().setPacketHandled(true);
         });
-        ctx.get().setPacketHandled(true);
     }
 
 }

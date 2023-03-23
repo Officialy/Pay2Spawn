@@ -44,7 +44,7 @@ import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.loading.FMLLoader;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 
 import java.util.HashMap;
 import java.util.UUID;
@@ -72,7 +72,7 @@ public class VoidRefunds {
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void livingDeathEvent(LivingDeathEvent event) {
-        if (FMLLoader.getDist().isClient())
+        if (FMLEnvironment.dist.isClient())
             return;
         if (event.getSource() != DamageSource.OUT_OF_WORLD || !(event.getEntity() instanceof Player))
             return;
@@ -92,7 +92,7 @@ public class VoidRefunds {
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public void playerRespawnEvent(PlayerEvent.PlayerRespawnEvent event) {
-        if (FMLLoader.getDist().isClient())
+        if (FMLEnvironment.dist.isClient())
             return;
         Inventory oldInventory = map.get(event.getPlayer().getUUID());
         if (oldInventory == null) return;

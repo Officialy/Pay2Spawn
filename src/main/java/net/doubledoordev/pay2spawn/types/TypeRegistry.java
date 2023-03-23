@@ -128,12 +128,12 @@ public class TypeRegistry
     public static void preInit()
     {
         TypeRegistry.register(new XPOrbsType());
-//        TypeRegistry.register(new EntityType());
+        TypeRegistry.register(new EntityType());
         TypeRegistry.register(new ItemType());
 //        TypeRegistry.register(new PotionEffectType());
         TypeRegistry.register(new LightningType());
-        //TypeRegistry.register(new SoundType());
-//        TypeRegistry.register(new FireworksType());
+//        TypeRegistry.register(new SoundType());
+        TypeRegistry.register(new FireworksType());
 //        TypeRegistry.register(new CustomEntityType());
         TypeRegistry.register(new RandomItemType());
         TypeRegistry.register(new DropItemType());

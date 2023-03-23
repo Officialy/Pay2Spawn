@@ -31,6 +31,7 @@
 package net.doubledoordev.pay2spawn.types;
 
 import com.google.gson.JsonObject;
+import net.doubledoordev.pay2spawn.Pay2Spawn;
 import net.doubledoordev.pay2spawn.permissions.Node;
 import net.doubledoordev.pay2spawn.types.guis.DeleteworldTypeGui;
 import net.minecraft.network.chat.TextComponent;
@@ -38,7 +39,11 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.level.storage.LevelResource;
+import org.apache.commons.io.FileUtils;
 
+import java.io.File;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -86,7 +91,16 @@ public class DeleteworldType extends TypeBase
         {
             player.getServer().getPlayerList().getPlayers().get(i).connection.disconnect(new TextComponent(dataFromClient.getString(MESSAGE_KEY).replace("\\n", "\n")));
         }
-//    todo    MinecraftServer.getServer().deleteWorldAndStopServer();
+        // hello this is \ and this \\
+        String brokenPath = player.getServer().getWorldPath(LevelResource.LEVEL_DATA_FILE).getParent().toAbsolutePath().toString();
+        String fixedPath = brokenPath.replace(".", "").replace("\\\\", "\\");
+
+        try {
+            FileUtils.deleteDirectory(new File(fixedPath));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+//        player.getServer().stopServer();
     }
 
     @Override

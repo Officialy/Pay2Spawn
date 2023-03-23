@@ -39,7 +39,7 @@ import net.doubledoordev.pay2spawn.network.TestMessage;
 import net.doubledoordev.pay2spawn.util.IIHasCallback;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraftforge.fml.loading.FMLLoader;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 
 import javax.swing.*;
 import java.awt.*;
@@ -150,7 +150,7 @@ public class ItemsTypeGui extends HelperGuiBase implements IIHasCallback {
         importinventoryBtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (FMLLoader.getDist().isClient()) {
+                if (FMLEnvironment.dist.isClient()) {
                     for (int i = 0; i < Minecraft.getInstance().player.getInventory().getContainerSize(); i++)
                         NbtRequestMessage.requestItem(instance, i);
                 }

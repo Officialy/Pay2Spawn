@@ -88,8 +88,8 @@ public class FireworksType extends TypeBase
         typeMap.put(AMOUNT_KEY, NBTTypes[INT]);
     }
 
-    private static final Field fireworkAgeField = getHackField(0);
-    private static final Field lifetimeField    = getHackField(1);
+    private static final Field fireworkAgeField = getHackField(3);
+    private static final Field lifetimeField    = getHackField(4);
 
     private static Field getHackField(int id)
     {

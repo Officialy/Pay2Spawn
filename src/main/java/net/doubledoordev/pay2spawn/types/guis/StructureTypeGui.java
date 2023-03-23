@@ -49,11 +49,10 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RenderLevelLastEvent;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.loading.FMLLoader;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 
@@ -73,8 +72,7 @@ import static net.doubledoordev.pay2spawn.util.Constants.*;
 /**
  * @author Dries007
  */
-@Mod.EventBusSubscriber(modid = MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
-
+@Mod.EventBusSubscriber(modid = MODID, bus = Mod.EventBusSubscriber.Bus.FORGE, value = Dist.CLIENT)
 public class StructureTypeGui extends HelperGuiBase {
     private static StructureTypeGui instance;
     public final ArrayList<IShape> ishapes = new ArrayList<>();
@@ -310,7 +308,7 @@ public class StructureTypeGui extends HelperGuiBase {
                     }
                 } catch (Exception ignored) {
                 }
-                if (FMLLoader.getDist().isClient()) {
+                if (FMLEnvironment.dist.isClient()) {
                     if (Minecraft.getInstance().player != null) {
                         int rot = Helper.getHeading(Minecraft.getInstance().player);
                         event.getPoseStack().mulPose(Vector3f.YN.rotationDegrees(90 * rot));
