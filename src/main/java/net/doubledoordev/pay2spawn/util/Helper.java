@@ -41,9 +41,7 @@ import com.mojang.authlib.GameProfileRepository;
 import com.mojang.authlib.ProfileLookupCallback;
 import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.blaze3d.vertex.*;
 import net.doubledoordev.pay2spawn.util.shapes.PointI;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -305,59 +303,60 @@ public class Helper {
 
     }
 
-    public static void renderPoint(PointI p, BufferBuilder tess, double r, double g, double b) {
+    public static void renderPoint(PoseStack stack,Tesselator tesselator, PointI p, BufferBuilder tess, double r, double g, double b) {
 //        GL11.glColor3d(r, g, b);
         RenderSystem.setShaderColor((float) r, (float) g, (float) b, 1.0F);
-        renderPoint(p, tess);
+        renderPoint(stack, tesselator, p, tess);
     }
 
-    public static void renderPoint(PointI p, BufferBuilder tess) {
-        renderPoint(tess, p.getX(), p.getY(), p.getZ());
+    public static void renderPoint(PoseStack stack,Tesselator tesselator, PointI p, BufferBuilder tess) {
+        renderPoint(stack, tesselator, tess, p.getX(), p.getY(), p.getZ());
     }
 
-    public static void renderPoint(BufferBuilder tess, int x, int y, int z) {
+    public static void renderPoint(PoseStack stack, Tesselator tesselator, BufferBuilder bufferBuilder, int x, int y, int z) {
 //        todo GL11.glPushMatrix();
-//        GL11.glTranslated(x, y, z);
+//        event.getPoseStack().translate(x, y, z);
 //        GL11.glScalef(1.01f, 1.01f, 1.01f);
+        var matrix = stack.last().pose();
 
         RenderSystem.setShader(GameRenderer::getRendertypeLinesShader);
         // FRONT
-        tess.begin(VertexFormat.Mode.LINES, DefaultVertexFormat.POSITION);
-        tess.vertex(0, 0, 0).endVertex();
-        tess.vertex(0, 1, 0).endVertex();
+        bufferBuilder.begin(VertexFormat.Mode.LINES, DefaultVertexFormat.POSITION);
+        bufferBuilder.vertex(matrix,0, 0, 0).endVertex();
+        bufferBuilder.vertex(matrix,0, 1, 0).endVertex();
 
-        tess.vertex(0, 1, 0).endVertex();
-        tess.vertex(1, 1, 0).endVertex();
+        bufferBuilder.vertex(matrix,0, 1, 0).endVertex();
+        bufferBuilder.vertex(matrix,1, 1, 0).endVertex();
 
-        tess.vertex(1, 1, 0).endVertex();
-        tess.vertex(1, 0, 0).endVertex();
+        bufferBuilder.vertex(matrix,1, 1, 0).endVertex();
+        bufferBuilder.vertex(matrix,1, 0, 0).endVertex();
 
-        tess.vertex(1, 0, 0).endVertex();
-        tess.vertex(0, 0, 0).endVertex();
+        bufferBuilder.vertex(matrix,1, 0, 0).endVertex();
+        bufferBuilder.vertex(matrix,0, 0, 0).endVertex();
 
         // BACK
-        tess.vertex(0, 0, -1).endVertex();
-        tess.vertex(0, 1, -1).endVertex();
-        tess.vertex(0, 0, -1).endVertex();
-        tess.vertex(1, 0, -1).endVertex();
-        tess.vertex(1, 0, -1).endVertex();
-        tess.vertex(1, 1, -1).endVertex();
-        tess.vertex(0, 1, -1).endVertex();
-        tess.vertex(1, 1, -1).endVertex();
+        bufferBuilder.vertex(matrix,0, 0, -1).endVertex();
+        bufferBuilder.vertex(matrix,0, 1, -1).endVertex();
+        bufferBuilder.vertex(matrix,0, 0, -1).endVertex();
+        bufferBuilder.vertex(matrix,1, 0, -1).endVertex();
+        bufferBuilder.vertex(matrix,1, 0, -1).endVertex();
+        bufferBuilder.vertex(matrix,1, 1, -1).endVertex();
+        bufferBuilder.vertex(matrix,0, 1, -1).endVertex();
+        bufferBuilder.vertex(matrix,1, 1, -1).endVertex();
 
         // betweens.
-        tess.vertex(0, 0, 0).endVertex();
-        tess.vertex(0, 0, -1).endVertex();
+        bufferBuilder.vertex(matrix,0, 0, 0).endVertex();
+        bufferBuilder.vertex(matrix,0, 0, -1).endVertex();
 
-        tess.vertex(0, 1, 0).endVertex();
-        tess.vertex(0, 1, -1).endVertex();
+        bufferBuilder.vertex(matrix,0, 1, 0).endVertex();
+        bufferBuilder.vertex(matrix,0, 1, -1).endVertex();
 
-        tess.vertex(1, 0, 0).endVertex();
-        tess.vertex(1, 0, -1).endVertex();
+        bufferBuilder.vertex(matrix,1, 0, 0).endVertex();
+        bufferBuilder.vertex(matrix,1, 0, -1).endVertex();
 
-        tess.vertex(1, 1, 0).endVertex();
-        tess.vertex(1, 1, -1).endVertex();
-        tess.end();
+        bufferBuilder.vertex(matrix,1, 1, 0).endVertex();
+        bufferBuilder.vertex(matrix,1, 1, -1).endVertex();
+        tesselator.end();
 //        GL11.glPopMatrix();
     }
 

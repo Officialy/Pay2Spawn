@@ -286,24 +286,24 @@ public class StructureTypeGui extends HelperGuiBase {
             Tesselator tess = Tesselator.getInstance();
             BufferBuilder buffer = tess.getBuilder();
 
-//        GL11.glPushMatrix();
+            var stack = event.getPoseStack();
+            stack.pushPose();
 //        GL11.glEnable(GL12.GL_RESCALE_NORMAL);
             RenderSystem.disableDepthTest();
             RenderSystem.disableTexture();
 //
-//        GL11.glTranslated(-RenderManager.renderPosX, -RenderManager.renderPosY, 1 - RenderManager.renderPosZ);
-            event.getPoseStack().translate(Helper.round(Minecraft.getInstance().player.getX()), Helper.round(Minecraft.getInstance().player.getY()), Helper.round(Minecraft.getInstance().player.getZ()));
+//        event.getPoseStack().translate(-RenderManager.renderPosX, -RenderManager.renderPosY, 1 - RenderManager.renderPosZ);
+            stack.translate(Helper.round(Minecraft.getInstance().player.getX()), Helper.round(Minecraft.getInstance().player.getY()), Helper.round(Minecraft.getInstance().player.getZ()));
 
             if (rotateBasedOnPlayerCheckBox.isSelected()) {
                 try {
                     int i = Integer.parseInt(baseRotation.getText());
                     if (i != -1) {
-//                    GL11.glRotated(90 * i, 0, -1, 0);
-
+                        stack.mulPose(Vector3f.YN.rotationDegrees(90 * i));
                         switch (i) {
-                            case 1 -> GL11.glTranslated(-1, 0, 0);
-                            case 2 -> GL11.glTranslated(-1, 0, 1);
-                            case 3 -> GL11.glTranslated(0, 0, 1);
+                            case 1 -> stack.translate(-1, 0, 0);
+                            case 2 -> stack.translate(-1, 0, 1);
+                            case 3 -> stack.translate(0, 0, 1);
                         }
                     }
                 } catch (Exception ignored) {
@@ -311,32 +311,31 @@ public class StructureTypeGui extends HelperGuiBase {
                 if (FMLEnvironment.dist.isClient()) {
                     if (Minecraft.getInstance().player != null) {
                         int rot = Helper.getHeading(Minecraft.getInstance().player);
-                        event.getPoseStack().mulPose(Vector3f.YN.rotationDegrees(90 * rot));
+                        stack.mulPose(Vector3f.YN.rotationDegrees(90 * rot));
                         switch (rot) {
-                            case 1 -> GL11.glTranslated(-1, 0, 0);
-                            case 2 -> GL11.glTranslated(-1, 0, 1);
-                            case 3 -> GL11.glTranslated(0, 0, 1);
+                            case 1 -> stack.translate(-1, 0, 0);
+                            case 2 -> stack.translate(-1, 0, 1);
+                            case 3 -> stack.translate(0, 0, 1);
                         }
                     }
                 }
             }
 
             synchronized (ishapes) {
-//            GL11.glLineWidth(1f);
                 RenderSystem.lineWidth(1f);
-//            GL11.glColor3d(1, 1, 1);
+                RenderSystem.setShaderColor(1, 1, 1, 1);
                 for (IShape ishape : ishapes) {
-                    ishape.render(buffer);
+                    ishape.render(stack, tess, buffer);
                 }
 
                 if (renderSelectedShapeInCheckBox.isSelected()) {
-//                GL11.glLineWidth(2f);
-//                GL11.glColor3d(0, 0, 1);
+                    RenderSystem.lineWidth(2f);
+                    RenderSystem.setShaderColor(0, 0, 1, 1);
                     for (int i : shapeList.getSelectedIndices()) {
                         // Fuck event based bullshit that causes IndexOutOfBoundsExceptions & NullPointerExceptions out of nowhere.
                         if (i < ishapes.size()) {
                             IShape shape = ishapes.get(i);
-                            if (shape != null) shape.render(buffer);
+                            if (shape != null) shape.render(stack, tess, buffer);
                         }
                     }
                 }
@@ -345,7 +344,7 @@ public class StructureTypeGui extends HelperGuiBase {
 //        GL11.glDisable(GL12.GL_RESCALE_NORMAL);
             RenderSystem.enableDepthTest();
             RenderSystem.enableTexture();
-//        GL11.glPopMatrix();
+            stack.popPose();
         }
     }
 

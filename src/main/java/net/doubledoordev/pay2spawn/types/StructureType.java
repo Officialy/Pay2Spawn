@@ -41,6 +41,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.doubledoordev.oldforge.Configuration;
 import net.minecraft.network.chat.TextComponent;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -50,6 +51,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.block.entity.SpawnerBlockEntity;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.*;
 
@@ -64,20 +66,23 @@ public class StructureType extends TypeBase {
     public static final String TEDATA_KEY = "tileEntityData";
     public static final String WEIGHT_KEY = "weight";
     public static final String ROTATE_KEY = "rotate";
+    public static final String BLOCKID_KEY = "blockID";
+
     public static final String BASEROTATION_KEY = "baseRotation";
     public static final HashMap<String, String> typeMap = new HashMap<>();
 
     static {
+        typeMap.put(BLOCKID_KEY, NBTTypes[STRING]);
         typeMap.put(WEIGHT_KEY, NBTTypes[INT]);
         typeMap.put(ROTATE_KEY, NBTTypes[BYTE]);
         typeMap.put(BASEROTATION_KEY, NBTTypes[BYTE]);
     }
 
     private static final String NAME = "structure";
-    public static int[][] bannedBlocks;
+    public static String[][] bannedBlocks;
 
     public static void applyShape(IShape shape, Player player, ArrayList<CompoundTag> blockDataNbtList, byte baseRotation) {
-        /*todo try {
+        try {
             ArrayList<BlockData> blockDataList = new ArrayList<>();
             for (CompoundTag compound : blockDataNbtList) {
                 BlockData blockData = new BlockData(compound);
@@ -88,16 +93,18 @@ public class StructureType extends TypeBase {
             int x = Helper.round(player.getX()), y = Helper.round(player.getY() + 1), z = Helper.round(player.getZ());
             Collection<PointI> points = shape.rotate(baseRotation).rotate(baseRotation == -1 ? -1 : Helper.getHeading(player)).move(x, y, z).getPoints();
             for (PointI p : points) {
-                if (!shape.getReplaceableOnly() || player.level.getBlockState(new BlockPos(p.getX(), p.getY(), p.getZ())).isReplaceable(player.level, p.getX(), p.getY(), p.getZ())) {
+                if (!shape.getReplaceableOnly() /*todo || player.level.getBlockState(new BlockPos(p.getX(), p.getY(), p.getZ())).isReplaceable(player.level, p.getX(), p.getY(), p.getZ())*/) {
                     BlockData block = blockDataList.size() == 1 ? blockDataList.get(0) : Helper.getRandomFromSet(blockDataList);
-                    Block block1 = Block.getBlockById(block.id);
-                    player.level.setBlock(p.getX(), p.getY(), p.getZ(), block1, block.meta, 2);
-                    if (block.te != null) {
+                    Block block1 = ForgeRegistries.BLOCKS.getValue(new ResourceLocation(block.id));
+                    if (block1 == null)
+                        block1 = Blocks.AIR;
+                    player.level.setBlock(new BlockPos(p.getX(), p.getY(), p.getZ()), block1.defaultBlockState(), 2);
+                   /* if (block.te != null) {
                         BlockEntity tileEntity = BlockEntity.createAndLoadEntity(block.te);
                         tileEntity.setLevel(player.level);
-//                        tileEntity.xCoord = p.getX();
+//                        tileEntity.setPosition = p.getX();
                         player.level.setBlockEntity(tileEntity);
-                    }
+                    }*/
                 }
             }
         } catch (BlockData.BannedBlockException e) {
@@ -108,7 +115,7 @@ public class StructureType extends TypeBase {
             Pay2Spawn.getLogger().warn("Shape: " + shape.toString());
             Pay2Spawn.getLogger().warn("Player: " + player);
             Pay2Spawn.getLogger().warn("BlockData array: " + Arrays.deepToString(blockDataNbtList.toArray()));
-        }*/
+        }
     }
 
     @Override
@@ -221,17 +228,17 @@ public class StructureType extends TypeBase {
         }
 
         // Point
-  /* todo     {
+        {
             CompoundTag shapeNbt = Shapes.storeShape(new PointI(-1, -2, -1));
 
             ListTag blockDataNbt = new ListTag();
-            for (Object mob : EntityList.entityEggs.keySet()) {
+            /*for (Object mob : EntityList.entityEggs.keySet()) {
                 CompoundTag compound = new CompoundTag();
 
                 SpawnerBlockEntity mobSpawner = new SpawnerBlockEntity();
                 mobSpawner.func_145881_a().setEntityName(EntityList.getStringFromID((Integer) mob));
                 CompoundTag spawnerNbt = new CompoundTag();
-                mobSpawner.save(spawnerNbt);
+                mobSpawner.load(spawnerNbt);
 
                 // Removes some clutter, not really necessary though
                 spawnerNbt.remove("x");
@@ -241,11 +248,11 @@ public class StructureType extends TypeBase {
                 compound.put(TEDATA_KEY, spawnerNbt);
 
                 blockDataNbt.add(compound);
-            }
+            }*/
             shapeNbt.put(BLOCKDATA_KEY, blockDataNbt);
 
             shapesList.add(shapeNbt);
-        }*/
+        }
 
         root.put(SHAPES_KEY, shapesList);
         return root;
@@ -272,11 +279,11 @@ public class StructureType extends TypeBase {
         configuration.addCustomCategoryComment(TYPES_CAT, "Reward config options");
         configuration.addCustomCategoryComment(TYPES_CAT + '.' + NAME, "Used when spawning structures");
         String[] bannedBlocksStrings = configuration.get(TYPES_CAT + '.' + NAME, "bannedBlocks", new String[0], "Banned blocks, format like this:\nid:metaData => Ban only that meta\nid => Ban all meta of that block").getStringList();
-        bannedBlocks = new int[bannedBlocksStrings.length][];
+        bannedBlocks = new String[bannedBlocksStrings.length][];
         for (int i = 0; i < bannedBlocksStrings.length; i++) {
             String[] split = bannedBlocksStrings[i].split(":");
-            if (split.length == 1) bannedBlocks[i] = new int[]{Integer.parseInt(split[0])};
-            else bannedBlocks[i] = new int[]{Integer.parseInt(split[0]), Integer.parseInt(split[1])};
+            if (split.length == 1) bannedBlocks[i] = new String[]{split[0]};
+            else bannedBlocks[i] = new String[]{split[0], split[1]};
         }
     }
 
@@ -306,19 +313,18 @@ public class StructureType extends TypeBase {
 
     public static class BlockData {
         final int weight;
+        final String id;
         final CompoundTag te;
 
         private BlockData(CompoundTag compound) throws BannedBlockException {
             weight = compound.contains(WEIGHT_KEY) ? compound.getInt(WEIGHT_KEY) : 1;
-
+            id = compound.getString(BLOCKID_KEY);
             te = compound.contains(TEDATA_KEY) ? compound.getCompound(TEDATA_KEY) : null;
 
-          /*  for (int[] ban : bannedBlocks) {
-                if (ban.length == 1 && id == ban[0])
+            for (String[] ban : bannedBlocks) {
+                if (ban.length == 1 && id.equals(ban[0]))
                     throw new BannedBlockException("You are trying to use a globally banned block!\nBlockid: " + ban[0]);
-                else if (ban.length == 2 && id == ban[0] && meta == ban[1])
-                    throw new BannedBlockException("You are trying to use a globally banned block!\nBlockid:" + ban[0] + ":" + ban[1]);
-            }*/
+            }
         }
 
         @Override
@@ -339,7 +345,7 @@ public class StructureType extends TypeBase {
                     '}';
         }
 
-        public class BannedBlockException extends Exception {
+        public static class BannedBlockException extends Exception {
 
             public BannedBlockException(String s) {
                 super(s);

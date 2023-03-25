@@ -31,105 +31,106 @@
 package net.doubledoordev.pay2spawn.types;
 
 import com.google.gson.JsonObject;
-import net.doubledoordev.pay2spawn.Pay2Spawn;
 import net.doubledoordev.pay2spawn.permissions.Node;
 import net.doubledoordev.pay2spawn.types.guis.DeleteworldTypeGui;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.TickTask;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.storage.LevelResource;
+import net.minecraftforge.event.world.WorldEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
-import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 
-import static net.doubledoordev.pay2spawn.util.Constants.NBTTypes;
-import static net.doubledoordev.pay2spawn.util.Constants.STRING;
+import static net.doubledoordev.pay2spawn.util.Constants.*;
 
 /**
  * This should be !FUN!
  *
  * @author Dries007
  */
-public class DeleteworldType extends TypeBase
-{
-    public static final  String                  MESSAGE_KEY = "message";
-    public static final  HashMap<String, String> typeMap     = new HashMap<>();
-    private static final String                  NAME        = "deleteworld";
 
-    static
-    {
+@Mod.EventBusSubscriber(modid = MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
+public class DeleteworldType extends TypeBase {
+    public static final String MESSAGE_KEY = "message";
+    public static final HashMap<String, String> typeMap = new HashMap<>();
+    private static final String NAME = "deleteworld";
+    private static boolean deleteWorld = false;
+
+    static {
         typeMap.put(MESSAGE_KEY, NBTTypes[STRING]);
     }
 
     public static String DEFAULTMESSAGE = "A Pay2Spawn donation deleted the world.\\nGoodbye!";
 
     @Override
-    public String getName()
-    {
+    public String getName() {
         return NAME;
     }
 
     @Override
-    public CompoundTag getExample()
-    {
+    public CompoundTag getExample() {
         CompoundTag nbtTagCompound = new CompoundTag();
         nbtTagCompound.putString(MESSAGE_KEY, DEFAULTMESSAGE);
         return nbtTagCompound;
     }
 
     @Override
-    public void spawnServerSide(ServerPlayer player, CompoundTag dataFromClient, CompoundTag rewardData)
-    {
-        for (int i = 0; i < player.getServer().getPlayerList().getPlayerCount(); ++i)
-        {
+    public void spawnServerSide(ServerPlayer player, CompoundTag dataFromClient, CompoundTag rewardData) {
+        for (int i = 0; i < player.getServer().getPlayerList().getPlayerCount(); ++i) {
             player.getServer().getPlayerList().getPlayers().get(i).connection.disconnect(new TextComponent(dataFromClient.getString(MESSAGE_KEY).replace("\\n", "\n")));
         }
-        // hello this is \ and this \\
-        String brokenPath = player.getServer().getWorldPath(LevelResource.LEVEL_DATA_FILE).getParent().toAbsolutePath().toString();
-        String fixedPath = brokenPath.replace(".", "").replace("\\\\", "\\");
+        deleteWorld = true;
+    }
 
-        try {
-            FileUtils.deleteDirectory(new File(fixedPath));
-        } catch (Exception e) {
-            e.printStackTrace();
+    @SubscribeEvent
+    public static void saveEvent(WorldEvent.Save event) {
+        if (deleteWorld) {
+            String brokenPath = event.getWorld().getServer().getWorldPath(LevelResource.LEVEL_DATA_FILE).getParent().toAbsolutePath().toString();
+            String fixedPath = brokenPath.replace(".", "").replace("\\\\", "\\");
+
+            MinecraftServer server = event.getWorld().getServer();
+            server.doRunTask(new TickTask(server.getTickCount(), () -> {
+                try {
+                    FileUtils.deleteDirectory(new File(fixedPath));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }));
+            deleteWorld = false;
         }
-//        player.getServer().stopServer();
     }
 
     @Override
-    public void openNewGui(int rewardID, JsonObject data)
-    {
+    public void openNewGui(int rewardID, JsonObject data) {
         new DeleteworldTypeGui(rewardID, NAME, data, typeMap);
     }
 
     @Override
-    public Collection<Node> getPermissionNodes()
-    {
+    public Collection<Node> getPermissionNodes() {
         return Collections.singletonList(new Node(NAME));
     }
 
     @Override
-    public Node getPermissionNode(Player player, CompoundTag dataFromClient)
-    {
+    public Node getPermissionNode(Player player, CompoundTag dataFromClient) {
         return new Node(NAME);
     }
 
     @Override
-    public boolean isInDefaultConfig()
-    {
+    public boolean isInDefaultConfig() {
         return false;
     }
 
     @Override
-    public String replaceInTemplate(String id, JsonObject jsonObject)
-    {
+    public String replaceInTemplate(String id, JsonObject jsonObject) {
         return id;
     }
 }

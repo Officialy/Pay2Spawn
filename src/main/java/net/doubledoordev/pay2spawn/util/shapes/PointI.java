@@ -32,6 +32,7 @@ package net.doubledoordev.pay2spawn.util.shapes;
 
 import com.google.gson.JsonObject;
 import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import net.doubledoordev.pay2spawn.types.guis.StructureTypeGui;
 import net.doubledoordev.pay2spawn.types.guis.shapes.PointIGui;
@@ -224,8 +225,8 @@ public class PointI implements IShape {
     }
 
     @Override
-    public void render(BufferBuilder tess) {
-        Helper.renderPoint(this, tess);
+    public void render(PoseStack stack, Tesselator tesselator, BufferBuilder tess) {
+        Helper.renderPoint(stack, tesselator, this, tess);
     }
 
     @Override

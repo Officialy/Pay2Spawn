@@ -32,6 +32,7 @@ package net.doubledoordev.pay2spawn.util.shapes;
 
 import com.google.gson.JsonObject;
 import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import net.doubledoordev.pay2spawn.types.guis.StructureTypeGui;
 import net.minecraft.nbt.CompoundTag;
@@ -67,7 +68,7 @@ public interface IShape
 
     void openGui(int i, JsonObject jsonObject, StructureTypeGui instance);
 
-    void render(BufferBuilder tess);
+    void render(PoseStack stack, Tesselator tesselator, BufferBuilder bufferBuilder);
 
     IShape rotate(int baseRotation);
 }

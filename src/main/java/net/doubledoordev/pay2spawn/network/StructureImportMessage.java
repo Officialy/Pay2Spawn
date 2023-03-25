@@ -41,11 +41,11 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.NetworkEvent;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.function.Supplier;
 
-import static net.doubledoordev.pay2spawn.types.StructureType.BLOCKDATA_KEY;
-import static net.doubledoordev.pay2spawn.types.StructureType.TEDATA_KEY;
+import static net.doubledoordev.pay2spawn.types.StructureType.*;
 import static net.doubledoordev.pay2spawn.util.Constants.COMPOUND;
 
 /**
@@ -89,7 +89,7 @@ public class StructureImportMessage {
                         CompoundTag compound = new CompoundTag();
 
                         // BlockID
-//                        compound.putInt(BLOCKID_KEY, Block.getIdFromBlock(world.getBlock(x, y, z)));
+                        compound.putString(BLOCKID_KEY, ForgeRegistries.BLOCKS.getKey(world.getBlockState(new BlockPos(x, y, z)).getBlock()).toString());
 
                         // metaData
 //                        int meta = world.getBlockMetadata(x, y, z);
@@ -118,6 +118,5 @@ public class StructureImportMessage {
             });
         } else if (ctx.get().getDirection() == NetworkDirection.PLAY_TO_SERVER)
             StructureTypeGui.importCallback(message.root);
-
     }
 }

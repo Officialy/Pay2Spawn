@@ -47,6 +47,7 @@ import net.doubledoordev.pay2spawn.types.TypeRegistry;
 import net.doubledoordev.pay2spawn.util.*;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.client.event.RegisterClientCommandsEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -278,6 +279,14 @@ public class Pay2Spawn implements ID3Mod {
 
     @SubscribeEvent
     public static void onRegisterCommandEvent(RegisterCommandsEvent event) {
+        CommandDispatcher<CommandSourceStack> commandDispatcher = event.getDispatcher();
+        CommandP2SPermissions.register(commandDispatcher);
+        CommandP2SServer.register(commandDispatcher);
+        CommandP2S.register(commandDispatcher);
+    }
+
+    @SubscribeEvent
+    public static void onRegisterClientCommandEvent(RegisterClientCommandsEvent event) {
         CommandDispatcher<CommandSourceStack> commandDispatcher = event.getDispatcher();
         CommandP2SPermissions.register(commandDispatcher);
         CommandP2SServer.register(commandDispatcher);

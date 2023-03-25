@@ -55,6 +55,7 @@ public class BlockDataGui extends HelperGuiBase implements IIHasCallback {
     public JPanel panel1;
     public JButton saveButton;
     public JTextField weightField;
+    public JTextField blockIDField;
     public JButton parseFromJsonButton;
     public JButton updateJsonButton;
     public JButton importNextBlockRightButton;
@@ -88,7 +89,7 @@ public class BlockDataGui extends HelperGuiBase implements IIHasCallback {
     @Override
     public void updateJson() {
         storeValue(WEIGHT_KEY, data, weightField.getText());
-
+        storeValue(BLOCKID_KEY, data, blockIDField.getText());
         jsonPane.setText(GSON.toJson(data));
     }
 
@@ -200,13 +201,6 @@ public class BlockDataGui extends HelperGuiBase implements IIHasCallback {
         gbc.gridy = 0;
         gbc.anchor = GridBagConstraints.WEST;
         panel1.add(label1, gbc);
-        final JLabel label2 = new JLabel();
-        label2.setText("MetaData:");
-        gbc = new GridBagConstraints();
-        gbc.gridx = 0;
-        gbc.gridy = 1;
-        gbc.anchor = GridBagConstraints.WEST;
-        panel1.add(label2, gbc);
         final JLabel label3 = new JLabel();
         label3.setText("Weight:");
         gbc = new GridBagConstraints();

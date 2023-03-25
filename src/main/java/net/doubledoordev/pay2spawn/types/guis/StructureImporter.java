@@ -30,6 +30,7 @@
 
 package net.doubledoordev.pay2spawn.types.guis;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.Tesselator;
 import net.doubledoordev.pay2spawn.Pay2Spawn;
@@ -38,16 +39,15 @@ import net.doubledoordev.pay2spawn.util.Helper;
 import net.doubledoordev.pay2spawn.util.shapes.IShape;
 import net.doubledoordev.pay2spawn.util.shapes.PointI;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.world.item.Items;
-import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderLevelLastEvent;
+import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.loading.FMLEnvironment;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL12;
 
 import javax.swing.*;
 import java.awt.*;
@@ -220,58 +220,69 @@ public class StructureImporter {
     }
 
     @SubscribeEvent
-    public void renderEvent(RenderLevelLastEvent event) {
-        if (selection.size() == 0 && points.size() == 0 && p1 == null && p2 == null) return;
-
-        Tesselator tess = Tesselator.getInstance();
-        BufferBuilder buffer = tess.getBuilder();
-
+    public void renderEvent(RenderLevelStageEvent event) {
+        if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_TRIPWIRE_BLOCKS) {
+            if (selection.size() == 0 && points.size() == 0 && p1 == null && p2 == null)
+                return;
+            event.getPoseStack().pushPose();
+            var stack = event.getPoseStack();
+            Tesselator tess = Tesselator.getInstance();
+            BufferBuilder buffer = tess.getBuilder();
 //        GL11.glPushMatrix();
 //        GL11.glEnable(GL12.GL_RESCALE_NORMAL);
-//        GL11.glDisable(GL11.GL_DEPTH_TEST);
-//        GL11.glDisable(GL11.GL_TEXTURE_2D);
+            RenderSystem.disableDepthTest();
+            RenderSystem.disableTexture();
 
-//        GL11.glTranslated(-RenderManager.renderPosX, -RenderManager.renderPosY, 1 - RenderManager.renderPosZ);
+//        event.getPoseStack().translate(-RenderManager.renderPosX, -RenderManager.renderPosY, 1 - RenderManager.renderPosZ);
 //        GL11.glScalef(1.0F, 1.0F, 1.0F);
 
-        if (!renderSelectionOnlyCheckBox.isSelected()) {
-            synchronized (points) {
-//                GL11.glLineWidth(1f);
-//                GL11.glColor3d(0, 1, 0);
-                for (PointI point : points) point.render(buffer);
+            if (!renderSelectionOnlyCheckBox.isSelected()) {
+                synchronized (points) {
+                    RenderSystem.lineWidth(1);
+                    RenderSystem.setShaderColor(0, 1, 0, 1);
+                    for (PointI point : points) {
+                        point.render(stack, tess, buffer);
+                    }
+                }
             }
-        }
 
-        synchronized (selection) {
-//            GL11.glLineWidth(2f);
-//            GL11.glColor3d(1, 0, 0);
-            for (IShape point : selection) point.render(buffer);
-        }
+            synchronized (selection) {
+                RenderSystem.lineWidth(2);
+                RenderSystem.setShaderColor(1, 0, 0, 1);
+                for (IShape point : selection) {
+                    point.render(stack, tess, buffer);
+                }
+            }
 
-        if (pointList.getSelectedIndex() != -1 && tempPointsArray.length < pointList.getSelectedIndex()) {
-//            GL11.glColor3d(0, 0, 1);
-            tempPointsArray[pointList.getSelectedIndex()].render(buffer);
-        }
+            if (pointList.getSelectedIndex() != -1 && tempPointsArray.length < pointList.getSelectedIndex()) {
+                RenderSystem.setShaderColor(0, 0, 1, 1);
+                tempPointsArray[pointList.getSelectedIndex()].render(stack, tess, buffer);
+            }
 
-        if (mode == Mode.BOX && p1 != null) {
-            Helper.renderPoint(p1, buffer, 246.0 / 255.0, 59.0 / 255.0, 246.0 / 255.0);
-        }
+            if (mode == Mode.BOX && p1 != null) {
+                Helper.renderPoint(stack, tess, p1, buffer, 246.0 / 255.0, 59.0 / 255.0, 246.0 / 255.0);
+            }
 
-        if (mode == Mode.BOX && p2 != null) {
-            Helper.renderPoint(p2, buffer, 59.0 / 243.0, 243.0 / 255.0, 246.0 / 255.0);
-        }
+            if (mode == Mode.BOX && p2 != null) {
+                Helper.renderPoint(stack, tess, p2, buffer, 59.0 / 243.0, 243.0 / 255.0, 246.0 / 255.0);
+            }
 
 //        GL11.glDisable(GL12.GL_RESCALE_NORMAL);
-//        GL11.glEnable(GL11.GL_DEPTH_TEST);
-//        GL11.glEnable(GL11.GL_TEXTURE_2D);
-        // tess.renderingWorldRenderer = true;
+            RenderSystem.enableDepthTest();
+            RenderSystem.enableTexture();
+            // tess.renderingWorldRenderer = true;
 //        GL11.glPopMatrix();
+            event.getPoseStack().popPose();
+        }
     }
 
     @SubscribeEvent
     public void clickEvent(PlayerInteractEvent e) {
-        if (e.getPlayer().getMainHandItem() == null || e.getPlayer().getMainHandItem().getItem() != Items.STICK) return;
-        e.setCanceled(true);
+        if (e.getPlayer().getMainHandItem() == null || e.getPlayer().getMainHandItem().getItem() != Items.STICK)
+            return;
+        if (e instanceof PlayerInteractEvent.LeftClickEmpty event) {
+            event.setCanceled(true);
+        }
 
         if (e instanceof PlayerInteractEvent.LeftClickBlock)
             click(Click.LEFT, e.getPos().getX(), e.getPos().getY(), e.getPos().getZ());
