@@ -38,7 +38,7 @@
 //            try {
 //                sender.addChatMessage(IChatComponent.Serializer.func_150699_a(txt));
 //            } catch (JsonParseException jsonparseexception) {
-//                sender.addChatMessage(new TextComponent(txt));
+//                sender.addChatMessage(Component.literal(txt));
 //            }
 //        }
 //    }

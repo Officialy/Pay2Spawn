@@ -39,8 +39,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
@@ -124,6 +123,6 @@ public class CommandP2SServer {
     }*/
 
     public static void sendChatToPlayer(CommandSourceStack sender, String message, ChatFormatting chatFormatting) throws CommandSyntaxException {
-        sender.getPlayerOrException().displayClientMessage(new TextComponent(message).withStyle(chatFormatting), false);
+        sender.getPlayerOrException().displayClientMessage(Component.literal(message).withStyle(chatFormatting), false);
     }
 }

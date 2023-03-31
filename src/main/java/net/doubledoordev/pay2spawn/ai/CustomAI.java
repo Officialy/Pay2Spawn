@@ -33,7 +33,7 @@
 //import com.google.common.collect.ImmutableList;
 //import net.doubledoordev.pay2spawn.util.Constants;
 //import net.minecraft.nbt.CompoundTag;
-//import net.minecraft.network.chat.TextComponent;
+//import net.minecraft.network.chat.Component;
 //import net.minecraft.world.entity.LivingEntity;
 //import net.minecraft.world.entity.ai.goal.RandomSwimmingGoal;
 //import net.minecraft.world.entity.ambient.AmbientCreature;
@@ -88,7 +88,7 @@
 //        zombie.setPos(player.getX(), player.getY(), player.getZ());
 //
 //        setOwner(zombie, player.getName().getString());
-//        zombie.setCustomName(new TextComponent("dries007"));
+//        zombie.setCustomName(Component.literal("dries007"));
 //        player.getLevel().addFreshEntity(zombie);
 //    }
 //

@@ -34,7 +34,7 @@
 //import net.doubledoordev.pay2spawn.permissions.Node;
 //import net.doubledoordev.pay2spawn.types.guis.PlayerModificationTypeGui;
 //import net.minecraft.ChatFormatting;
-//import net.minecraft.network.chat.TextComponent;
+//import net.minecraft.network.chat.Component;
 //import net.minecraft.world.entity.player.Player;
 //import net.minecraft.server.level.ServerPlayer;
 //import net.minecraft.nbt.CompoundTag;
@@ -218,7 +218,7 @@
 //                                player.giveExperiencePoints((int) Mth.clamp(-dataFromClient.getFloat(AMOUNT_KEY), -player.totalExperience, 0));
 //                                break;
 //                            case SET:
-//                                player.displayClientMessage(new TextComponent("You can't set the XP amount with pay2spawn. Only add and subtract.").withStyle(ChatFormatting.AQUA), false);
+//                                player.displayClientMessage(Component.literal("You can't set the XP amount with pay2spawn. Only add and subtract.").withStyle(ChatFormatting.AQUA), false);
 //                        }
 //                    }
 //                },

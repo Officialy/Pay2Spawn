@@ -35,7 +35,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import net.doubledoordev.oldforge.Configuration;
-import net.doubledoordev.pay2spawn.Pay2Spawn;
 import net.doubledoordev.pay2spawn.hud.DonationsBasedHudEntry;
 import net.doubledoordev.pay2spawn.util.Donation;
 
@@ -60,7 +59,7 @@ public class StreamElementsChecker extends AbstractChecker implements Runnable {
     public final static String CAT = BASECAT_TRACKERS + '.' + NAME;
     public String URL = "https://api.streamelements.com/kappa/v2/tips/";
     private static String JWT_TOKEN = "";
-    private static String channelId = "";
+    private static String accountId = "";
 
     DonationsBasedHudEntry topDonationsBasedHudEntry, recentDonationsBasedHudEntry;
 
@@ -93,7 +92,7 @@ public class StreamElementsChecker extends AbstractChecker implements Runnable {
         enabled = configuration.get(CAT, "enabled", enabled).getBoolean(enabled);
 
         JWT_TOKEN = configuration.get(CAT, "APIKey", JWT_TOKEN).getString();
-        channelId = configuration.get(CAT, "channelId", channelId).getString();
+        accountId = configuration.get(CAT, "accountId", accountId).getString();
         interval = configuration.get(CAT, "interval", interval, "The time in between polls minimum 20 (in seconds).").getInt();
         min_donation = configuration.get(CAT, "min_donation", min_donation, "Donations below this amount will only be added to statistics and will not spawn rewards").getDouble();
         URL = configuration.get(CAT, "url", URL, "Donation Tracker API end point string").getString();
@@ -138,7 +137,7 @@ public class StreamElementsChecker extends AbstractChecker implements Runnable {
     private void processDonationAPI(boolean firstRun) {
         try {
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(URL + channelId + "?limit=1"))
+                    .uri(URI.create(URL + accountId + "?limit=1"))
                     .header("Content-Type", "application/json")
                     .header("Authorization", "Bearer " + JWT_TOKEN)
                     .method("GET", HttpRequest.BodyPublishers.noBody())

@@ -51,7 +51,7 @@ public class RndEntity implements IRandomResolver {
 
     @Override
     public String solverRandom(int type, String value) {
-        return PATTERN.matcher(value).replaceFirst(Helper.getRandomFromSet(ForgeRegistries.ENTITIES.getKeys().stream().filter(s -> !s.getPath().contains("player") && !s.getPath().contains("potion")).toList()).toString());
+        return PATTERN.matcher(value).replaceFirst(Helper.getRandomFromSet(ForgeRegistries.ENTITY_TYPES.getKeys().stream().filter(s -> !s.getPath().contains("player") && !s.getPath().contains("potion")).toList()).toString());
     }
 
     @Override

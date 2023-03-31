@@ -190,18 +190,10 @@ public class StructureTypeGui extends HelperGuiBase {
                 }
             }
         });
-        updateJsonButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                updateJson();
-            }
-        });
-        addShapeButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                Shapes.MAP.get(JOptionPane.showInputDialog(instance.panel1, "Please pick a new shape to add.", "Pick a shape", JOptionPane.QUESTION_MESSAGE, null, Shapes.LIST.toArray(), Shapes.LIST.get(0))).openGui(-1, new JsonObject(), instance);
-                shapeList.clearSelection();
-            }
+        updateJsonButton.addActionListener(e -> updateJson());
+        addShapeButton.addActionListener(e -> {
+            Shapes.MAP.get(JOptionPane.showInputDialog(instance.panel1, "Please pick a new shape to add.", "Pick a shape", JOptionPane.QUESTION_MESSAGE, null, Shapes.LIST.toArray(), Shapes.LIST.get(0))).openGui(-1, new JsonObject(), instance);
+            shapeList.clearSelection();
         });
         shapeList.addMouseListener(new MouseAdapter() {
             @Override
@@ -263,7 +255,7 @@ public class StructureTypeGui extends HelperGuiBase {
     }
 
     private void setupModels() {
-        shapeList.setModel(new AbstractListModel<String>() {
+        shapeList.setModel(new AbstractListModel<>() {
             @Override
             public int getSize() {
                 return shapes.size();
@@ -291,9 +283,10 @@ public class StructureTypeGui extends HelperGuiBase {
 //        GL11.glEnable(GL12.GL_RESCALE_NORMAL);
             RenderSystem.disableDepthTest();
             RenderSystem.disableTexture();
-//
 //        event.getPoseStack().translate(-RenderManager.renderPosX, -RenderManager.renderPosY, 1 - RenderManager.renderPosZ);
             stack.translate(Helper.round(Minecraft.getInstance().player.getX()), Helper.round(Minecraft.getInstance().player.getY()), Helper.round(Minecraft.getInstance().player.getZ()));
+            stack.popPose();
+            stack.pushPose();
 
             if (rotateBasedOnPlayerCheckBox.isSelected()) {
                 try {

@@ -32,27 +32,21 @@
 
 package net.doubledoordev.d3core.util;
 
-import com.google.gson.JsonParseException;
+
 import net.doubledoordev.d3core.D3Core;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.level.storage.ServerLevelData;
-import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.common.Mod;
-import org.apache.commons.io.FileUtils;
 
 import java.io.File;
-import java.io.IOException;
 
 import static net.doubledoordev.pay2spawn.util.Constants.MODID;
 
@@ -72,13 +66,13 @@ public class FMLEventHandler
     public boolean lilypad;
 
     @SubscribeEvent
-    public void worldTickHandler(TickEvent.WorldTickEvent event)
+    public void worldTickHandler(TickEvent.LevelTickEvent event)
     {
         if (event.side != LogicalSide.SERVER || event.phase != TickEvent.Phase.START) return;
 
         if (norain)
         {
-            ServerLevelData worldInfo = event.world.getServer().getWorldData().overworldData();
+            ServerLevelData worldInfo = event.level.getServer().getWorldData().overworldData();
             worldInfo.setThundering(false);
             worldInfo.setRaining(false);
             worldInfo.setRainTime(Integer.MAX_VALUE);
@@ -126,7 +120,7 @@ public class FMLEventHandler
                 }
                 catch (JsonParseException jsonparseexception)
                 {
-                    event.getPlayer().displayClientMessage(new TextComponent(txt), false); //todo boolean
+                    event.getPlayer().displayClientMessage(Component.literal(txt), false); //todo boolean
                 }
             }
             catch (IOException e)
@@ -135,15 +129,15 @@ public class FMLEventHandler
             }
         }*/
 
-        if (lilypad) lilypad(event.getPlayer());
-        if (CoreConstants.isAprilFools()) CoreConstants.spawnRandomFireworks(event.getPlayer(), 1 + CoreConstants.RANDOM.nextInt(5), 1 + CoreConstants.RANDOM.nextInt(5));
+        if (lilypad) lilypad(event.getEntity());
+        if (CoreConstants.isAprilFools()) CoreConstants.spawnRandomFireworks(event.getEntity(), 1 + CoreConstants.RANDOM.nextInt(5), 1 + CoreConstants.RANDOM.nextInt(5));
     }
 
     @SubscribeEvent
     public void playerRespawnEvent(PlayerEvent.PlayerRespawnEvent event)
     {
-        if (lilypad) lilypad(event.getPlayer());
-        if (CoreConstants.isAprilFools()) CoreConstants.spawnRandomFireworks(event.getPlayer(), 1 + CoreConstants.RANDOM.nextInt(5), 1 + CoreConstants.RANDOM.nextInt(5));
+        if (lilypad) lilypad(event.getEntity());
+        if (CoreConstants.isAprilFools()) CoreConstants.spawnRandomFireworks(event.getEntity(), 1 + CoreConstants.RANDOM.nextInt(5), 1 + CoreConstants.RANDOM.nextInt(5));
     }
 
     private void lilypad(Player player)

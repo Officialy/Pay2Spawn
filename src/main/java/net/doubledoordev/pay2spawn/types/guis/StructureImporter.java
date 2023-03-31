@@ -278,11 +278,11 @@ public class StructureImporter {
 
     @SubscribeEvent
     public void clickEvent(PlayerInteractEvent e) {
-        if (e.getPlayer().getMainHandItem() == null || e.getPlayer().getMainHandItem().getItem() != Items.STICK)
+        if (e.getEntity().getMainHandItem() == null || e.getEntity().getMainHandItem().getItem() != Items.STICK)
             return;
-        if (e instanceof PlayerInteractEvent.LeftClickEmpty event) {
-            event.setCanceled(true);
-        }
+
+//        e.setCanceled(true);
+
 
         if (e instanceof PlayerInteractEvent.LeftClickBlock)
             click(Click.LEFT, e.getPos().getX(), e.getPos().getY(), e.getPos().getZ());

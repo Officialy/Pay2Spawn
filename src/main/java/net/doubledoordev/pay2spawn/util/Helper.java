@@ -46,10 +46,11 @@ import net.doubledoordev.pay2spawn.util.shapes.PointI;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
@@ -114,7 +115,7 @@ public class Helper {
         System.out.println("P2S client message: " + message);
         if (FMLLoader.getDist().isClient()) {
             if (Minecraft.getInstance().player != null)
-                Minecraft.getInstance().player.displayClientMessage(new TextComponent(message), false);
+                Minecraft.getInstance().player.displayClientMessage(Component.literal(message), false);
         }
     }
 
@@ -158,7 +159,7 @@ public class Helper {
      */
     public static GameProfile getGameProfileFromName(String name) {
         if (name == null) {
-            UUID uuid = Player.createPlayerUUID(new GameProfile(null, ANONYMOUS));
+            UUID uuid = UUIDUtil.getOrCreatePlayerUUID(new GameProfile(null, ANONYMOUS));
             return new GameProfile(uuid, ANONYMOUS);
         }
         if (nameToProfileMap.containsKey(name)) return nameToProfileMap.get(name);
@@ -179,7 +180,7 @@ public class Helper {
         profileRepo.findProfilesByNames(new String[]{name}, Agent.MINECRAFT, profilelookupcallback);
 
         if (agameprofile[0] == null) {
-            UUID uuid = Player.createPlayerUUID(new GameProfile(null, name));
+            UUID uuid = UUIDUtil.getOrCreatePlayerUUID(new GameProfile(null, name));
             GameProfile gameprofile = new GameProfile(uuid, name);
             profilelookupcallback.onProfileLookupSucceeded(gameprofile);
         }
@@ -291,11 +292,11 @@ public class Helper {
     }
 
     public static void sendChatToPlayer(ServerPlayer player, String message, ChatFormatting chatFormatting) {
-        player.displayClientMessage(new TextComponent(message).withStyle(chatFormatting), false);
+        player.displayClientMessage(Component.literal(message).withStyle(chatFormatting), false);
     }
 
     public static void sendChatToPlayer(Player player, String message) {
-        player.displayClientMessage(new TextComponent(message), false);
+        player.displayClientMessage(Component.literal(message), false);
     }
 
     public static int round(double d) {
@@ -317,9 +318,9 @@ public class Helper {
 //        todo GL11.glPushMatrix();
 //        event.getPoseStack().translate(x, y, z);
 //        GL11.glScalef(1.01f, 1.01f, 1.01f);
-        var matrix = stack.last().pose();
 
         RenderSystem.setShader(GameRenderer::getRendertypeLinesShader);
+        var matrix = stack.last().pose();
         // FRONT
         bufferBuilder.begin(VertexFormat.Mode.LINES, DefaultVertexFormat.POSITION);
         bufferBuilder.vertex(matrix,0, 0, 0).endVertex();
@@ -476,7 +477,7 @@ public class Helper {
     }
 
     public static Entity getEntityByName(String name, Level level) {
-        EntityType<?> entity = ForgeRegistries.ENTITIES.getValue(new ResourceLocation(name));
+        EntityType<?> entity = ForgeRegistries.ENTITY_TYPES.getValue(new ResourceLocation(name));
         return entity.create(level);
     }
 

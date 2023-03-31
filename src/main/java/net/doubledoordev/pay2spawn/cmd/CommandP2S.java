@@ -46,7 +46,7 @@ import net.doubledoordev.pay2spawn.util.Statistics;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 
 import java.io.IOException;
 import java.util.Timer;
@@ -73,7 +73,7 @@ public class CommandP2S {
         LiteralArgumentBuilder<CommandSourceStack> builder = dispatcher.register(Commands.literal("p2s")).createBuilder();
 
         builder.then(Commands.literal("help")).executes(context -> {
-            context.getSource().sendSuccess(new TranslatableComponent("p2s.command.p2s.help"), false);
+            context.getSource().sendSuccess(Component.translatable("p2s.command.p2s.help"), false);
             return 1;
         });
 

@@ -78,7 +78,7 @@ public class ForgeEventHandler {
 //        {
 //            if (enableStringID) event.getToolTip().add(ChatFormatting.DARK_AQUA + GameData.getItemRegistry().getNameForObject(event.getItemStack().getItem()));
         if (enableUnlocalizedName)
-            event.getToolTip().add(new TextComponent(ChatFormatting.DARK_GREEN + event.getItemStack().getDescriptionId()));
+            event.getToolTip().add(Component.literal(ChatFormatting.DARK_GREEN + event.getItemStack().getDescriptionId()));
         if (enableBurnTime && FurnaceBlockEntity.isFuel(event.getItemStack()))
             event.getToolTip().add(Component.nullToEmpty(ChatFormatting.GOLD + "Burns for " + FurnaceBlockEntity.isFuel(event.getItemStack()) + " ticks"));
 //        }
@@ -86,7 +86,7 @@ public class ForgeEventHandler {
 
     @SubscribeEvent()
     public void entityDeathEvent(LivingDropsEvent event) {
-        if (event.getEntityLiving() instanceof Player && claysTortureMode) {
+        if (event.getEntity() instanceof Player && claysTortureMode) {
             event.setCanceled(true);
         }// else if (event.getEntityLiving() instanceof EnderMan && EndermanGriefing.dropCarrying) {
         //  EnderMan entityEnderman = ((EnderMan) event.getEntityLiving());
@@ -99,20 +99,20 @@ public class ForgeEventHandler {
 
     @SubscribeEvent()
     public void playerDeath(LivingDeathEvent event) {
-        if (event.getEntityLiving() instanceof Player && printDeathCoords) {
-            TextComponent posText = new TextComponent("X: " + Mth.floor(event.getEntityLiving().getX()) + " Y: " + Mth.floor(event.getEntityLiving().getY() + 0.5d) + " Z: " + Mth.floor(event.getEntityLiving().getZ()));
+        if (event.getEntity() instanceof Player && printDeathCoords) {
+            Component posText = Component.literal("X: " + Mth.floor(event.getEntity().getX()) + " Y: " + Mth.floor(event.getEntity().getY() + 0.5d) + " Z: " + Mth.floor(event.getEntity().getZ()));
             /*todo try {
                 if (!event.getEntityLiving().createCommandSourceStack().hasPermission(2))//todo check .getCommandManager().getPossibleCommands((CommandSourceStack) event.getEntityLiving(), "tp").isEmpty())
                 {
                     posText.withStyle(new Style().setItalic(true)
-                            .setChatHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent("Click to teleport!")))
+                            .setChatHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Click to teleport!")))
                             .setChatClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tp " + event.getEntityLiving().getX() + " " + (event.getEntityLiving().getY() + 0.5d) + " " + event.getEntityLiving().getZ())));
                 }
             } catch (Exception ignored) {
 
             }*/
 
-            ((Player) event.getEntityLiving()).displayClientMessage(new TextComponent("You died at ").setStyle(Style.EMPTY.withColor(ChatFormatting.AQUA)).append(posText), false);
+            ((Player) event.getEntity()).displayClientMessage(Component.literal("You died at ").setStyle(Style.EMPTY.withColor(ChatFormatting.AQUA)).append(posText), false);
         }
     }
 
@@ -126,7 +126,7 @@ public class ForgeEventHandler {
     @SubscribeEvent
     public void aprilFools(ServerChatEvent event) {
         if (CoreConstants.isAprilFools()) {
-            Style style = event.getComponent().getStyle();
+            Style style = event.getMessage().getStyle();
             float chance = 0.25f;
             if (CoreConstants.RANDOM.nextFloat() < chance) {
                 style.withBold(true);
@@ -148,7 +148,7 @@ public class ForgeEventHandler {
                 style.withObfuscated(true);
             }
             style.withColor(ChatFormatting.values()[CoreConstants.RANDOM.nextInt(ChatFormatting.values().length)]);
-            event.getComponent().toFlatList(style);
+            event.getMessage().toFlatList(style);
         }
     }
 

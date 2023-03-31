@@ -76,7 +76,7 @@ public class VoidRefunds {
             return;
         if (event.getSource() != DamageSource.OUT_OF_WORLD || !(event.getEntity() instanceof Player))
             return;
-        if (event.getEntityLiving().lastHurt >= (Float.MAX_VALUE / 2))
+        if (event.getEntity().lastHurt >= (Float.MAX_VALUE / 2))
             return; // try to ignore /kill command
         for (ResourceKey<Level> dim : voidRefundDimensions) {
             if (dim != event.getEntity().getLevel().dimension()) continue;
@@ -94,9 +94,9 @@ public class VoidRefunds {
     public void playerRespawnEvent(PlayerEvent.PlayerRespawnEvent event) {
         if (FMLEnvironment.dist.isClient())
             return;
-        Inventory oldInventory = map.get(event.getPlayer().getUUID());
+        Inventory oldInventory = map.get(event.getEntity().getUUID());
         if (oldInventory == null) return;
-        event.getPlayer().getInventory().replaceWith(oldInventory);
-        map.remove(event.getPlayer().getUUID());
+        event.getEntity().getInventory().replaceWith(oldInventory);
+        map.remove(event.getEntity().getUUID());
     }
 }

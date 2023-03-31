@@ -30,7 +30,6 @@
 
 package net.doubledoordev.pay2spawn.random;
 
-import net.minecraftforge.registries.ForgeRegistryEntry;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
@@ -41,7 +40,7 @@ import static net.doubledoordev.pay2spawn.util.Constants.SHORT;
 /**
  * @author Dries007
  */
-public abstract class ItemId<T extends ForgeRegistryEntry<T>> implements IRandomResolver { //todo check ForgeRegistryEntry is good to be there?
+public abstract class ItemId<T> implements IRandomResolver { //todo check ForgeRegistryEntry is good to be there?
     @Override
     public String solverRandom(int type, String value) {
         return String.valueOf(getRegistry());//todo .getId(getRegistry().getObject(value)));

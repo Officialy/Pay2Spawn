@@ -81,6 +81,7 @@ public class BlockDataGui extends HelperGuiBase implements IIHasCallback {
 
     @Override
     public void readJson() {
+        blockIDField.setText(readValue(BLOCKID_KEY, data));
         weightField.setText(readValue(WEIGHT_KEY, data));
 
         jsonPane.setText(GSON.toJson(data));
@@ -208,6 +209,13 @@ public class BlockDataGui extends HelperGuiBase implements IIHasCallback {
         gbc.gridy = 2;
         gbc.anchor = GridBagConstraints.WEST;
         panel1.add(label3, gbc);
+        blockIDField = new JTextField();
+        gbc = new GridBagConstraints();
+        gbc.gridx = 1;
+        gbc.gridy = 0;
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        panel1.add(blockIDField, gbc);
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
         gbc.gridy = 0;

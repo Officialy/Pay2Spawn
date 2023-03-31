@@ -42,7 +42,7 @@ import net.doubledoordev.pay2spawn.util.PointD;
 import net.doubledoordev.pay2spawn.util.Vector3;
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
@@ -153,9 +153,9 @@ public class EntityType extends TypeBase {
                     ((Mob) entity).setPersistenceRequired();
                 }
                 if (dataFromClient.contains(CUSTOMNAME_KEY) && entity instanceof LivingEntity)
-                    entity.setCustomName(new TextComponent(dataFromClient.getString(CUSTOMNAME_KEY)));
+                    entity.setCustomName(Component.literal(dataFromClient.getString(CUSTOMNAME_KEY)));
 
-                entity.setCustomName(new TextComponent(p2sTag.getString("name"))); //todo Constants.NAME
+                entity.setCustomName(Component.literal(p2sTag.getString("name"))); //todo Constants.NAME
                 player.getLevel().addFreshEntity(entity);
 
                 Entity entity1 = entity;
@@ -180,10 +180,10 @@ public class EntityType extends TypeBase {
                         if (tag.getCompound(RIDING_KEY).getBoolean(AGRO_KEY) && entity2 instanceof LivingEntity)
                             ((LivingEntity) entity2).doHurtTarget(player);
                         if (tag.getCompound(RIDING_KEY).contains(CUSTOMNAME_KEY) && entity2 instanceof LivingEntity)
-                            (entity2).setCustomName(new TextComponent(tag.getCompound(RIDING_KEY).getString(CUSTOMNAME_KEY)));
+                            (entity2).setCustomName(Component.literal(tag.getCompound(RIDING_KEY).getString(CUSTOMNAME_KEY)));
 
                         entity2.setPos(entity.getX(), entity.getY(), entity.getZ());
-                        entity2.setCustomName(new TextComponent(p2sTag.getString("name"))); //todo Constants.NAME
+                        entity2.setCustomName(Component.literal(p2sTag.getString("name"))); //todo Constants.NAME
                         player.level.addFreshEntity(entity2);
                         entity1.startRiding(entity2);
 
@@ -224,7 +224,7 @@ public class EntityType extends TypeBase {
             ArrayList<String> modId = new ArrayList<>();
             ArrayList<String> name = new ArrayList<>();
 
-            for (ResourceLocation entry : ForgeRegistries.ENTITIES.getKeys().stream().filter(s -> !s.getPath().contains("player") && !s.getPath().contains("potion")).toList()) {
+            for (ResourceLocation entry : ForgeRegistries.ENTITY_TYPES.getKeys().stream().filter(s -> !s.getPath().contains("player") && !s.getPath().contains("potion")).toList()) {
                 modId.add(entry.getNamespace());
                 name.add(entry.getPath());
 

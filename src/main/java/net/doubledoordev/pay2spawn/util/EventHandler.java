@@ -31,12 +31,17 @@
 package net.doubledoordev.pay2spawn.util;
 
 import com.google.gson.JsonObject;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.doubledoordev.pay2spawn.Pay2Spawn;
 import net.doubledoordev.pay2spawn.hud.Hud;
 import net.doubledoordev.pay2spawn.network.NbtRequestMessage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.screens.ChatScreen;
-import net.minecraftforge.client.event.RenderGameOverlayEvent;
+import net.minecraftforge.client.event.RegisterGuiOverlaysEvent;
+import net.minecraftforge.client.event.RenderGuiOverlayEvent;
+import net.minecraftforge.client.gui.overlay.ForgeGui;
+import net.minecraftforge.client.gui.overlay.IGuiOverlay;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -52,85 +57,81 @@ import static net.doubledoordev.pay2spawn.util.Constants.MODID;
  * @author Dries007
  */
 @Mod.EventBusSubscriber(modid = MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
-public class EventHandler
-{
+public class EventHandler {
     static boolean entityTracking = false, blockTracking = false;
     private JsonObject perks;
 
-    public EventHandler()
-    {
-        try
-        {
+    public EventHandler() {
+        try {
             MinecraftForge.EVENT_BUS.register(this);
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public static void addEntityTracking()
-    {
+    public static void addEntityTracking() {
         entityTracking = true;
     }
 
-    public static void addBlockTracker()
-    {
+    public static void addBlockTracker() {
         blockTracking = true;
     }
 
     @SubscribeEvent
-    public void event(PlayerInteractEvent e)
-    {
-        if (blockTracking)
-        {
+    public void event(PlayerInteractEvent e) {
+        if (blockTracking) {
             blockTracking = false;
 
-            NbtRequestMessage.requestBlock(e.getPos().getX(), e.getPos().getY(), e.getPos().getZ(), e.getWorld().dimension().getRegistryName());
+            NbtRequestMessage.requestBlock(e.getPos().getX(), e.getPos().getY(), e.getPos().getZ(), e.getLevel().dimension().registry());
 
             e.setCanceled(true);
         }
     }
 
     @SubscribeEvent
-    public void event(PlayerInteractEvent.EntityInteract event)
-    {
-        if (entityTracking)
-        {
+    public void event(PlayerInteractEvent.EntityInteract event) {
+        if (entityTracking) {
             entityTracking = false;
             NbtRequestMessage.requestByEntityID(event.getTarget().getId());
         }
     }
 
     @SubscribeEvent
-    public void hudEvent(RenderGameOverlayEvent.Text event)
-    {
+    public void hudEvent(RenderGuiOverlayEvent.Pre event) {
+        if (event.isCanceled())
+            return;
+
         ArrayList<String> bottomLeft = new ArrayList<>();
         ArrayList<String> bottomRight = new ArrayList<>();
-
+        ArrayList<String> left = new ArrayList<>();
+        ArrayList<String> right = new ArrayList<>();
+        left.add("Left");
+        right.add("Right");
+        left.add("Left 2");
+        right.add("Right 2");
+        left.add("Left 3");
+        right.add("Right 3");
         Font fontRenderer = Minecraft.getInstance().font;
-
-        Hud.INSTANCE.render(event.getLeft(), event.getRight(), bottomLeft, bottomRight);
+//      todo      event.getLeft(), event.getRight()
+        Hud.INSTANCE.render(left, right, bottomLeft, bottomRight);
 
         int baseHeight = event.getWindow().getGuiScaledHeight() - 25 - bottomLeft.size() * 10;
-        if (!(Minecraft.getInstance().screen instanceof ChatScreen))
-        {
-            for (int x = 0; x < bottomLeft.size(); x++)
-            {
+        if (!(Minecraft.getInstance().screen instanceof ChatScreen)) {
+            for (int x = 0; x < bottomLeft.size(); x++) {
                 String msg = bottomLeft.get(x);
-                fontRenderer.draw(event.getMatrixStack(), msg, 2, baseHeight + 2 + x * 10, 0xFFFFFF);
+                fontRenderer.draw(event.getPoseStack(), msg, 2, baseHeight + 2 + x * 10, 0xFFFFFF);
             }
         }
 
         baseHeight = event.getWindow().getGuiScaledHeight() - 25 - bottomRight.size() * 10;
-        if (!(Minecraft.getInstance().screen instanceof ChatScreen))
-        {
-            for (int x = 0; x < bottomRight.size(); x++)
-            {
+        if (!(Minecraft.getInstance().screen instanceof ChatScreen)) {
+            for (int x = 0; x < bottomRight.size(); x++) {
                 String msg = bottomRight.get(x);
                 int w = fontRenderer.width(msg);
-                fontRenderer.draw(event.getMatrixStack(), msg, event.getWindow().getGuiScaledWidth() - w - 10, baseHeight + 2 + x * 10, 0xFFFFFF);
+                fontRenderer.draw(event.getPoseStack(), msg, event.getWindow().getGuiScaledWidth() - w - 10, baseHeight + 2 + x * 10, 0xFFFFFF);
             }
         }
     }
+
+
 }

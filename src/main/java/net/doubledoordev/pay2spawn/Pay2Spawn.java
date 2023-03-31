@@ -57,7 +57,6 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
-import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.simple.SimpleChannel;
@@ -226,14 +225,14 @@ public class Pay2Spawn implements ID3Mod {
             e.printStackTrace();
         }
 
-        if (newConfig && FMLEnvironment.dist.isClient()) {
+        if (newConfig && FMLLoader.getDist().isClient()) {
             JOptionPane pane = new JOptionPane();
             pane.setMessageType(JOptionPane.WARNING_MESSAGE);
             pane.setMessage("""
                     Please configure Pay2Spawn properly BEFORE you try launching this instance again.
                     You should provide AT LEAST your channel in the config.
 
-                    If you need help with the configuring of your rewards, contact us!""");
+                    If you need help with the configuring of your rewards, contact OfficialyMax on his discord!""");
             JDialog dialog = pane.createDialog("Please configure Pay2Spawn!");
             dialog.setAlwaysOnTop(true);
             dialog.setVisible(true);
@@ -247,7 +246,7 @@ public class Pay2Spawn implements ID3Mod {
 
             }
 
-            if (FMLEnvironment.dist.isClient()) {
+            if (FMLLoader.getDist().isClient()) {
                 JOptionPane pane = new JOptionPane();
                 pane.setMessageType(JOptionPane.INFORMATION_MESSAGE);
                 pane.setMessage("""

@@ -40,7 +40,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.doubledoordev.oldforge.Configuration;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
@@ -108,7 +108,7 @@ public class StructureType extends TypeBase {
                 }
             }
         } catch (BlockData.BannedBlockException e) {
-            ((ServerPlayer) player).connection.disconnect(new TextComponent(e.getMessage()));
+            ((ServerPlayer) player).connection.disconnect(Component.literal(e.getMessage()));
         } catch (Exception e) {
             e.printStackTrace();
             Pay2Spawn.getLogger().warn("Error spawning in shape.");
@@ -267,8 +267,9 @@ public class StructureType extends TypeBase {
 
             ArrayList<CompoundTag> blockDataList = new ArrayList<>();
             ListTag blockDataNbt = shapeNbt.getList(BLOCKDATA_KEY, COMPOUND);
-            for (int j = 0; j < blockDataNbt.size(); j++)
+            for (int j = 0; j < blockDataNbt.size(); j++) {
                 blockDataList.add(blockDataNbt.getCompound(j));
+            }
 
             applyShape(Shapes.loadShape(shapeNbt), player, blockDataList, baseRotation);
         }
@@ -278,7 +279,7 @@ public class StructureType extends TypeBase {
     public void doConfig(Configuration configuration) {
         configuration.addCustomCategoryComment(TYPES_CAT, "Reward config options");
         configuration.addCustomCategoryComment(TYPES_CAT + '.' + NAME, "Used when spawning structures");
-        String[] bannedBlocksStrings = configuration.get(TYPES_CAT + '.' + NAME, "bannedBlocks", new String[0], "Banned blocks, format like this:\nid:metaData => Ban only that meta\nid => Ban all meta of that block").getStringList();
+        String[] bannedBlocksStrings = configuration.get(TYPES_CAT + '.' + NAME, "bannedBlocks", new String[0], "Banned blocks").getStringList();
         bannedBlocks = new String[bannedBlocksStrings.length][];
         for (int i = 0; i < bannedBlocksStrings.length; i++) {
             String[] split = bannedBlocksStrings[i].split(":");
@@ -334,12 +335,13 @@ public class StructureType extends TypeBase {
 
             BlockData data = (BlockData) o;
 
-            return !(te != null ? !te.equals(data.te) : data.te != null);
+            return Objects.equals(id, data.id) && Objects.equals(te, data.te);
         }
 
         @Override
         public String toString() {
             return "BlockData{" +
+                    "id='" + id +
                     ", weight=" + weight +
                     ", te=" + te +
                     '}';

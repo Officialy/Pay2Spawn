@@ -121,7 +121,7 @@ public class CommandType extends TypeBase {
 
     public class CMDSender extends ServerPlayer {
         public CMDSender(ServerPlayer player) {
-            super(player.server, player.server.overworld(), player.getGameProfile());
+            super(player.server, player.server.overworld(), player.getGameProfile(), player.getProfilePublicKey());
 //            this.theItemInWorldManager.thisPlayerMP = player;
 //            this.playerNetServerHandler = player.playerNetServerHandler;
         }

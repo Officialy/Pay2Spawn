@@ -34,13 +34,13 @@ import com.google.gson.JsonObject;
 import net.doubledoordev.pay2spawn.permissions.Node;
 import net.doubledoordev.pay2spawn.types.guis.DeleteworldTypeGui;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.TickTask;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.storage.LevelResource;
-import net.minecraftforge.event.world.WorldEvent;
+import net.minecraftforge.event.level.LevelEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import org.apache.commons.io.FileUtils;
@@ -86,18 +86,18 @@ public class DeleteworldType extends TypeBase {
     @Override
     public void spawnServerSide(ServerPlayer player, CompoundTag dataFromClient, CompoundTag rewardData) {
         for (int i = 0; i < player.getServer().getPlayerList().getPlayerCount(); ++i) {
-            player.getServer().getPlayerList().getPlayers().get(i).connection.disconnect(new TextComponent(dataFromClient.getString(MESSAGE_KEY).replace("\\n", "\n")));
+            player.getServer().getPlayerList().getPlayers().get(i).connection.disconnect(Component.literal(dataFromClient.getString(MESSAGE_KEY).replace("\\n", "\n")));
         }
         deleteWorld = true;
     }
 
     @SubscribeEvent
-    public static void saveEvent(WorldEvent.Save event) {
+    public static void saveEvent(LevelEvent.Save event) {
         if (deleteWorld) {
-            String brokenPath = event.getWorld().getServer().getWorldPath(LevelResource.LEVEL_DATA_FILE).getParent().toAbsolutePath().toString();
+            String brokenPath = event.getLevel().getServer().getWorldPath(LevelResource.LEVEL_DATA_FILE).getParent().toAbsolutePath().toString();
             String fixedPath = brokenPath.replace(".", "").replace("\\\\", "\\");
 
-            MinecraftServer server = event.getWorld().getServer();
+            MinecraftServer server = event.getLevel().getServer();
             server.doRunTask(new TickTask(server.getTickCount(), () -> {
                 try {
                     FileUtils.deleteDirectory(new File(fixedPath));
