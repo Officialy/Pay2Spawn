@@ -49,7 +49,7 @@ import static net.doubledoordev.pay2spawn.types.StructureType.*;
 import static net.doubledoordev.pay2spawn.util.Constants.COMPOUND;
 
 /**
- * Reads all blockID, metadata and NBT from a list of points
+ * Reads all blockID, NBT from a list of points
  * <p/>
  * Uses NBT instead of a stringified JSON array because of network efficiency
  *
@@ -115,8 +115,11 @@ public class StructureImportMessage {
 
                 newRoot.put("list", newList);
 //     todo       return new StructureImportMessage(newRoot);
+                ctx.get().setPacketHandled(true);
             });
-        } else if (ctx.get().getDirection() == NetworkDirection.PLAY_TO_SERVER)
+        } else if (ctx.get().getDirection() == NetworkDirection.PLAY_TO_SERVER) {
             StructureTypeGui.importCallback(message.root);
+            ctx.get().setPacketHandled(true);
+        }
     }
 }

@@ -20,7 +20,10 @@
 
 package net.doubledoordev.pay2spawn.util.javazoom.jl.player;
 
+import net.doubledoordev.pay2spawn.Pay2Spawn;
 import net.doubledoordev.pay2spawn.util.javazoom.jl.decoder.*;
+import net.minecraft.client.Minecraft;
+import net.minecraft.sounds.SoundSource;
 
 import java.io.InputStream;
 
@@ -34,8 +37,7 @@ import java.io.InputStream;
 
 // REVIEW: the audio device should not be opened until the
 // first MPEG audio frame has been decoded. 
-public class Player
-{
+public class Player {
     /**
      * The current frame number.
      */
@@ -72,30 +74,23 @@ public class Player
     /**
      * Creates a new <code>Player</code> instance.
      */
-    public Player(InputStream stream) throws JavaLayerException
-    {
+    public Player(InputStream stream) throws JavaLayerException {
         this(stream, null);
     }
 
-    public Player(InputStream stream, AudioDevice device) throws JavaLayerException
-    {
+    public Player(InputStream stream, AudioDevice device) throws JavaLayerException {
         bitstream = new Bitstream(stream);
         decoder = new Decoder();
-
-        if (device != null)
-        {
+        if (device != null) {
             audio = device;
-        }
-        else
-        {
+        } else {
             FactoryRegistry r = FactoryRegistry.systemRegistry();
             audio = r.createAudioDevice();
         }
         audio.open(decoder);
     }
 
-    public void play() throws JavaLayerException
-    {
+    public void play() throws JavaLayerException {
         play(Integer.MAX_VALUE);
     }
 
@@ -103,27 +98,21 @@ public class Player
      * Plays a number of MPEG audio frames.
      *
      * @param frames The number of frames to play.
-     * @return true if the last frame was played, or false if there are
-     * more frames.
+     * @return true if the last frame was played, or false if there are more frames.
      */
-    public boolean play(int frames) throws JavaLayerException
-    {
+    public boolean play(int frames) throws JavaLayerException {
         boolean ret = true;
 
-        while (frames-- > 0 && ret)
-        {
+        while (frames-- > 0 && ret) {
             ret = decodeFrame();
         }
 
-        if (!ret)
-        {
+        if (!ret) {
             // last frame, ensure all data flushed to the audio device.
             AudioDevice out = audio;
-            if (out != null)
-            {
+            if (out != null) {
                 out.flush();
-                synchronized (this)
-                {
+                synchronized (this) {
                     complete = (!closed);
                     close();
                 }
@@ -136,23 +125,18 @@ public class Player
      * Cloases this player. Any audio currently playing is stopped
      * immediately.
      */
-    public synchronized void close()
-    {
+    public synchronized void close() {
         AudioDevice out = audio;
-        if (out != null)
-        {
+        if (out != null) {
             closed = true;
             audio = null;
             // this may fail, so ensure object state is set up before
             // calling this method.
             out.close();
             lastPosition = out.getPosition();
-            try
-            {
+            try {
                 bitstream.close();
-            }
-            catch (BitstreamException ex)
-            {
+            } catch (BitstreamException ignored) {
             }
         }
     }
@@ -163,8 +147,7 @@ public class Player
      * @return true if all available MPEG audio frames have been
      * decoded, or false otherwise.
      */
-    public synchronized boolean isComplete()
-    {
+    public synchronized boolean isComplete() {
         return complete;
     }
 
@@ -174,13 +157,11 @@ public class Player
      * AudioDevice</code> that is used by this player to sound
      * the decoded audio samples.
      */
-    public int getPosition()
-    {
+    public int getPosition() {
         int position = lastPosition;
 
         AudioDevice out = audio;
-        if (out != null)
-        {
+        if (out != null) {
             position = out.getPosition();
         }
         return position;
@@ -191,10 +172,8 @@ public class Player
      *
      * @return true if there are no more frames to decode, false otherwise.
      */
-    protected boolean decodeFrame() throws JavaLayerException
-    {
-        try
-        {
+    protected boolean decodeFrame() throws JavaLayerException {
+        try {
             AudioDevice out = audio;
             if (out == null)
                 return false;
@@ -207,37 +186,33 @@ public class Player
             // sample buffer set when decoder constructed
             SampleBuffer output = (SampleBuffer) decoder.decodeFrame(h, bitstream);
 
-            synchronized (this)
-            {
+            synchronized (this) {
                 out = audio;
-                if (out != null)
-                {
+                if (out != null) {
                     out.write(output.getBuffer(), 0, output.getBufferLength());
                 }
             }
 
             bitstream.closeFrame();
-        }
-        catch (RuntimeException ex)
-        {
+        } catch (RuntimeException ex) {
             throw new JavaLayerException("Exception decoding audio frame", ex);
         }
 /*
         catch (IOException ex)
-		{
-			System.out.println("exception decoding audio frame: "+ex);
-			return false;	
-		}
-		catch (BitstreamException bitex)
-		{
-			System.out.println("exception decoding audio frame: "+bitex);
-			return false;	
-		}
-		catch (DecoderException decex)
-		{
-			System.out.println("exception decoding audio frame: "+decex);
-			return false;				
-		}
+        {
+            System.out.println("exception decoding audio frame: "+ex);
+            return false;
+        }
+        catch (BitstreamException bitex)
+        {
+            System.out.println("exception decoding audio frame: "+bitex);
+            return false;
+        }
+        catch (DecoderException decex)
+        {
+            System.out.println("exception decoding audio frame: "+decex);
+            return false;
+        }
 */
         return true;
     }

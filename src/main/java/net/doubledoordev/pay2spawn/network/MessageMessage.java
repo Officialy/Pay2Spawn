@@ -52,8 +52,8 @@ import static net.doubledoordev.pay2spawn.util.Constants.GSON_NOPP;
  */
 public class MessageMessage {
     private Reward reward;
-    private static Donation donation;
-    private static String message, name;
+    private final Donation donation;
+    private String message, name;
     private static double amount;
     private static int countdown;
 

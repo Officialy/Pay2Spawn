@@ -56,16 +56,12 @@ import java.util.function.Supplier;
  */
 public class StatusMessage {
     public static String serverConfig;
-    private Type type;
-    private String[] extraData;
+    private final Type type;
+    private final String[] extraData;
 
     public StatusMessage(Type type, String... extraData) {
         this.type = type;
         this.extraData = extraData;
-    }
-
-    public StatusMessage() {
-
     }
 
     public static void sendHandshakeToPlayer(ServerPlayer player) {
@@ -107,25 +103,30 @@ public class StatusMessage {
     public static void handle(StatusMessage message, Supplier<NetworkEvent.Context> ctx) {
         if (ctx.get().getDirection() == NetworkDirection.PLAY_TO_CLIENT) {
             switch (message.type) {
-//                    todo case HANDSHAKE:
-//                        return new StatusMessage(Type.HANDSHAKE);
+                case HANDSHAKE:
+                    new StatusMessage(Type.HANDSHAKE);
+                    ctx.get().setPacketHandled(true);
                 case CONFIGSYNC:
                     Pay2Spawn.reloadDBFromServer(message.extraData[0]);
                     ConfiguratorManager.exit();
                     Helper.msg(ChatFormatting.GOLD + "[P2S] Using config specified by the server.");
+                    ctx.get().setPacketHandled(true);
                     break;
                 case FORCE:
                     Pay2Spawn.forceOn = true;
+                    ctx.get().setPacketHandled(true);
                     break;
-//             todo       case STATUS:
-//                        return new StatusMessage(Type.STATUS, message.extraData[0], Boolean.toString(Pay2Spawn.enable));
+                case STATUS:
+                    new StatusMessage(Type.STATUS, message.extraData[0], Boolean.toString(Pay2Spawn.enable));
+                    ctx.get().setPacketHandled(true);
                 case SALE:
                     Pay2Spawn.getRewardsDB().addSale(Integer.parseInt(message.extraData[0]), Integer.parseInt(message.extraData[1]));
+                    ctx.get().setPacketHandled(true);
                     break;
             }
         } else {
             switch (message.type) {
-                case HANDSHAKE:
+                case HANDSHAKE -> {
                     PermissionsHandler.getDB().newPlayer(ctx.get().getSender().getName().getString());
                     Pay2Spawn.playersWithValidConfig.add(ctx.get().getSender().getName().getString());
                     // Can't use return statement here cause you can't return multiple packets
@@ -133,11 +134,14 @@ public class StatusMessage {
                         sendConfigToPlayer(ctx.get().getSender());
                     if (ctx.get().getSender().getServer().isDedicatedServer() && Pay2Spawn.getConfig().forceP2S)
                         sendForceToPlayer(ctx.get().getSender());
-                    break;
-                case STATUS:
+
+                    ctx.get().setPacketHandled(true);
+                }
+                case STATUS -> {
                     Player sender = ctx.get().getSender().getServer().getPlayerList().getPlayerByName(message.extraData[0]);
                     Helper.sendChatToPlayer((ServerPlayer) sender /*todo casting here check it*/, ctx.get().getSender().getName().getString() + " has Pay2Spawn " + (Boolean.parseBoolean(message.extraData[1]) ? "enabled." : "disabled."), ChatFormatting.AQUA);
-                    break;
+                    ctx.get().setPacketHandled(true);
+                }
             }
         }
     }

@@ -58,6 +58,7 @@ import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.loading.FMLLoader;
+import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.simple.SimpleChannel;
 import net.minecraftforge.server.ServerLifecycleHooks;
@@ -184,17 +185,18 @@ public class Pay2Spawn implements ID3Mod {
         int id = 0;
         snw = NetworkRegistry.newSimpleChannel(new ResourceLocation(MODID, "main"), () -> PROTOCOL_VERSION, PROTOCOL_VERSION::equals, PROTOCOL_VERSION::equals);
 
-        snw.messageBuilder(TestMessage.class, id++).encoder(TestMessage::toBytes).decoder(TestMessage::new).consumer(TestMessage::handle).add();
-        snw.messageBuilder(MessageMessage.class, id++).encoder(MessageMessage::toBytes).decoder(MessageMessage::new).consumer(MessageMessage::handle).add();
-        snw.messageBuilder(NbtRequestMessage.class, id++).encoder(NbtRequestMessage::toBytes).decoder(NbtRequestMessage::new).consumer(NbtRequestMessage::handle).add();
+        snw.messageBuilder(TestMessage.class, id++).encoder(TestMessage::toBytes).decoder(TestMessage::new).consumerNetworkThread(TestMessage::handle).add();
+        snw.messageBuilder(MessageMessage.class, id++).encoder(MessageMessage::toBytes).decoder(MessageMessage::new).consumerNetworkThread(MessageMessage::handle).add();
+        snw.messageBuilder(NbtRequestMessage.class, id++).encoder(NbtRequestMessage::toBytes).decoder(NbtRequestMessage::new).consumerNetworkThread(NbtRequestMessage::handle).add();
 //        snw.messageBuilder(NbtRequestMessage.class, id++).encoder(NbtRequestMessage::toBytes).decoder(NbtRequestMessage::new).consumer(NbtRequestMessage::handle).add(); //todo server
-        snw.messageBuilder(RewardMessage.class, id++).encoder(RewardMessage::toBytes).decoder(RewardMessage::new).consumer(RewardMessage::handle).add();
-        snw.messageBuilder(StatusMessage.class, id++).encoder(StatusMessage::toBytes).decoder(StatusMessage::new).consumer(StatusMessage::handle).add();
+        snw.messageBuilder(RewardMessage.class, id++).encoder(RewardMessage::toBytes).decoder(RewardMessage::new).consumerNetworkThread(RewardMessage::handle).add();
+        snw.messageBuilder(StatusMessage.class, id++).encoder(StatusMessage::toBytes).decoder(StatusMessage::new).consumerNetworkThread(StatusMessage::handle).add();
 //        snw.messageBuilder(StatusMessage.class, id++).encoder(StatusMessage::toBytes).decoder(StatusMessage::new).consumer(StatusMessage::handle).add(); //todo server
-        snw.messageBuilder(StructureImportMessage.class, id++).encoder(StructureImportMessage::toBytes).decoder(StructureImportMessage::new).consumer(StructureImportMessage::handle).add();
+        snw.messageBuilder(StructureImportMessage.class, id++).encoder(StructureImportMessage::toBytes).decoder(StructureImportMessage::new).consumerNetworkThread(StructureImportMessage::handle).add();
 //        snw.messageBuilder(StructureImportMessage.class, id++).encoder(StructureImportMessage::toBytes).decoder(StructureImportMessage::new).consumer(StructureImportMessage::handle).add(); //todo server
-        snw.messageBuilder(HTMLuploadMessage.class, id++).encoder(HTMLuploadMessage::toBytes).decoder(HTMLuploadMessage::new).consumer(HTMLuploadMessage::handle).add();
-        snw.messageBuilder(CrashMessage.class, id++).encoder(CrashMessage::toBytes).decoder(CrashMessage::new).consumer(CrashMessage::handle).add();
+        snw.messageBuilder(HTMLuploadMessage.class, id++).encoder(HTMLuploadMessage::toBytes).decoder(HTMLuploadMessage::new).consumerNetworkThread(HTMLuploadMessage::handle).add();
+        snw.messageBuilder(MusicMessage.class, id++, NetworkDirection.PLAY_TO_CLIENT).encoder(MusicMessage::toBytes).decoder(MusicMessage::new).consumerNetworkThread(MusicMessage::handle).add();
+        snw.messageBuilder(CrashMessage.class, id).encoder(CrashMessage::toBytes).decoder(CrashMessage::new).consumerNetworkThread(CrashMessage::handle).add();
 
 
         TypeRegistry.preInit();

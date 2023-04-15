@@ -32,12 +32,14 @@ package net.doubledoordev.pay2spawn.types;
 
 import com.google.gson.JsonObject;
 import net.doubledoordev.pay2spawn.Pay2Spawn;
+import net.doubledoordev.pay2spawn.network.MusicMessage;
 import net.doubledoordev.pay2spawn.permissions.Node;
 import net.doubledoordev.pay2spawn.types.guis.MusicTypeGui;
 import net.doubledoordev.pay2spawn.util.Constants;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraftforge.network.NetworkDirection;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 
@@ -56,102 +58,81 @@ import static net.doubledoordev.pay2spawn.util.Constants.STRING;
 /**
  * @author Dries007
  */
-public class MusicType extends TypeBase
-{
-    public static final  String                  SOUND_KEY = "song";
-    public static final  HashMap<String, String> typeMap   = new HashMap<>();
-    private static final String                  NAME      = "music";
+public class MusicType extends TypeBase {
+    public static final String SOUND_KEY = "song";
+    public static final HashMap<String, String> typeMap = new HashMap<>();
+    private static final String NAME = "music";
     public static File musicFolder;
 
-    static
-    {
+    static {
         typeMap.put(SOUND_KEY, NBTTypes[STRING]);
     }
 
     @Override
-    public String getName()
-    {
+    public String getName() {
         return NAME;
     }
 
     @Override
-    public CompoundTag getExample()
-    {
+    public CompoundTag getExample() {
         CompoundTag nbt = new CompoundTag();
         nbt.putString(SOUND_KEY, "Rickroll.mp3");
         return nbt;
     }
 
     @Override
-    public void spawnServerSide(ServerPlayer player, CompoundTag dataFromClient, CompoundTag rewardData)
-    {
-//        Pay2Spawn.getSnw().sendTo(new MusicMessage(dataFromClient.getString(SOUND_KEY)), (ServerPlayer) player);
+    public void spawnServerSide(ServerPlayer player, CompoundTag dataFromClient, CompoundTag rewardData) {
+        Pay2Spawn.getSnw().sendTo(new MusicMessage(dataFromClient.getString(SOUND_KEY)), player.connection.getConnection(), NetworkDirection.PLAY_TO_CLIENT);
     }
 
     @Override
-    public void printHelpList(File configFolder)
-    {
+    public void printHelpList(File configFolder) {
         musicFolder = new File(configFolder, "music");
-        if (musicFolder.mkdirs())
-        {
-            new Thread(new Runnable()
-            {
-                @Override
-                public void run()
-                {
-                    try
-                    {
-                        File zip = new File(musicFolder, "music.zip");
-                        FileUtils.copyURLToFile(new URL(Constants.MUSICURL), zip);
-                        ZipFile zipFile = new ZipFile(zip);
-                        Enumeration<? extends ZipEntry> entries = zipFile.entries();
-                        while (entries.hasMoreElements())
-                        {
-                            ZipEntry entry = entries.nextElement();
-                            File entryDestination = new File(musicFolder, entry.getName());
-                            entryDestination.getParentFile().mkdirs();
-                            InputStream in = zipFile.getInputStream(entry);
-                            OutputStream out = new FileOutputStream(entryDestination);
-                            IOUtils.copy(in, out);
-                            IOUtils.closeQuietly(in);
-                            IOUtils.closeQuietly(out);
-                        }
-                        zipFile.close();
-                        zip.delete();
+        if (musicFolder.mkdirs()) {
+            new Thread(() -> {
+                try {
+                    File zip = new File(musicFolder, "music.zip");
+                    FileUtils.copyURLToFile(new URL(Constants.MUSICURL), zip);
+                    ZipFile zipFile = new ZipFile(zip);
+                    Enumeration<? extends ZipEntry> entries = zipFile.entries();
+                    while (entries.hasMoreElements()) {
+                        ZipEntry entry = entries.nextElement();
+                        File entryDestination = new File(musicFolder, entry.getName());
+                        entryDestination.getParentFile().mkdirs();
+                        InputStream in = zipFile.getInputStream(entry);
+                        OutputStream out = new FileOutputStream(entryDestination);
+                        IOUtils.copy(in, out);
+                        IOUtils.closeQuietly(in);
+                        IOUtils.closeQuietly(out);
                     }
-                    catch (IOException e)
-                    {
-                        Pay2Spawn.getLogger().warn("Error downloading music file. Get from github and unpack yourself please.");
-                        e.printStackTrace();
-                    }
+                    zipFile.close();
+                    zip.delete();
+                } catch (IOException e) {
+                    Pay2Spawn.getLogger().warn("Error downloading music file. Get from github and unpack yourself please.");
+                    e.printStackTrace();
                 }
             }, "Pay2Spawn music download and unzip").start();
         }
     }
 
     @Override
-    public void openNewGui(int rewardID, JsonObject data)
-    {
+    public void openNewGui(int rewardID, JsonObject data) {
         new MusicTypeGui(rewardID, NAME, data, typeMap);
     }
 
     @Override
-    public Collection<Node> getPermissionNodes()
-    {
+    public Collection<Node> getPermissionNodes() {
         return new HashSet<>();
     }
 
     @Override
-    public Node getPermissionNode(Player player, CompoundTag dataFromClient)
-    {
+    public Node getPermissionNode(Player player, CompoundTag dataFromClient) {
         return new Node(NAME, dataFromClient.getString(SOUND_KEY).split(" ")[0]);
     }
 
     @Override
-    public String replaceInTemplate(String id, JsonObject jsonObject)
-    {
-        switch (id)
-        {
+    public String replaceInTemplate(String id, JsonObject jsonObject) {
+        switch (id) {
             case "song":
                 return jsonObject.get(SOUND_KEY).getAsString().replace(typeMap.get(SOUND_KEY) + ":", "");
         }

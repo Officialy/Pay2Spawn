@@ -69,6 +69,7 @@ public class HTMLuploadMessage {
                 File file = new File(/*DimensionManager.getCurrentSaveRootDirectory().getParentFile()*/ ctx.get().getSender().getServer().getServerDirectory() , "pay2spawn/" + ctx.get().getSender().getName() + ".html"); //todo fix this
                 file.getParentFile().mkdir();
                 FileUtils.writeStringToFile(file, message.text);
+                ctx.get().setPacketHandled(true);
             } catch (IOException ignored) {
                 ignored.printStackTrace();
             }

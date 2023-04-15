@@ -28,56 +28,35 @@ import net.doubledoordev.pay2spawn.util.javazoom.jl.decoder.JavaLayerException;
  * and tested dynamically as not all systems will have support
  * for JavaSound, or they may have the incorrect version.
  */
-public class JavaSoundAudioDeviceFactory extends AudioDeviceFactory
-{
-    static private final String  DEVICE_CLASS_NAME = "net.doubledoordev.pay2spawn.util.javazoom.jl.player.JavaSoundAudioDevice";
-    private              boolean tested            = false;
+public class JavaSoundAudioDeviceFactory extends AudioDeviceFactory {
+    static private final String DEVICE_CLASS_NAME = "net.doubledoordev.pay2spawn.util.javazoom.jl.player.JavaSoundAudioDevice";
+    private boolean tested = false;
 
-    public synchronized AudioDevice createAudioDevice()
-            throws JavaLayerException
-    {
-        if (!tested)
-        {
+    public synchronized AudioDevice createAudioDevice() throws JavaLayerException {
+        if (!tested) {
             testAudioDevice();
             tested = true;
         }
-
-        try
-        {
+        try {
             return createAudioDeviceImpl();
-        }
-        catch (Exception ex)
-        {
-            throw new JavaLayerException("unable to create JavaSound device: " + ex);
-        }
-        catch (LinkageError ex)
-        {
+        } catch (Exception | LinkageError ex) {
             throw new JavaLayerException("unable to create JavaSound device: " + ex);
         }
     }
 
     protected JavaSoundAudioDevice createAudioDeviceImpl()
-            throws JavaLayerException
-    {
+            throws JavaLayerException {
         ClassLoader loader = getClass().getClassLoader();
-        try
-        {
+        try {
             JavaSoundAudioDevice dev = (JavaSoundAudioDevice) instantiate(loader, DEVICE_CLASS_NAME);
             return dev;
-        }
-        catch (Exception ex)
-        {
-            throw new JavaLayerException("Cannot create JavaSound device", ex);
-        }
-        catch (LinkageError ex)
-        {
+        } catch (Exception | LinkageError ex) {
             throw new JavaLayerException("Cannot create JavaSound device", ex);
         }
 
     }
 
-    public void testAudioDevice() throws JavaLayerException
-    {
+    public void testAudioDevice() throws JavaLayerException {
         JavaSoundAudioDevice dev = createAudioDeviceImpl();
         dev.test();
     }

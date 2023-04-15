@@ -42,10 +42,7 @@ import java.util.function.Supplier;
  * @author Dries007
  */
 public class CrashMessage {
-    private String message;
-
-    public CrashMessage() {
-    }
+    private final String message;
 
     public CrashMessage(String message) {
         this.message = message;
@@ -64,6 +61,7 @@ public class CrashMessage {
             DramaException exception = new DramaException(message.message);
             exception.setStackTrace(CrashType.getRandomStackTrace());
             CrashType.crash = exception;
+            ctx.get().setPacketHandled(true);
         });
     }
 }

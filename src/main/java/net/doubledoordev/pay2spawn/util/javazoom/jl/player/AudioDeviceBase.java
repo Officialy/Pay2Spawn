@@ -36,12 +36,11 @@ import net.doubledoordev.pay2spawn.util.javazoom.jl.decoder.JavaLayerException;
 /*
  * REVIEW:  It is desirable to be able to use the decoder whe
  *			in the implementation of open(), but the decoder
- *			has not yet read a frame, and so much of the 
+ *			has not yet read a frame, and so much of the
  *			desired information (sample rate, channels etc.)
- *			are not available. 
+ *			are not available.
  */
-public abstract class AudioDeviceBase implements AudioDevice
-{
+public abstract class AudioDeviceBase implements AudioDevice {
     private boolean open = false;
 
     private Decoder decoder = null;
@@ -52,10 +51,8 @@ public abstract class AudioDeviceBase implements AudioDevice
      * @param decoder The decoder that will provide audio data
      *                to this audio device.
      */
-    public synchronized void open(Decoder decoder) throws JavaLayerException
-    {
-        if (!isOpen())
-        {
+    public synchronized void open(Decoder decoder) throws JavaLayerException {
+        if (!isOpen()) {
             this.decoder = decoder;
             openImpl();
             setOpen(true);
@@ -68,16 +65,14 @@ public abstract class AudioDeviceBase implements AudioDevice
      * @return <code>true</code> if the audio device is open,
      * <code>false</code> if it is not.
      */
-    public synchronized boolean isOpen()
-    {
+    public synchronized boolean isOpen() {
         return open;
     }
 
     /**
      * Sets the open state for this audio device.
      */
-    protected void setOpen(boolean open)
-    {
+    protected void setOpen(boolean open) {
         this.open = open;
     }
 
@@ -94,11 +89,8 @@ public abstract class AudioDeviceBase implements AudioDevice
      *                            written to the audio device.
      *                            If the audio device is not open, this method does nthing.
      */
-    public void write(short[] samples, int offs, int len)
-            throws JavaLayerException
-    {
-        if (isOpen())
-        {
+    public void write(short[] samples, int offs, int len) throws JavaLayerException {
+        if (isOpen()) {
             writeImpl(samples, offs, len);
         }
     }
@@ -108,10 +100,8 @@ public abstract class AudioDeviceBase implements AudioDevice
      * audio, playback is stopped immediately without flushing
      * any buffered audio data.
      */
-    public synchronized void close()
-    {
-        if (isOpen())
-        {
+    public synchronized void close() {
+        if (isOpen()) {
             closeImpl();
             setOpen(false);
             decoder = null;
@@ -123,10 +113,8 @@ public abstract class AudioDeviceBase implements AudioDevice
      * audio device. This method should only be called prior
      * to closing the device.
      */
-    public void flush()
-    {
-        if (isOpen())
-        {
+    public void flush() {
+        if (isOpen()) {
             flushImpl();
         }
     }
@@ -135,16 +123,14 @@ public abstract class AudioDeviceBase implements AudioDevice
      * Template method to provide the
      * implementation for the opening of the audio device.
      */
-    protected void openImpl() throws JavaLayerException
-    {
+    protected void openImpl() throws JavaLayerException {
     }
 
     /**
      * Template method to provide the implementation for
      * closing the audio device.
      */
-    protected void closeImpl()
-    {
+    protected void closeImpl() {
     }
 
     /**
@@ -152,16 +138,14 @@ public abstract class AudioDeviceBase implements AudioDevice
      * writing audio samples to the audio device.
      */
     protected void writeImpl(short[] samples, int offs, int len)
-            throws JavaLayerException
-    {
+            throws JavaLayerException {
     }
 
     /**
      * Template method to provide the implementation for
      * flushing any buffered audio data.
      */
-    protected void flushImpl()
-    {
+    protected void flushImpl() {
     }
 
     /**
@@ -170,8 +154,7 @@ public abstract class AudioDeviceBase implements AudioDevice
      *
      * @return The associated decoder.
      */
-    protected Decoder getDecoder()
-    {
+    protected Decoder getDecoder() {
         return decoder;
     }
 }

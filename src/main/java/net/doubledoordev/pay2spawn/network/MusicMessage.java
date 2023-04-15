@@ -33,7 +33,11 @@ package net.doubledoordev.pay2spawn.network;
 import net.doubledoordev.pay2spawn.Pay2Spawn;
 import net.doubledoordev.pay2spawn.types.MusicType;
 import net.doubledoordev.pay2spawn.util.javazoom.jl.decoder.JavaLayerException;
+import net.doubledoordev.pay2spawn.util.javazoom.jl.player.Player;
+import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Mth;
 import net.minecraftforge.network.NetworkEvent;
 
 import java.io.File;
@@ -47,33 +51,26 @@ import java.util.function.Supplier;
  *
  * @author Dries007
  */
-public class MusicMessage{
-    private String name;
+public class MusicMessage {
+    private final String name;
 
     public MusicMessage(String name) {
         this.name = name;
     }
 
-    public MusicMessage() {
-
+    public MusicMessage(FriendlyByteBuf buf) {
+        name = buf.readUtf();
     }
 
     private static void play(final File file) {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    new net.doubledoordev.pay2spawn.util.javazoom.jl.player.Player(new FileInputStream(file)).play();
-                } catch (JavaLayerException | FileNotFoundException e) {
-                    e.printStackTrace();
-                }
+        new Thread(() -> {
+            try {
+                var player = new Player(new FileInputStream(file));
+                player.play();
+            } catch (JavaLayerException | FileNotFoundException e) {
+                e.printStackTrace();
             }
         }, "Pay2Spawn music thread").start();
-    }
-
-
-    public MusicMessage(FriendlyByteBuf buf) {
-        name = buf.readUtf();
     }
 
     public void toBytes(FriendlyByteBuf buf) {
@@ -84,8 +81,10 @@ public class MusicMessage{
         ctx.get().enqueueWork(() -> {
             File file = new File(MusicType.musicFolder, message.name);
 
-            if (file.exists() && file.isFile()) play(file);
-            else {
+            if (file.exists() && file.isFile()) {
+                play(file);
+                ctx.get().setPacketHandled(true);
+            } else {
                 if (!file.isDirectory()) file = file.getParentFile();
 
                 File[] files = file.listFiles((dir, name) -> name.startsWith(message.name));
@@ -99,6 +98,7 @@ public class MusicMessage{
                     for (File file1 : files) Pay2Spawn.getLogger().warn(file1.getName());
                 }
             }
+            ctx.get().setPacketHandled(true);
         });
     }
 

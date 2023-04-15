@@ -97,7 +97,7 @@ public class EventHandler {
     }
 
     @SubscribeEvent
-    public void hudEvent(RenderGuiOverlayEvent.Pre event) {
+    public void hudEvent(RenderGuiOverlayEvent event) {
         if (event.isCanceled())
             return;
 
@@ -105,12 +105,7 @@ public class EventHandler {
         ArrayList<String> bottomRight = new ArrayList<>();
         ArrayList<String> left = new ArrayList<>();
         ArrayList<String> right = new ArrayList<>();
-        left.add("Left");
-        right.add("Right");
-        left.add("Left 2");
-        right.add("Right 2");
-        left.add("Left 3");
-        right.add("Right 3");
+
         Font fontRenderer = Minecraft.getInstance().font;
 //      todo      event.getLeft(), event.getRight()
         Hud.INSTANCE.render(left, right, bottomLeft, bottomRight);
@@ -132,6 +127,5 @@ public class EventHandler {
             }
         }
     }
-
 
 }

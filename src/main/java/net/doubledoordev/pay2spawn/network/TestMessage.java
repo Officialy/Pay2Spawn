@@ -106,6 +106,7 @@ public class TestMessage {
                 return;
             }
             type.spawnServerSide(ctx.get().getSender(), message.data, rewardData);
+            ctx.get().setPacketHandled(true);
         });
     }
 
