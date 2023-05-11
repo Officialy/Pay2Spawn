@@ -31,13 +31,20 @@
 package net.doubledoordev.pay2spawn.util;
 
 import com.google.gson.JsonObject;
+import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.Tesselator;
 import net.doubledoordev.pay2spawn.Pay2Spawn;
 import net.doubledoordev.pay2spawn.hud.Hud;
 import net.doubledoordev.pay2spawn.network.NbtRequestMessage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.screens.ChatScreen;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderBuffers;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.client.event.RegisterGuiOverlaysEvent;
 import net.minecraftforge.client.event.RenderGuiOverlayEvent;
 import net.minecraftforge.client.gui.overlay.ForgeGui;
@@ -107,10 +114,31 @@ public class EventHandler {
         ArrayList<String> right = new ArrayList<>();
 
         Font fontRenderer = Minecraft.getInstance().font;
-//      todo      event.getLeft(), event.getRight()
-        Hud.INSTANCE.render(left, right, bottomLeft, bottomRight);
 
-        int baseHeight = event.getWindow().getGuiScaledHeight() - 25 - bottomLeft.size() * 10;
+        Hud.INSTANCE.render(left, right, bottomLeft, bottomRight);
+        RenderSystem.enableBlend();
+        RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.ONE_MINUS_DST_COLOR, GlStateManager.DestFactor.ONE_MINUS_SRC_COLOR, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+
+        int baseHeight = 2; // Offset from top of screen
+        for (int x = 0; x < left.size(); x++) {
+            String msg = left.get(x);
+//            fontRenderer.draw(event.getPoseStack(), msg, 2, baseHeight + x * 10, 0xFFFFFF);
+            var renderbuffer = new RenderBuffers();
+            MultiBufferSource.BufferSource bufferSource = renderbuffer.bufferSource();
+            var buffer = bufferSource.getBuffer(RenderType.text(new ResourceLocation("textures/font/ascii.png")));
+
+            fontRenderer.drawInBatch(msg, 2, baseHeight + x * 10, 0xFFFFFF, false, event.getPoseStack().last().pose(), bufferSource, false, 0, 15728880, false);
+            bufferSource.endBatch();
+        }
+
+        for (int x = 0; x < right.size(); x++) {
+            String msg = right.get(x);
+            int w = fontRenderer.width(msg);
+            fontRenderer.draw(event.getPoseStack(), msg, event.getWindow().getGuiScaledWidth() - w - 2, baseHeight + x * 10, 0xFFFFFF);
+        }
+
+
+        baseHeight = event.getWindow().getGuiScaledHeight() - 25 - bottomLeft.size() * 10;
         if (!(Minecraft.getInstance().screen instanceof ChatScreen)) {
             for (int x = 0; x < bottomLeft.size(); x++) {
                 String msg = bottomLeft.get(x);
@@ -126,6 +154,7 @@ public class EventHandler {
                 fontRenderer.draw(event.getPoseStack(), msg, event.getWindow().getGuiScaledWidth() - w - 10, baseHeight + 2 + x * 10, 0xFFFFFF);
             }
         }
+        RenderSystem.disableBlend();
     }
 
 }

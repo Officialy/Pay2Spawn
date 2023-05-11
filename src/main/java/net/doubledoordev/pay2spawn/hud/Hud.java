@@ -37,6 +37,7 @@ import net.doubledoordev.oldforge.Configuration;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
@@ -45,11 +46,14 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashSet;
 
+import static net.doubledoordev.pay2spawn.util.Constants.MODID;
+
 /**
  * Handler for the event, keeps track of all active IHudEntry s
  *
  * @author Dries007
  */
+@Mod.EventBusSubscriber(modid = MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class Hud
 {
     public static final Hud                INSTANCE = new Hud();
@@ -83,7 +87,8 @@ public class Hud
     {
         Configuration config = Pay2Spawn.getConfig().configuration;
         lineSeperator = config.get(P2SConfig.HUD, "lineSeperator", lineSeperator, "Separator in between 2 or more lines when writing to the text tile. Use \\n to indicate a new line.").getString();
-        for (IHudEntry hudEntry : set) hudEntry.updateConfig();
+        for (IHudEntry hudEntry : set)
+            hudEntry.updateConfig();
 
         joiner = Joiner.on(lineSeperator);
     }
